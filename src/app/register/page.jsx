@@ -1,10 +1,7 @@
-import Link from 'next/link'
+import AuthPage from '../auth-page'
+
+export const metadata = { title: 'Daftar | ALTERIA' }
 
 export default function Register() {
-  return (
-    <main>
-      <h1>Daftar</h1>
-      <Link href="/">Kembali ke beranda</Link>
-    </main>
-  )
+  return <AuthPage variant="register" />
 }

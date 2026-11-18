@@ -1,0 +1,277 @@
+@font-face {
+  font-family: "Alteria Serif";
+  src: url("/alteria/instrument-serif.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.screen {
+  --paper: #f5f1e7;
+  --ink: #24221d;
+  --muted: #625a4d;
+  --rule: #bdb4a5;
+  --accent: #3a4434;
+  --serif: "Alteria Serif", Georgia, serif;
+  flex: 1;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+}
+
+.screen :is(a, button, input):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.shell {
+  width: min(100% - clamp(2rem, 8vw, 8rem), 1190px);
+  margin-inline: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem;
+  min-height: 4.7rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.wordmark {
+  font: 1.7rem/1 var(--serif);
+  letter-spacing: .23em;
+}
+
+.back {
+  font-size: .83rem;
+}
+
+.back:hover,
+.switch a {
+  text-decoration: underline;
+  text-underline-offset: .22em;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: clamp(2rem, 7vw, 6.25rem);
+  padding-block: clamp(2rem, 5vw, 4.5rem);
+}
+
+.panel {
+  width: min(100%, 28rem);
+  justify-self: center;
+}
+
+.panel h1 {
+  font: 400 clamp(3.55rem, 6vw, 5.3rem)/.95 var(--serif);
+  letter-spacing: -.025em;
+}
+
+.intro {
+  margin-block: .65rem 1.55rem;
+  color: var(--muted);
+  font-size: .91rem;
+  line-height: 1.55;
+}
+
+.form,
+.field {
+  display: grid;
+}
+
+.form {
+  gap: .95rem;
+}
+
+.field {
+  gap: .35rem;
+}
+
+.field label,
+.roles legend {
+  font-size: .83rem;
+  font-weight: 600;
+}
+
+.field > input,
+.password {
+  min-height: 2.9rem;
+  border: 1px solid var(--rule);
+  background: #faf8f1;
+}
+
+.field > input,
+.password input {
+  width: 100%;
+  min-width: 0;
+  padding: .55rem .75rem;
+  font-size: 1rem;
+}
+
+.password {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.password:focus-within {
+  border-color: var(--accent);
+}
+
+.password button {
+  min-width: 5.2rem;
+  padding-inline: .7rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: .73rem;
+}
+
+.password button:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.hint {
+  margin-top: -.65rem;
+  color: var(--muted);
+  font-size: .76rem;
+}
+
+.roles {
+  min-inline-size: 0;
+}
+
+.roleOptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .55rem;
+  margin-top: .4rem;
+}
+
+.role {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: .45rem;
+  padding: .72rem .65rem;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+}
+
+.role:has(input:checked) {
+  border-color: var(--accent);
+  background: #e9ecdf;
+}
+
+.role input {
+  margin-top: .2rem;
+  accent-color: var(--accent);
+}
+
+.role strong,
+.role small {
+  display: block;
+}
+
+.role strong {
+  font-size: .82rem;
+}
+
+.role small {
+  margin-top: .16rem;
+  color: var(--muted);
+  font-size: .71rem;
+  line-height: 1.4;
+}
+
+.submit {
+  min-height: 2.9rem;
+  padding: .65rem 1rem;
+  background: var(--accent);
+  color: var(--paper);
+  cursor: pointer;
+  font-size: .88rem;
+  font-weight: 600;
+}
+
+.submit:hover {
+  background: var(--ink);
+}
+
+.feedback {
+  padding: .6rem .75rem;
+  border-left: 2px solid var(--accent);
+  background: #e9ecdf;
+  font-size: .82rem;
+}
+
+.feedback[data-error="true"] {
+  border-color: #893c2b;
+  background: #f8e6dd;
+  color: #702c20;
+}
+
+.switch {
+  margin-top: 1.2rem;
+  color: var(--muted);
+  font-size: .85rem;
+}
+
+.switch a {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.artworkImage {
+  position: relative;
+  aspect-ratio: 1.03;
+  background: #ded6c8;
+}
+
+.artworkImage img {
+  object-fit: cover;
+}
+
+.caption {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: .25rem .65rem;
+  margin-top: .65rem;
+  color: var(--muted);
+  font-size: .73rem;
+}
+
+.caption cite {
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  .header {
+    min-height: 4.1rem;
+  }
+
+  .content {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.2rem;
+  }
+
+  .panel,
+  .artwork {
+    width: min(100%, 32rem);
+    justify-self: center;
+  }
+
+  .artworkImage {
+    aspect-ratio: 1.55;
+  }
+}
+
+@media (max-width: 350px) {
+  .roleOptions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
