@@ -1,9 +1,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { dashboardPath, getCurrentUser } from '../lib/session'
 import GalleryExplorer from './gallery-explorer'
 import styles from './home.module.css'
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser()
+  const accountPath = user ? dashboardPath(user) : null
+
   return (
     <div className={styles.home} id="atas">
       <div className={styles.shell}>
@@ -16,8 +20,16 @@ export default function Home() {
           </nav>
 
           <div className={styles.account}>
-            <Link href="/login">Masuk</Link>
-            <Link className={styles.solidButton} href="/register">Daftar</Link>
+            {accountPath ? (
+              <Link className={styles.solidButton} href={accountPath}>
+                {accountPath === '/curator/pending' ? 'Status akun' : 'Dashboard'}
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">Masuk</Link>
+                <Link className={styles.solidButton} href="/register">Daftar</Link>
+              </>
+            )}
           </div>
         </header>
 

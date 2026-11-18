@@ -1,0 +1,127 @@
+'use server'
+
+import { redirect } from 'next/navigation'
+import { pool } from '../lib/db.mjs'
+import { hashPassword, verifyPassword } from '../lib/password.mjs'
+import { clearSession, dashboardPath, generateSession, requireUser, setSessionCookie } from '../lib/session'
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function textField(formData, name) {
+  if (!(formData instanceof FormData)) return ''
+  const value = formData.get(name)
+  return typeof value === 'string' ? value : ''
+}
+
+function isValidEmail(email) {
+  return email.length <= 254 && emailPattern.test(email)
+}
+
+export async function signUp(_previousState, formData) {
+  const displayName = textField(formData, 'displayName').trim()
+  const email = textField(formData, 'email').trim().toLowerCase()
+  const password = textField(formData, 'password')
+  const confirmation = textField(formData, 'confirmation')
+  const role = textField(formData, 'role')
+  const curatorStatus = role === 'curator' ? 'pending' : null
+  const values = {
+    displayName: displayName.slice(0, 120),
+    email: email.slice(0, 254),
+    role: role === 'curator' ? 'curator' : 'member',
+  }
+
+  if (!displayName || displayName.length > 120) {
+    return { error: 'Isi nama tampilan dengan maksimal 120 karakter.', values }
+  }
+  if (!isValidEmail(email)) return { error: 'Masukkan alamat email yang valid.', values }
+  if (password.length < 8 || password.length > 128) {
+    return { error: 'Kata sandi harus berisi 8 sampai 128 karakter.', values }
+  }
+  if (password !== confirmation) {
+    return { error: 'Konfirmasi kata sandi harus sama dengan kata sandi.', values }
+  }
+  if (role !== 'member' && role !== 'curator') {
+    return { error: 'Pilih Member atau Curator untuk mendaftar.', values }
+  }
+
+  const session = generateSession()
+  try {
+    const passwordHash = await hashPassword(password)
+    await pool.query(
+      `WITH new_user AS (
+         INSERT INTO users (display_name, email, password_hash, role, curator_status)
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id
+       )
+       INSERT INTO sessions (token_hash, user_id, expires_at)
+       SELECT $6, id, $7 FROM new_user`,
+      [displayName, email, passwordHash, role, curatorStatus, session.hash, session.expiresAt],
+    )
+  } catch (error) {
+    if (error.code === '23505' && error.constraint === 'users_email_lower_unique') {
+      return { error: 'Email sudah terdaftar. Gunakan halaman Masuk.', values }
+    }
+    console.error('Pendaftaran ALTERIA gagal', error.code ?? error.name)
+    return { error: 'Akun belum bisa dibuat. Coba lagi sebentar.', values }
+  }
+
+  await setSessionCookie(session.token)
+  redirect(dashboardPath({ role, curator_status: curatorStatus }))
+}
+
+export async function signIn(_previousState, formData) {
+  const email = textField(formData, 'email').trim().toLowerCase()
+  const password = textField(formData, 'password')
+  const values = { email: email.slice(0, 254) }
+  const invalidLogin = { error: 'Email atau kata sandi tidak cocok.', values }
+
+  if (!isValidEmail(email) || !password || password.length > 128) return invalidLogin
+
+  const session = generateSession()
+  let user
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, password_hash, role, curator_status
+       FROM users
+       WHERE lower(email) = $1`,
+      [email],
+    )
+    user = rows[0]
+
+    if (!(await verifyPassword(password, user?.password_hash)) || !user) return invalidLogin
+
+    await pool.query(
+      'INSERT INTO sessions (token_hash, user_id, expires_at) VALUES ($1, $2, $3)',
+      [session.hash, user.id, session.expiresAt],
+    )
+  } catch (error) {
+    console.error('Login ALTERIA gagal', error.code ?? error.name)
+    return { error: 'Masuk belum bisa diproses. Coba lagi sebentar.', values }
+  }
+
+  await setSessionCookie(session.token)
+  redirect(dashboardPath(user))
+}
+
+export async function signOut() {
+  await clearSession()
+  redirect('/login')
+}
+
+export async function deleteRejectedCurator(formData) {
+  const user = await requireUser()
+  if (user.role !== 'curator' || user.curator_status !== 'rejected') {
+    redirect(dashboardPath(user))
+  }
+  if (textField(formData, 'confirmed') !== 'yes') redirect('/curator/pending')
+
+  const { rowCount } = await pool.query(
+    `DELETE FROM users
+     WHERE id = $1 AND role = 'curator' AND curator_status = 'rejected'`,
+    [user.id],
+  )
+  if (rowCount === 0) redirect('/curator/pending')
+
+  await clearSession()
+  redirect('/register')
+}

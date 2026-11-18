@@ -2,7 +2,8 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useActionState, useState } from 'react'
+import { signIn, signUp } from './auth-actions'
 import styles from './auth.module.css'
 
 const screens = {
@@ -47,6 +48,7 @@ function PasswordField({ name, label, autoComplete, minLength, hintId }) {
           type={visible ? 'text' : 'password'}
           autoComplete={autoComplete}
           minLength={minLength}
+          maxLength={128}
           aria-describedby={hintId}
           required
         />
@@ -65,21 +67,7 @@ function PasswordField({ name, label, autoComplete, minLength, hintId }) {
 export default function AuthPage({ variant }) {
   const screen = screens[variant]
   const registering = variant === 'register'
-  const [feedback, setFeedback] = useState(null)
-
-  function handleSubmit(event) {
-    event.preventDefault()
-    const form = event.currentTarget
-    const fields = new FormData(form)
-
-    if (registering && fields.get('password') !== fields.get('confirmation')) {
-      setFeedback({ error: true, text: 'Konfirmasi kata sandi harus sama dengan kata sandi.' })
-      form.elements.namedItem('confirmation').focus()
-      return
-    }
-
-    setFeedback({ error: false, text: 'Ini pratinjau. Form akan aktif setelah autentikasi terhubung.' })
-  }
+  const [feedback, submit, pending] = useActionState(registering ? signUp : signIn, null)
 
   return (
     <div className={styles.screen}>
@@ -94,17 +82,33 @@ export default function AuthPage({ variant }) {
             <h1 id="auth-title">{screen.title}</h1>
             <p className={styles.intro}>{screen.description}</p>
 
-            <form className={styles.form} method="post" onSubmit={handleSubmit} onChange={() => setFeedback(null)}>
+            <form className={styles.form} action={submit}>
               {registering && (
                 <div className={styles.field}>
                   <label htmlFor="displayName">Nama tampilan</label>
-                  <input id="displayName" name="displayName" type="text" autoComplete="name" required />
+                  <input
+                    id="displayName"
+                    name="displayName"
+                    type="text"
+                    autoComplete="name"
+                    defaultValue={feedback?.values.displayName}
+                    maxLength={120}
+                    required
+                  />
                 </div>
               )}
 
               <div className={styles.field}>
                 <label htmlFor="email">Email</label>
-                <input id="email" name="email" type="email" autoComplete="email" required />
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete={registering ? 'email' : 'username'}
+                  defaultValue={feedback?.values.email}
+                  maxLength={254}
+                  required
+                />
               </div>
 
               <PasswordField
@@ -128,14 +132,24 @@ export default function AuthPage({ variant }) {
                     <legend>Daftar sebagai</legend>
                     <div className={styles.roleOptions}>
                       <label className={styles.role}>
-                        <input type="radio" name="role" value="member" defaultChecked />
+                        <input
+                          type="radio"
+                          name="role"
+                          value="member"
+                          defaultChecked={feedback?.values.role !== 'curator'}
+                        />
                         <span>
                           <strong>Member</strong>
                           <small>Unggah karya dan ikuti challenge.</small>
                         </span>
                       </label>
                       <label className={styles.role}>
-                        <input type="radio" name="role" value="curator" />
+                        <input
+                          type="radio"
+                          name="role"
+                          value="curator"
+                          defaultChecked={feedback?.values.role === 'curator'}
+                        />
                         <span>
                           <strong>Curator</strong>
                           <small>Kelola challenge setelah akun disetujui Admin.</small>
@@ -146,15 +160,11 @@ export default function AuthPage({ variant }) {
                 </>
               )}
 
-              <button className={styles.submit} type="submit">{screen.action}</button>
+              <button className={styles.submit} type="submit" disabled={pending}>
+                {pending ? 'Memproses…' : screen.action}
+              </button>
               {feedback && (
-                <p
-                  className={styles.feedback}
-                  data-error={feedback.error}
-                  role={feedback.error ? 'alert' : 'status'}
-                >
-                  {feedback.text}
-                </p>
+                <p className={styles.feedback} role="alert">{feedback.error}</p>
               )}
             </form>
 
