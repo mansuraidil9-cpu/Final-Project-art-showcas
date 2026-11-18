@@ -1,0 +1,84 @@
+[
+  {
+    "filename": "paris-rainy-day.jpg",
+    "title": "Paris Street; Rainy Day",
+    "artist": "Gustave Caillebotte",
+    "category": "Lukisan",
+    "source": "https://commons.wikimedia.org/wiki/File:Gustave_Caillebotte_-_Paris_Street%3B_Rainy_Day_-_Google_Art_Project.jpg",
+    "rights": "Public domain",
+    "date": "1877",
+    "width": 1100,
+    "height": 834
+  },
+  {
+    "filename": "la-grande-jatte.jpg",
+    "title": "A Sunday on La Grande Jatte",
+    "artist": "Georges Seurat",
+    "category": "Lukisan",
+    "source": "https://commons.wikimedia.org/wiki/File:Georges_Seurat_-_A_Sunday_on_La_Grande_Jatte_--_1884_-_Google_Art_Project.jpg",
+    "rights": "Public domain",
+    "date": "1884–1886",
+    "width": 820,
+    "height": 546
+  },
+  {
+    "filename": "wheat-field.jpg",
+    "title": "Wheat Field with Cypresses",
+    "originalTitle": "Wheat Field with Cypresses",
+    "artist": "Vincent van Gogh",
+    "category": "Lukisan",
+    "source": "https://www.metmuseum.org/art/collection/search/436535",
+    "rights": "Public domain (The Met Open Access, CC0)",
+    "date": "1889",
+    "width": 599,
+    "height": 477
+  },
+  {
+    "filename": "woman-with-flowers.jpg",
+    "title": "A Woman Seated beside a Vase of Flowers",
+    "originalTitle": "A Woman Seated beside a Vase of Flowers (Madame Paul Valpinçon?)",
+    "artist": "Edgar Degas",
+    "category": "Lukisan",
+    "source": "https://www.metmuseum.org/art/collection/search/436121",
+    "rights": "Public domain (The Met Open Access, CC0)",
+    "date": "1865",
+    "width": 600,
+    "height": 488
+  },
+  {
+    "filename": "great-wave.jpg",
+    "title": "Under the Wave off Kanagawa",
+    "originalTitle": "Under the Wave off Kanagawa (Kanagawa oki nami ura), also known as The Great Wave, from the series Thirty-six Views of Mount Fuji (Fugaku sanjūrokkei)",
+    "artist": "Katsushika Hokusai",
+    "category": "Seni cetak",
+    "source": "https://www.metmuseum.org/art/collection/search/45434",
+    "rights": "Public domain (The Met Open Access, CC0)",
+    "date": "ca. 1830–32",
+    "width": 600,
+    "height": 403
+  },
+  {
+    "filename": "teabowl.jpg",
+    "title": "Teabowl",
+    "originalTitle": "Teabowl",
+    "artist": "Meissen Manufactory",
+    "category": "Keramik",
+    "source": "https://www.metmuseum.org/art/collection/search/198649",
+    "rights": "Public domain (The Met Open Access, CC0)",
+    "date": "ca. 1720–25",
+    "width": 598,
+    "height": 367
+  },
+  {
+    "filename": "the-oxbow.jpg",
+    "title": "The Oxbow",
+    "originalTitle": "View from Mount Holyoke, Northampton, Massachusetts, after a Thunderstorm—The Oxbow",
+    "artist": "Thomas Cole",
+    "category": "Lukisan",
+    "source": "https://www.metmuseum.org/art/collection/search/10497",
+    "rights": "Public domain (The Met Open Access, CC0)",
+    "date": "1836",
+    "width": 599,
+    "height": 409
+  }
+]
