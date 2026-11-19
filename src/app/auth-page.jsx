@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useActionState, useState } from 'react'
 import { signIn, signUp } from './auth-actions'
@@ -13,12 +12,6 @@ const screens = {
     action: 'Masuk',
     question: 'Belum punya akun?',
     link: { href: '/register', label: 'Daftar' },
-    artwork: {
-      image: '/alteria/woman-with-flowers.jpg',
-      alt: 'Lukisan seorang perempuan duduk di samping rangkaian bunga.',
-      title: 'A Woman Seated beside a Vase of Flowers',
-      artist: 'Edgar Degas, 1865',
-    },
   },
   register: {
     title: 'Daftar',
@@ -26,12 +19,6 @@ const screens = {
     action: 'Buat akun',
     question: 'Sudah punya akun?',
     link: { href: '/login', label: 'Masuk' },
-    artwork: {
-      image: '/alteria/wheat-field.jpg',
-      alt: 'Lukisan ladang gandum dengan pohon cemara di bawah langit berawan.',
-      title: 'Wheat Field with Cypresses',
-      artist: 'Vincent van Gogh, 1889',
-    },
   },
 }
 
@@ -78,7 +65,7 @@ export default function AuthPage({ variant }) {
         </header>
 
         <main className={styles.content}>
-          <section className={styles.panel} aria-labelledby="auth-title">
+          <section className={`${styles.panel} ${styles.formPanel}`} aria-labelledby="auth-title">
             <h1 id="auth-title">{screen.title}</h1>
             <p className={styles.intro}>{screen.description}</p>
 
@@ -173,20 +160,11 @@ export default function AuthPage({ variant }) {
             </p>
           </section>
 
-          <figure className={styles.artwork}>
-            <div className={styles.artworkImage}>
-              <Image
-                src={screen.artwork.image}
-                alt={screen.artwork.alt}
-                fill
-                sizes="(max-width: 760px) 92vw, 49vw"
-              />
-            </div>
-            <figcaption className={styles.caption}>
-              <cite>{screen.artwork.title}</cite>
-              <span>{screen.artwork.artist}</span>
-            </figcaption>
-          </figure>
+          <aside className={styles.accountInfo} aria-labelledby="account-info-heading">
+            <h2 id="account-info-heading">Apa itu ALTERIA?</h2>
+            <p>ALTERIA adalah galeri seni digital untuk menjelajahi karya dan mengenal kreator di baliknya.</p>
+            <p>Kreator bisa memamerkan karya dan mengikuti challenge seni yang diadakan Curator.</p>
+          </aside>
         </main>
       </div>
     </div>

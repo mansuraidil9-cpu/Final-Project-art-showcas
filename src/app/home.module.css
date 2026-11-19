@@ -21,6 +21,7 @@
   --rule: #c7beb0;
   --accent: #3a4434;
   --serif: "Alteria Serif", Georgia, serif;
+  --header-height: 4.7rem;
   background: var(--paper);
   color: var(--ink);
   flex: 1;
@@ -38,11 +39,15 @@
 }
 
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 1.5rem;
-  min-height: 4.7rem;
+  min-height: var(--header-height);
+  background: var(--paper);
   border-bottom: 1px solid var(--rule);
 }
 
@@ -216,7 +221,7 @@
 .gallery,
 .challenge {
   padding-block: clamp(2.15rem, 4.2vw, 4.3rem);
-  scroll-margin-top: 1rem;
+  scroll-margin-top: calc(var(--header-height) + 1rem);
 }
 
 .sectionHeader,
@@ -421,6 +426,10 @@
 }
 
 @media (max-width: 760px) {
+  .home {
+    --header-height: 6.625rem;
+  }
+
   .header {
     grid-template-columns: 1fr auto;
     gap: .25rem .75rem;
