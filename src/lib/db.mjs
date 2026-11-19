@@ -1,6 +1,12 @@
 import pg from "pg";
 
 const { Pool } = pg;
+const maxDatabaseId = 9223372036854775807n;
+const databaseIdPattern = /^[1-9][0-9]{0,18}$/;
+
+export function isDatabaseId(id) {
+  return typeof id === "string" && databaseIdPattern.test(id) && BigInt(id) <= maxDatabaseId;
+}
 
 function createPool() {
   const pool = new Pool();

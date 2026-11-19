@@ -3,53 +3,55 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import credits from '../../public/alteria/credits.json'
+import ChallengeCard from './challenge-card'
 import styles from './home.module.css'
 
-const artworks = credits.slice(1).map((artwork, index) => ({
-  ...artwork,
-  id: index + 1,
-  likes: [88, 96, 71, 82, 54, 63][index],
-  uploadOrder: index,
-}))
-
-const categories = ['Semua', ...new Set(artworks.map(artwork => artwork.category))]
-
-const challenge = {
-  title: 'Kota Setelah Hujan',
-  category: 'Lukisan · Ilustrasi · Fotografi',
-  description: 'Ceritakan suasana kota setelah hujan melalui medium pilihanmu.',
-  deadline: '2026-11-30',
-  deadlineLabel: '30 November 2026',
-}
-
-export default function GalleryExplorer() {
+export default function GalleryExplorer({ artworks, challenge, galleryPage = false }) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Semua')
   const [sort, setSort] = useState('popular')
 
+  const GalleryHeading = galleryPage ? 'h1' : 'h2'
+  const ArtworkHeading = galleryPage ? 'h2' : 'h3'
+  const searchLabel = galleryPage ? 'Cari karya, kreator, atau tag' : 'Cari karya, kreator, atau challenge'
+  const galleryArtworks = artworks ?? []
+  const categories = ['Semua', ...new Set(galleryArtworks.map(artwork => artwork.category))]
   const search = query.trim().toLocaleLowerCase('id')
-  const filteredArtworks = artworks
+  const filteredArtworks = galleryArtworks
     .filter(artwork => category === 'Semua' || artwork.category === category)
-    .filter(artwork => `${artwork.title} ${artwork.artist}`.toLocaleLowerCase('id').includes(search))
+    .filter(artwork => [artwork.title, artwork.artist, ...artwork.tags].join(' ')
+      .toLocaleLowerCase('id').includes(search))
     .sort((first, second) => sort === 'popular'
       ? second.likes - first.likes
-      : second.uploadOrder - first.uploadOrder)
+      : second.uploadedAt.localeCompare(first.uploadedAt))
 
-  const challengeMatches = `${challenge.title} ${challenge.category}`
+  let galleryMessage = 'Tidak ada karya yang cocok.'
+  if (!artworks) {
+    galleryMessage = 'Galeri belum bisa dimuat.'
+  } else if (artworks.length === 0) {
+    galleryMessage = 'Belum ada karya di galeri.'
+  }
+
+  const challengeMatches = challenge && `${challenge.title} ${challenge.category}`
     .toLocaleLowerCase('id').includes(search)
+  let challengeMessage = 'Tidak ada challenge yang cocok.'
+  if (challenge === undefined) {
+    challengeMessage = 'Challenge belum bisa dimuat.'
+  } else if (challenge === null) {
+    challengeMessage = 'Belum ada challenge aktif.'
+  }
 
   return (
     <>
       <section className={styles.gallery} id="galeri" aria-labelledby="judul-galeri">
         <div className={styles.sectionHeader}>
-          <h2 id="judul-galeri">Galeri Karya</h2>
+          <GalleryHeading id="judul-galeri" className={galleryPage ? styles.pageTitle : undefined}>Galeri Karya</GalleryHeading>
           <label className={styles.search}>
-            <span className="sr-only">Cari karya, kreator, atau challenge</span>
+            <span className="sr-only">{searchLabel}</span>
             <span className={styles.searchIcon} aria-hidden="true" />
             <input
               type="search"
-              placeholder="Cari karya, kreator, atau challenge"
+              placeholder={searchLabel}
               value={query}
               onChange={event => setQuery(event.target.value)}
             />
@@ -88,7 +90,7 @@ export default function GalleryExplorer() {
                 <Link className={styles.artworkLink} href={`/karya/${artwork.id}`}>
                   <div className={styles.artworkImage}>
                     <Image
-                      src={`/alteria/${artwork.filename}`}
+                      src={artwork.imageSrc}
                       alt=""
                       fill
                       sizes="(max-width: 500px) 94vw, (max-width: 900px) 48vw, 32vw"
@@ -97,7 +99,7 @@ export default function GalleryExplorer() {
                   <div className={styles.artworkCaption}>
                     <div>
                       <p className={styles.artworkCategory}>{artwork.category}</p>
-                      <h3>{artwork.title}</h3>
+                      <ArtworkHeading className={styles.artworkTitle}>{artwork.title}</ArtworkHeading>
                       <p className={styles.artworkArtist}>{artwork.artist} · {artwork.date}</p>
                     </div>
                     <span className={`${styles.arrow} ${styles.arrowOut}`} aria-hidden="true" />
@@ -108,7 +110,7 @@ export default function GalleryExplorer() {
           </div>
         ) : (
           <div className={styles.emptyGallery}>
-            <p>Tidak ada karya yang cocok.</p>
+            <p>{galleryMessage}</p>
             {search && challengeMatches && (
               <a className={styles.textLink} href="#challenge">
                 Lihat hasil challenge <span className={`${styles.arrow} ${styles.arrowDown}`} aria-hidden="true" />
@@ -118,32 +120,14 @@ export default function GalleryExplorer() {
         )}
       </section>
 
-      <section className={styles.challenge} id="challenge" aria-labelledby="judul-challenge">
-        <h2 id="judul-challenge">Challenge Aktif</h2>
-        {challengeMatches ? (
-          <article className={styles.challengeCard}>
-            <div className={styles.challengeImage}>
-              <Image
-                src="/alteria/the-oxbow.jpg"
-                alt="Bentang alam dengan langit mendung dan hamparan sungai."
-                fill
-                sizes="(max-width: 760px) 94vw, 44vw"
-              />
-            </div>
-            <div className={styles.challengeCopy}>
-              <p className={styles.eyebrow}>{challenge.category}</p>
-              <h3>{challenge.title}</h3>
-              <p>{challenge.description}</p>
-              <p className={styles.deadline}>
-                Sampai <time dateTime={challenge.deadline}>{challenge.deadlineLabel}</time>
-              </p>
-              <Link className={styles.textLink} href="/challenge/1">
-                Lihat Challenge <span className={`${styles.arrow} ${styles.arrowOut}`} aria-hidden="true" />
-              </Link>
-            </div>
-          </article>
-        ) : <p className={styles.emptyGallery}>Tidak ada challenge yang cocok.</p>}
-      </section>
+      {!galleryPage && (
+        <section className={styles.challenge} id="challenge" aria-labelledby="judul-challenge">
+          <h2 id="judul-challenge">Challenge Aktif</h2>
+          {challengeMatches
+            ? <ChallengeCard challenge={challenge} />
+            : <p className={styles.emptyGallery}>{challengeMessage}</p>}
+        </section>
+      )}
     </>
   )
 }

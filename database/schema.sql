@@ -27,4 +27,44 @@ CREATE TABLE IF NOT EXISTS sessions (
 CREATE INDEX IF NOT EXISTS sessions_user_id_index ON sessions (user_id);
 CREATE INDEX IF NOT EXISTS sessions_expires_at_index ON sessions (expires_at);
 
+CREATE TABLE IF NOT EXISTS challenges (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL,
+    description TEXT NOT NULL,
+    rules TEXT[] NOT NULL CHECK (cardinality(rules) > 0),
+    prize TEXT NOT NULL,
+    cover_image TEXT NOT NULL CHECK (
+        cover_image ~* '^/[a-z0-9_-]+(/[a-z0-9_-]+)*\.(avif|gif|jpe?g|png|webp)$'
+    ),
+    cover_alt TEXT NOT NULL,
+    starts_at TIMESTAMPTZ NOT NULL,
+    ends_at TIMESTAMPTZ NOT NULL,
+    CONSTRAINT challenges_date_range_check CHECK (ends_at > starts_at)
+);
+
+CREATE INDEX IF NOT EXISTS challenges_ends_at_index ON challenges (ends_at, id);
+
+CREATE TABLE IF NOT EXISTS artworks (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    artist TEXT NOT NULL,
+    artwork_date TEXT NOT NULL,
+    category TEXT NOT NULL,
+    image_src TEXT NOT NULL CHECK (
+        image_src ~* '^/[a-z0-9_-]+(/[a-z0-9_-]+)*\.(avif|gif|jpe?g|png|webp)$'
+    ),
+    image_alt TEXT NOT NULL,
+    image_width INTEGER NOT NULL CHECK (image_width > 0),
+    image_height INTEGER NOT NULL CHECK (image_height > 0),
+    description TEXT NOT NULL,
+    tags TEXT[] NOT NULL CHECK (cardinality(tags) > 0),
+    like_count INTEGER NOT NULL DEFAULT 0 CHECK (like_count >= 0),
+    uploaded_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    source_url TEXT CHECK (source_url ~* '^https://[^[:space:]]+$'),
+    rights TEXT
+);
+
 COMMIT;

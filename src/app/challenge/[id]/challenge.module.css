@@ -1,0 +1,95 @@
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, .87fr) minmax(0, 1.13fr);
+  align-items: center;
+  gap: clamp(1.6rem, 4.6vw, 5rem);
+  padding-block: clamp(2.2rem, 5vw, 5rem);
+  border-bottom: 1px solid var(--rule);
+}
+
+.introduction {
+  overflow-wrap: anywhere;
+}
+
+.introduction h1 {
+  margin-block: .7rem 1.1rem;
+  font: 400 clamp(3.5rem, 7.1vw, 6.6rem)/.94 var(--serif);
+  letter-spacing: -.035em;
+}
+
+.description {
+  max-width: 39ch;
+  color: var(--muted);
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+.deadline {
+  display: grid;
+  gap: .35rem;
+  margin-top: 1.65rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+
+.deadline time {
+  font-weight: 600;
+}
+
+.cover {
+  position: relative;
+  aspect-ratio: 1.55;
+  background: #ded6c8;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, .65fr);
+  align-items: start;
+  gap: clamp(1.5rem, 5vw, 5rem);
+  padding-block: clamp(2rem, 4.5vw, 4.25rem);
+  overflow-wrap: anywhere;
+}
+
+.rules {
+  display: grid;
+  gap: .65rem;
+  max-width: 56ch;
+  margin-top: 1rem;
+  padding-inline-start: 1.3rem;
+  color: var(--muted);
+  list-style-type: decimal;
+  line-height: 1.65;
+}
+
+.rules li {
+  padding-inline-start: .25rem;
+}
+
+.rules li::marker {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.prize {
+  padding: clamp(1.4rem, 3vw, 2.4rem);
+  background: var(--accent);
+  color: var(--paper);
+}
+
+.prize p {
+  margin-top: .7rem;
+  line-height: 1.65;
+  white-space: pre-line;
+}
+
+@media (max-width: 760px) {
+  .hero,
+  .details {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .introduction h1 {
+    font-size: clamp(3.3rem, 10vw, 5.35rem);
+  }
+}

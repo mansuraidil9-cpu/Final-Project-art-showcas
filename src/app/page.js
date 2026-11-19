@@ -1,37 +1,30 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { dashboardPath, getCurrentUser } from '../lib/session'
+import { connection } from 'next/server'
+import { getGalleryArtworks } from '../lib/artworks'
+import { getActiveChallenge } from '../lib/challenges'
+import { getCurrentUser } from '../lib/session'
 import GalleryExplorer from './gallery-explorer'
+import ShowcaseHeader from './showcase-header'
 import styles from './home.module.css'
 
 export default async function Home() {
-  const user = await getCurrentUser()
-  const accountPath = user ? dashboardPath(user) : null
-
+  await connection()
+  const [user, artworks, challenge] = await Promise.all([
+    getCurrentUser(),
+    getGalleryArtworks().catch(error => {
+      console.error('Galeri gagal dimuat.', error.code ?? error.name)
+      return undefined
+    }),
+    getActiveChallenge().catch(error => {
+      console.error('Challenge gagal dimuat.', error.code ?? error.name)
+      return undefined
+    }),
+  ])
   return (
     <div className={styles.home} id="atas">
       <div className={styles.shell}>
-        <header className={styles.header}>
-          <Link className={styles.wordmark} href="/">ALTERIA</Link>
-
-          <nav className={styles.navigation} aria-label="Navigasi utama">
-            <a href="#galeri">Galeri</a>
-            <a href="#challenge">Challenge</a>
-          </nav>
-
-          <div className={styles.account}>
-            {accountPath ? (
-              <Link className={styles.solidButton} href={accountPath}>
-                {accountPath === '/curator/pending' ? 'Status akun' : 'Dashboard'}
-              </Link>
-            ) : (
-              <>
-                <Link href="/login">Masuk</Link>
-                <Link className={styles.solidButton} href="/register">Daftar</Link>
-              </>
-            )}
-          </div>
-        </header>
+        <ShowcaseHeader user={user} currentPage="home" />
 
         <main>
           <section className={styles.hero} aria-labelledby="judul-beranda">
@@ -66,7 +59,7 @@ export default async function Home() {
             </figure>
           </section>
 
-          <GalleryExplorer />
+          <GalleryExplorer artworks={artworks} challenge={challenge} />
         </main>
 
         <footer className={styles.footer}>

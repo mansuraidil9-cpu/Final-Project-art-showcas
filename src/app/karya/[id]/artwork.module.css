@@ -1,0 +1,122 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+  grid-template-areas:
+    "artwork heading"
+    "artwork details";
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  gap: 1.6rem clamp(1.8rem, 5vw, 5.3rem);
+  padding-block: clamp(2rem, 5vw, 4.85rem);
+  overflow-wrap: anywhere;
+}
+
+.heading {
+  grid-area: heading;
+  padding-top: clamp(.4rem, 1.5vw, 1.5rem);
+}
+
+.heading h1 {
+  margin-block: .7rem 1rem;
+  font: 400 clamp(3.25rem, 5.8vw, 6rem)/.94 var(--serif);
+  letter-spacing: -.03em;
+  text-wrap: balance;
+}
+
+.byline {
+  color: var(--accent);
+  font-size: .95rem;
+  font-weight: 500;
+}
+
+.artwork {
+  grid-area: artwork;
+}
+
+.frame {
+  padding: clamp(.5rem, 1.6vw, 1.15rem);
+  border: 1px solid var(--rule);
+  background: #e9e1d4;
+}
+
+.frame img {
+  width: 100%;
+  height: auto;
+}
+
+.credit {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: .3rem 1rem;
+  margin-top: .6rem;
+  color: var(--muted);
+  font-size: .75rem;
+}
+
+.credit a {
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
+.credit a:hover {
+  color: var(--ink);
+}
+
+.details {
+  grid-area: details;
+  padding-top: 1.35rem;
+  border-top: 1px solid var(--rule);
+}
+
+.description {
+  max-width: 53ch;
+  color: var(--muted);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem;
+  margin-top: 1.35rem;
+}
+
+.tags li {
+  padding: .35rem .65rem;
+  border: 1px solid var(--rule);
+  color: var(--accent);
+  font-size: .8rem;
+}
+
+.metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2.5rem;
+  margin-top: 1.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+
+.metadata dd {
+  margin-top: .3rem;
+  font-size: .88rem;
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "heading" "artwork" "details";
+    grid-template-rows: auto;
+  }
+
+  .heading {
+    padding-top: 0;
+  }
+
+  .heading h1 {
+    font-size: clamp(3rem, 10vw, 5rem);
+  }
+}

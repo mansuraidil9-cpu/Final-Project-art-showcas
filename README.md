@@ -38,6 +38,15 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 Kalau password berisi tanda dolar, tulis tanda itu sebagai `\$` di `.env.local` supaya terbaca sebagai karakter biasa.
 
+### Menambahkan karya dan challenge contoh
+
+Jika database sudah dibuat sebelum fitur Galeri dan Challenge, jalankan kembali `database/schema.sql` di **Query Tool**. Setelah itu, jalankan skrip berikut di database `alteria`.
+
+1. `database/seed-artworks.sql` menambahkan enam karya contoh ke Galeri. Pada database baru, `/karya/2` membuka **Wheat Field with Cypresses**.
+2. `database/seed-challenge.sql` menambahkan **Kota Setelah Hujan**, yang tampil di bagian challenge aktif hingga 30 November 2026 pukul 23.59 WITA. Pada database baru, `/challenge/1` membuka detailnya, termasuk setelah tenggat.
+
+Kedua skrip bisa dijalankan ulang tanpa mengganti data yang sudah ada.
+
 ### Membuat akun Admin
 
 Tambahkan pengaturan berikut sementara ke `.env.local` dan isi dengan email serta kata sandi yang kamu pilih.

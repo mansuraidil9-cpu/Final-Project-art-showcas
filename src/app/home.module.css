@@ -57,6 +57,26 @@
   letter-spacing: .23em;
 }
 
+.detailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.7rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.detailBackLink {
+  padding-block: .85rem;
+  font-size: .84rem;
+  text-align: right;
+}
+
+.detailBackLink:hover {
+  text-decoration: underline;
+  text-underline-offset: .25em;
+}
+
 .navigation,
 .account {
   display: flex;
@@ -81,6 +101,7 @@
 }
 
 .navigation a:hover,
+.navigation a[aria-current="page"],
 .account a:not(.solidButton):hover {
   text-decoration: underline;
   text-underline-offset: .25em;
@@ -219,8 +240,13 @@
 }
 
 .gallery,
-.challenge {
+.challenge,
+.standalone {
   padding-block: clamp(2.15rem, 4.2vw, 4.3rem);
+}
+
+.gallery,
+.challenge {
   scroll-margin-top: calc(var(--header-height) + 1rem);
 }
 
@@ -235,6 +261,11 @@
 .home h2 {
   font: 400 clamp(2.65rem, 4.7vw, 4.4rem)/.95 var(--serif);
   letter-spacing: -.025em;
+}
+
+.pageTitle {
+  font: 400 clamp(3.5rem, 7vw, 6.4rem)/.93 var(--serif);
+  letter-spacing: -.03em;
 }
 
 .search {
@@ -358,7 +389,7 @@
   font-size: .75rem;
 }
 
-.artworkCaption h3 {
+.artworkCaption .artworkTitle {
   margin-block: .15rem .25rem;
   font: 400 1.7rem/1.05 var(--serif);
 }
@@ -376,13 +407,14 @@
 
 .challengeCard {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
   margin-top: 1.25rem;
   border: 1px solid var(--rule);
 }
 
 .challengeImage {
+  width: 100%;
   aspect-ratio: 1.8;
 }
 
@@ -391,9 +423,10 @@
   align-content: center;
   gap: .55rem;
   padding: clamp(1.2rem, 4vw, 3.25rem);
+  overflow-wrap: anywhere;
 }
 
-.challengeCopy h3 {
+.challengeCopy :is(h2, h3) {
   font: 400 clamp(2rem, 3.5vw, 3.4rem)/1 var(--serif);
 }
 
