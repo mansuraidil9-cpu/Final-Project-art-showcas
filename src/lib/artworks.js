@@ -3,17 +3,19 @@ import { isDatabaseId, pool } from './db.mjs'
 
 const galleryArtworkColumns = `
   artworks.id::text AS id, title, COALESCE(creator.display_name, artist) AS artist,
-  artwork_date, category, image_src, like_count, uploaded_at, tags,
+  artwork_date, category, image_src, uploaded_at, tags,
   owner_id IS NOT NULL AS is_uploaded`
+
+const artworkDetailColumns = 'image_alt, image_width, image_height, description, source_url, rights'
+
+const likeCountColumn = `
+  artworks.like_count + (
+    SELECT count(*) FROM artwork_likes WHERE artwork_id = artworks.id
+  ) AS like_count`
 
 const fromArtworks = `
   FROM artworks
   LEFT JOIN users AS creator ON creator.id = artworks.owner_id`
-
-const selectArtworkDetail = `
-  SELECT ${galleryArtworkColumns}, image_alt, image_width, image_height,
-         description, source_url, rights
-  ${fromArtworks}`
 
 function toGalleryArtwork(row) {
   return {
@@ -23,7 +25,7 @@ function toGalleryArtwork(row) {
     date: row.artwork_date,
     category: row.category,
     imageSrc: row.image_src,
-    likes: row.like_count,
+    likes: Number(row.like_count),
     uploadedAt: row.uploaded_at.toISOString(),
     tags: row.tags,
     isUploaded: row.is_uploaded,
@@ -35,6 +37,7 @@ function toArtworkDetail(row) {
 
   return {
     ...toGalleryArtwork(row),
+    liked: row.liked ?? false,
     imageAlt: row.image_alt,
     width: row.image_width,
     height: row.image_height,
@@ -46,28 +49,46 @@ function toArtworkDetail(row) {
 
 export async function getGalleryArtworks() {
   const { rows } = await pool.query(`
-    SELECT ${galleryArtworkColumns}
+    SELECT ${galleryArtworkColumns}, ${likeCountColumn}
     ${fromArtworks}
     ORDER BY artworks.id`,
   )
   return rows.map(toGalleryArtwork)
 }
 
-export async function getArtworkById(id) {
+export async function getArtworkById(id, userId = null) {
   if (!isDatabaseId(id)) return null
 
-  const { rows } = await pool.query(
-    `${selectArtworkDetail} WHERE artworks.id = $1`,
-    [id],
+  const { rows } = await pool.query(`
+    SELECT ${galleryArtworkColumns}, ${artworkDetailColumns}, ${likeCountColumn},
+      EXISTS (
+        SELECT 1 FROM artwork_likes WHERE artwork_id = artworks.id AND user_id = $2
+      ) AS liked
+    ${fromArtworks}
+    WHERE artworks.id = $1`,
+    [id, userId],
   )
   return toArtworkDetail(rows[0])
+}
+
+export async function setArtworkLike(id, userId, liked) {
+  if (liked) {
+    await pool.query(`
+      INSERT INTO artwork_likes (artwork_id, user_id)
+      VALUES ($1, $2)
+      ON CONFLICT (artwork_id, user_id) DO NOTHING`,
+      [id, userId],
+    )
+  } else {
+    await pool.query('DELETE FROM artwork_likes WHERE artwork_id = $1 AND user_id = $2', [id, userId])
+  }
 }
 
 export async function getMemberArtworks(ownerId) {
   if (!isDatabaseId(ownerId)) return []
 
   const { rows } = await pool.query(`
-    SELECT ${galleryArtworkColumns}
+    SELECT ${galleryArtworkColumns}, artworks.like_count
     ${fromArtworks}
     WHERE artworks.owner_id = $1
     ORDER BY artworks.uploaded_at DESC, artworks.id DESC`,
@@ -79,8 +100,10 @@ export async function getMemberArtworks(ownerId) {
 export async function getMemberArtwork(id, ownerId) {
   if (!isDatabaseId(id) || !isDatabaseId(ownerId)) return null
 
-  const { rows } = await pool.query(
-    `${selectArtworkDetail} WHERE artworks.id = $1 AND artworks.owner_id = $2`,
+  const { rows } = await pool.query(`
+    SELECT ${galleryArtworkColumns}, ${artworkDetailColumns}, artworks.like_count
+    ${fromArtworks}
+    WHERE artworks.id = $1 AND artworks.owner_id = $2`,
     [id, ownerId],
   )
   return toArtworkDetail(rows[0])
