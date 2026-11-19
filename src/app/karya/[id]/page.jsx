@@ -64,7 +64,10 @@ export default async function DetailKarya({ params }) {
             </div>
             <div>
               <dt className={homeStyles.eyebrow}>Suka</dt>
-              <dd>{likeCount.format(artwork.likes)}</dd>
+              <dd className={styles.likeCount}>
+                <span className={styles.likeHeart} aria-hidden="true">♥</span>
+                {likeCount.format(artwork.likes)}
+              </dd>
             </div>
           </dl>
         </div>
