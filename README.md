@@ -47,6 +47,8 @@ Jika database sudah dibuat sebelum fitur Galeri dan Challenge, jalankan kembali 
 
 Kedua skrip bisa dijalankan ulang tanpa mengganti data yang sudah ada.
 
+Jika database sudah ada, jalankan kembali `database/schema.sql` untuk mengaktifkan tombol hati. Pengguna yang masuk bisa menyukai karya dari Galeri dan halaman detail.
+
 ### Kelola Karya Member
 
 Jika database sudah ada, jalankan kembali `database/schema.sql` untuk menambahkan kolom penyimpanan karya Member. Masuk sebagai Member, lalu buka **Dashboard → Unggah karya**. Pilih satu gambar JPEG, PNG, atau WebP hingga 5 MB. Aplikasi menyimpan gambar dalam format WebP di PostgreSQL dan menampilkannya di Galeri. Dari dashboard, Member bisa mengubah judul, deskripsi, kategori, dan tag, atau menghapus karya miliknya.

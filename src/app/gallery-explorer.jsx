@@ -3,10 +3,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import ArtworkLike from './artwork-like'
 import ChallengeCard from './challenge-card'
 import styles from './home.module.css'
 
-export default function GalleryExplorer({ artworks, challenge, galleryPage = false }) {
+export default function GalleryExplorer({ artworks, challenge, canLike, galleryPage = false }) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Semua')
   const [sort, setSort] = useState('popular')
@@ -105,9 +106,9 @@ export default function GalleryExplorer({ artworks, challenge, galleryPage = fal
                         {artwork.artist}{artwork.date && ` · ${artwork.date}`}
                       </p>
                     </div>
-                    <span className={`${styles.arrow} ${styles.arrowOut}`} aria-hidden="true" />
                   </div>
                 </Link>
+                <ArtworkLike artwork={artwork} canLike={canLike} overlay />
               </article>
             ))}
           </div>
@@ -116,7 +117,7 @@ export default function GalleryExplorer({ artworks, challenge, galleryPage = fal
             <p>{galleryMessage}</p>
             {search && challengeMatches && (
               <a className={styles.textLink} href="#challenge">
-                Lihat hasil challenge <span className={`${styles.arrow} ${styles.arrowDown}`} aria-hidden="true" />
+                Lihat hasil challenge
               </a>
             )}
           </div>
