@@ -25,7 +25,7 @@ export default async function DetailKarya({ params }) {
         <header className={styles.heading}>
           <p className={homeStyles.eyebrow}>{artwork.category}</p>
           <h1 id="judul-karya">{artwork.title}</h1>
-          <p className={styles.byline}>{artwork.artist} · {artwork.date}</p>
+          <p className={styles.byline}>{artwork.artist}{artwork.date && ` · ${artwork.date}`}</p>
         </header>
 
         <figure className={styles.artwork}>
@@ -35,6 +35,7 @@ export default async function DetailKarya({ params }) {
               alt={artwork.imageAlt}
               width={artwork.width}
               height={artwork.height}
+              unoptimized={artwork.isUploaded}
               sizes="(max-width: 760px) 92vw, (max-width: 1480px) 54vw, 740px"
               preload
             />

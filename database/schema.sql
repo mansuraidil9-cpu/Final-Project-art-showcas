@@ -67,4 +67,15 @@ CREATE TABLE IF NOT EXISTS artworks (
     rights TEXT
 );
 
+ALTER TABLE artworks
+    ADD COLUMN IF NOT EXISTS owner_id BIGINT REFERENCES users (id) ON DELETE CASCADE,
+    ADD COLUMN IF NOT EXISTS image_data BYTEA CONSTRAINT artworks_upload_pair_check
+        CHECK ((owner_id IS NULL) = (image_data IS NULL));
+
+CREATE INDEX IF NOT EXISTS artworks_owner_upload_index
+    ON artworks (owner_id, uploaded_at DESC, id DESC);
+
+CREATE UNIQUE INDEX IF NOT EXISTS artworks_uploaded_image_src_unique
+    ON artworks (image_src) WHERE owner_id IS NOT NULL;
+
 COMMIT;

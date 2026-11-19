@@ -93,6 +93,7 @@ export default function GalleryExplorer({ artworks, challenge, galleryPage = fal
                       src={artwork.imageSrc}
                       alt=""
                       fill
+                      unoptimized={artwork.isUploaded}
                       sizes="(max-width: 500px) 94vw, (max-width: 900px) 48vw, 32vw"
                     />
                   </div>
@@ -100,7 +101,9 @@ export default function GalleryExplorer({ artworks, challenge, galleryPage = fal
                     <div>
                       <p className={styles.artworkCategory}>{artwork.category}</p>
                       <ArtworkHeading className={styles.artworkTitle}>{artwork.title}</ArtworkHeading>
-                      <p className={styles.artworkArtist}>{artwork.artist} · {artwork.date}</p>
+                      <p className={styles.artworkArtist}>
+                        {artwork.artist}{artwork.date && ` · ${artwork.date}`}
+                      </p>
                     </div>
                     <span className={`${styles.arrow} ${styles.arrowOut}`} aria-hidden="true" />
                   </div>

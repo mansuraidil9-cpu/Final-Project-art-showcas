@@ -47,6 +47,10 @@ Jika database sudah dibuat sebelum fitur Galeri dan Challenge, jalankan kembali 
 
 Kedua skrip bisa dijalankan ulang tanpa mengganti data yang sudah ada.
 
+### Kelola Karya Member
+
+Jika database sudah ada, jalankan kembali `database/schema.sql` untuk menambahkan kolom penyimpanan karya Member. Masuk sebagai Member, lalu buka **Dashboard → Unggah karya**. Pilih satu gambar JPEG, PNG, atau WebP hingga 5 MB. Aplikasi menyimpan gambar dalam format WebP di PostgreSQL dan menampilkannya di Galeri. Dari dashboard, Member bisa mengubah judul, deskripsi, kategori, dan tag, atau menghapus karya miliknya.
+
 ### Membuat akun Admin
 
 Tambahkan pengaturan berikut sementara ke `.env.local` dan isi dengan email serta kata sandi yang kamu pilih.
