@@ -78,12 +78,4 @@ CREATE INDEX IF NOT EXISTS artworks_owner_upload_index
 CREATE UNIQUE INDEX IF NOT EXISTS artworks_uploaded_image_src_unique
     ON artworks (image_src) WHERE owner_id IS NOT NULL;
 
-CREATE TABLE IF NOT EXISTS artwork_likes (
-    artwork_id BIGINT NOT NULL REFERENCES artworks (id) ON DELETE CASCADE,
-    user_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-    PRIMARY KEY (artwork_id, user_id)
-);
-
-CREATE INDEX IF NOT EXISTS artwork_likes_user_id_index ON artwork_likes (user_id);
-
 COMMIT;

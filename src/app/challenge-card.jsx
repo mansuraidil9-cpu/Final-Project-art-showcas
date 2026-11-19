@@ -22,7 +22,9 @@ export default function ChallengeCard({ challenge, statusLabel, heading: Heading
         <p className={styles.deadline}>
           Sampai <time dateTime={challenge.deadline}>{challenge.deadlineLabel}</time>
         </p>
-        <Link className={styles.textLink} href={`/challenge/${challenge.id}`}>Lihat challenge</Link>
+        <Link className={styles.textLink} href={`/challenge/${challenge.id}`}>
+          Lihat Challenge <span className={`${styles.arrow} ${styles.arrowOut}`} aria-hidden="true" />
+        </Link>
       </div>
     </article>
   )

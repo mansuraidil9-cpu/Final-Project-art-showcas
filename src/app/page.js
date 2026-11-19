@@ -10,9 +10,9 @@ import styles from './home.module.css'
 
 export default async function Home() {
   await connection()
-  const user = await getCurrentUser()
-  const [artworks, challenge] = await Promise.all([
-    getGalleryArtworks(user?.id).catch(error => {
+  const [user, artworks, challenge] = await Promise.all([
+    getCurrentUser(),
+    getGalleryArtworks().catch(error => {
       console.error('Galeri gagal dimuat.', error.code ?? error.name)
       return undefined
     }),
@@ -31,13 +31,15 @@ export default async function Home() {
             <div className={styles.heroCopy}>
               <p className={styles.eyebrow}>Galeri seni digital</p>
               <h1 id="judul-beranda">
-                Temukan karya.
-                <em>Kenali kreatornya.</em>
+                Temukan Karya,<br />
+                <em>Kenali Kreatornya.</em>
               </h1>
               <p className={styles.intro}>
                 Jelajahi karya lintas medium dan ikuti challenge dari para kurator.
               </p>
-              <a className={styles.heroAction} href="#galeri">Jelajahi galeri</a>
+              <a className={styles.textLink} href="#galeri">
+                Jelajahi Galeri <span className={`${styles.arrow} ${styles.arrowDown}`} aria-hidden="true" />
+              </a>
             </div>
 
             <figure className={styles.heroFigure}>
@@ -47,7 +49,7 @@ export default async function Home() {
                   alt="Dua orang berpayung melintasi jalan berbatu di Paris."
                   fill
                   preload
-                  sizes="(max-width: 760px) 94vw, (max-width: 1300px) 52vw, 680px"
+                  sizes="(max-width: 760px) 94vw, 55vw"
                 />
               </div>
               <figcaption className={styles.heroCaption}>
@@ -57,12 +59,14 @@ export default async function Home() {
             </figure>
           </section>
 
-          <GalleryExplorer artworks={artworks} challenge={challenge} canLike={Boolean(user)} />
+          <GalleryExplorer artworks={artworks} challenge={challenge} />
         </main>
 
         <footer className={styles.footer}>
           <Link className={styles.wordmark} href="/">ALTERIA</Link>
-          <a className={styles.textLink} href="#atas">Kembali ke atas</a>
+          <a className={styles.textLink} href="#atas">
+            Kembali ke atas <span className={`${styles.arrow} ${styles.arrowUp}`} aria-hidden="true" />
+          </a>
         </footer>
       </div>
     </div>

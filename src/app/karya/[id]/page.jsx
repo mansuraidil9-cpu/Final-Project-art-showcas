@@ -1,8 +1,6 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { getArtworkById } from '../../../lib/artworks'
-import { getCurrentUser } from '../../../lib/session'
-import ArtworkLike from '../../artwork-like'
 import homeStyles from '../../home.module.css'
 import ShowcaseDetail from '../../showcase-detail'
 import styles from './artwork.module.css'
@@ -13,9 +11,11 @@ const uploadDate = new Intl.DateTimeFormat('id-ID', {
   dateStyle: 'long',
   timeZone: 'Asia/Makassar',
 })
+const likeCount = new Intl.NumberFormat('id-ID')
+
 export default async function DetailKarya({ params }) {
-  const [{ id }, user] = await Promise.all([params, getCurrentUser()])
-  const artwork = await getArtworkById(id, user?.id)
+  const { id } = await params
+  const artwork = await getArtworkById(id)
 
   if (!artwork) notFound()
 
@@ -64,7 +64,10 @@ export default async function DetailKarya({ params }) {
             </div>
             <div>
               <dt className={homeStyles.eyebrow}>Suka</dt>
-              <dd><ArtworkLike artwork={artwork} canLike={Boolean(user)} /></dd>
+              <dd className={styles.likeCount}>
+                <span className={styles.likeHeart} aria-hidden="true">♥</span>
+                {likeCount.format(artwork.likes)}
+              </dd>
             </div>
           </dl>
         </div>
