@@ -10,16 +10,18 @@ import styles from './home.module.css'
 
 export default async function Home() {
   await connection()
-  const [user, artworks, challenge] = await Promise.all([
-    getCurrentUser(),
-    getGalleryArtworks().catch(error => {
+  const challengeQuery = getActiveChallenge().catch(error => {
+    console.error('Challenge gagal dimuat.', error.code ?? error.name)
+    return undefined
+  })
+  const user = await getCurrentUser()
+  const canLike = user?.role === 'member'
+  const [artworks, challenge] = await Promise.all([
+    getGalleryArtworks(canLike ? user.id : null).catch(error => {
       console.error('Galeri gagal dimuat.', error.code ?? error.name)
       return undefined
     }),
-    getActiveChallenge().catch(error => {
-      console.error('Challenge gagal dimuat.', error.code ?? error.name)
-      return undefined
-    }),
+    challengeQuery,
   ])
   return (
     <div className={styles.home} id="atas">
@@ -59,7 +61,7 @@ export default async function Home() {
             </figure>
           </section>
 
-          <GalleryExplorer artworks={artworks} challenge={challenge} />
+          <GalleryExplorer artworks={artworks} challenge={challenge} canLike={canLike} />
         </main>
 
         <footer className={styles.footer}>

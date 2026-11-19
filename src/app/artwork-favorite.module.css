@@ -1,0 +1,21 @@
+.bookmark {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  inline-size: .8rem;
+  block-size: 1rem;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 74%, 0 100%);
+}
+
+.bookmark::after {
+  position: absolute;
+  inset: .11rem .11rem .17rem;
+  clip-path: inherit;
+  background: #faf7ef;
+  content: "";
+}
+
+.button[aria-pressed="true"] .bookmark::after {
+  content: none;
+}

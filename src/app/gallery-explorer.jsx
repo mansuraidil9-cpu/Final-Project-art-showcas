@@ -3,10 +3,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import ArtworkFavorite from './artwork-favorite'
+import ArtworkLike from './artwork-like'
 import ChallengeCard from './challenge-card'
 import styles from './home.module.css'
 
-export default function GalleryExplorer({ artworks, challenge, galleryPage = false }) {
+export default function GalleryExplorer({ artworks, challenge, canLike, galleryPage = false }) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Semua')
   const [sort, setSort] = useState('popular')
@@ -108,6 +110,15 @@ export default function GalleryExplorer({ artworks, challenge, galleryPage = fal
                     <span className={`${styles.arrow} ${styles.arrowOut}`} aria-hidden="true" />
                   </div>
                 </Link>
+                <div className={styles.artworkReaction}>
+                  <ArtworkLike artwork={artwork} canLike={canLike && !artwork.isOwner} variant="gallery" />
+                  {canLike && !artwork.isOwner && <ArtworkFavorite artwork={artwork} variant="gallery" />}
+                </div>
+                {canLike && !artwork.isOwner && (
+                  <Link className={styles.artworkComments} href={`/karya/${artwork.id}#komentar`}>
+                    Komentar<span className="sr-only"> untuk {artwork.title}</span>
+                  </Link>
+                )}
               </article>
             ))}
           </div>

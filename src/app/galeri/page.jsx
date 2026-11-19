@@ -13,20 +13,19 @@ export const metadata = {
 export default async function GalleryPage() {
   await connection()
 
-  const [user, artworks] = await Promise.all([
-    getCurrentUser(),
-    getGalleryArtworks().catch(error => {
-      console.error('Galeri gagal dimuat.', error.code ?? error.name)
-      return undefined
-    }),
-  ])
+  const user = await getCurrentUser()
+  const canLike = user?.role === 'member'
+  const artworks = await getGalleryArtworks(canLike ? user.id : null).catch(error => {
+    console.error('Galeri gagal dimuat.', error.code ?? error.name)
+    return undefined
+  })
 
   return (
     <div className={styles.home}>
       <div className={styles.shell}>
         <ShowcaseHeader user={user} currentPage="galeri" />
         <main>
-          <GalleryExplorer artworks={artworks} galleryPage />
+          <GalleryExplorer artworks={artworks} canLike={canLike} galleryPage />
         </main>
       </div>
     </div>

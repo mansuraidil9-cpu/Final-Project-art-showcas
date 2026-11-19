@@ -1,0 +1,97 @@
+.form {
+  display: grid;
+  justify-items: start;
+  gap: .35rem;
+  max-inline-size: 100%;
+}
+
+.form[data-variant="gallery"] {
+  justify-items: end;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 2.75rem;
+  min-block-size: 2.75rem;
+  padding-inline: .8rem;
+  border: 1px solid #c8bcaa;
+  border-radius: 999px;
+  background: #faf7ef;
+  color: var(--accent);
+  font-size: .82rem;
+  font-weight: 600;
+}
+
+.pill[data-variant="gallery"] {
+  padding-inline: .6rem;
+}
+
+.contents {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.heart {
+  inline-size: 1.1rem;
+  color: #845144;
+  font: 1.25rem/1 "Segoe UI Symbol", "Noto Sans Symbols 2", Arial, sans-serif;
+  text-align: center;
+}
+
+.number {
+  font-variant-numeric: tabular-nums;
+}
+
+.count {
+  pointer-events: none;
+}
+
+.button {
+  cursor: pointer;
+  pointer-events: auto;
+  transition: border-color .16s ease, background-color .16s ease, color .16s ease;
+}
+
+.button:hover {
+  border-color: #9d6c5c;
+}
+
+.button[aria-pressed="true"] {
+  border-color: #c5927d;
+  background: #f6e5dc;
+  color: #702c20;
+}
+
+.button[aria-pressed="true"] .heart {
+  color: #a24031;
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.error {
+  max-inline-size: 100%;
+  font-size: .78rem;
+  line-height: 1.35;
+  color: #702c20;
+  overflow-wrap: anywhere;
+  pointer-events: auto;
+}
+
+.form[data-variant="gallery"] .error {
+  max-inline-size: min(15rem, 100%);
+  padding: .45rem .6rem;
+  border-radius: .35rem;
+  background: #faf7ef;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}

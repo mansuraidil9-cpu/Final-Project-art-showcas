@@ -1,5 +1,8 @@
 BEGIN;
 
+-- Serialize concurrent executions of this schema in the same database.
+SELECT pg_advisory_xact_lock(hashtext('alteria'), hashtext('database/schema.sql'));
+
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     display_name VARCHAR(120) NOT NULL CHECK (btrim(display_name) <> ''),
@@ -61,7 +64,6 @@ CREATE TABLE IF NOT EXISTS artworks (
     image_height INTEGER NOT NULL CHECK (image_height > 0),
     description TEXT NOT NULL,
     tags TEXT[] NOT NULL CHECK (cardinality(tags) > 0),
-    like_count INTEGER NOT NULL DEFAULT 0 CHECK (like_count >= 0),
     uploaded_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     source_url TEXT CHECK (source_url ~* '^https://[^[:space:]]+$'),
     rights TEXT
@@ -77,5 +79,77 @@ CREATE INDEX IF NOT EXISTS artworks_owner_upload_index
 
 CREATE UNIQUE INDEX IF NOT EXISTS artworks_uploaded_image_src_unique
     ON artworks (image_src) WHERE owner_id IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS artwork_likes (
+    artwork_id BIGINT NOT NULL REFERENCES artworks (id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    PRIMARY KEY (artwork_id, user_id)
+);
+
+DO $migration$
+DECLARE
+    likes_table regclass := 'artwork_likes'::regclass;
+    legacy_index regclass;
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_catalog.pg_attribute
+        WHERE attrelid = likes_table AND attname = 'member_id' AND NOT attisdropped
+    ) THEN
+        RETURN;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM pg_catalog.pg_attribute
+        WHERE attrelid = likes_table AND attname = 'user_id' AND NOT attisdropped
+    ) THEN
+        RAISE EXCEPTION 'artwork_likes already has both member_id and user_id';
+    END IF;
+
+    ALTER TABLE artwork_likes RENAME COLUMN member_id TO user_id;
+
+    IF EXISTS (
+        SELECT 1 FROM pg_catalog.pg_constraint
+        WHERE conrelid = likes_table AND conname = 'artwork_likes_member_id_fkey'
+    ) THEN
+        ALTER TABLE artwork_likes
+            RENAME CONSTRAINT artwork_likes_member_id_fkey TO artwork_likes_user_id_fkey;
+    END IF;
+
+    SELECT idx.oid::regclass INTO legacy_index
+    FROM pg_catalog.pg_index AS indexed
+    JOIN pg_catalog.pg_class AS idx ON idx.oid = indexed.indexrelid
+    WHERE indexed.indrelid = likes_table AND idx.relname = 'artwork_likes_member_id_index';
+
+    IF legacy_index IS NOT NULL THEN
+        EXECUTE format('ALTER INDEX %s RENAME TO artwork_likes_user_id_index', legacy_index);
+    END IF;
+END;
+$migration$;
+
+CREATE INDEX IF NOT EXISTS artwork_likes_user_id_index ON artwork_likes (user_id);
+
+CREATE TABLE IF NOT EXISTS artwork_favorites (
+    artwork_id BIGINT NOT NULL REFERENCES artworks (id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (artwork_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS artwork_favorites_user_created_index
+    ON artwork_favorites (user_id, created_at DESC, artwork_id DESC);
+
+CREATE TABLE IF NOT EXISTS artwork_comments (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    artwork_id BIGINT NOT NULL REFERENCES artworks (id) ON DELETE CASCADE,
+    user_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    body TEXT NOT NULL CHECK (
+        char_length(body) BETWEEN 1 AND 1000 AND body !~ '^[[:space:]]|[[:space:]]$'
+    ),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS artwork_comments_artwork_created_index
+    ON artwork_comments (artwork_id, created_at, id);
+CREATE INDEX IF NOT EXISTS artwork_comments_user_id_index ON artwork_comments (user_id);
 
 COMMIT;

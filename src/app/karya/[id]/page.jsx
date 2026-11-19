@@ -1,8 +1,12 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
-import { getArtworkById } from '../../../lib/artworks'
+import { getArtworkById, getArtworkComments } from '../../../lib/artworks'
+import { getCurrentUser } from '../../../lib/session'
+import ArtworkFavorite from '../../artwork-favorite'
+import ArtworkLike from '../../artwork-like'
 import homeStyles from '../../home.module.css'
 import ShowcaseDetail from '../../showcase-detail'
+import ArtworkComments from './artwork-comments'
 import styles from './artwork.module.css'
 
 export const metadata = { title: 'Detail Karya | ALTERIA' }
@@ -11,13 +15,17 @@ const uploadDate = new Intl.DateTimeFormat('id-ID', {
   dateStyle: 'long',
   timeZone: 'Asia/Makassar',
 })
-const likeCount = new Intl.NumberFormat('id-ID')
 
 export default async function DetailKarya({ params }) {
   const { id } = await params
-  const artwork = await getArtworkById(id)
+  const user = await getCurrentUser()
+  const memberId = user?.role === 'member' ? user.id : null
+  const artwork = await getArtworkById(id, memberId)
 
   if (!artwork) notFound()
+
+  const comments = await getArtworkComments(artwork.id, memberId)
+  const canInteract = memberId !== null && !artwork.isOwner
 
   return (
     <ShowcaseDetail backHref="/galeri" backLabel="Kembali ke Galeri">
@@ -57,18 +65,19 @@ export default async function DetailKarya({ params }) {
             </ul>
           )}
 
-          <dl className={styles.metadata}>
-            <div>
+          <div className={styles.metadata}>
+            <dl className={styles.uploadDate}>
               <dt className={homeStyles.eyebrow}>Diunggah</dt>
               <dd><time dateTime={artwork.uploadedAt}>{uploadDate.format(new Date(artwork.uploadedAt))}</time></dd>
+            </dl>
+            <div className={styles.interactions}>
+              <ArtworkLike artwork={artwork} canLike={canInteract} />
+              {canInteract && <ArtworkFavorite artwork={artwork} />}
             </div>
-            <div>
-              <dt className={homeStyles.eyebrow}>Suka</dt>
-              <dd>{likeCount.format(artwork.likes)}</dd>
-            </div>
-          </dl>
+          </div>
         </div>
       </article>
+      <ArtworkComments artworkId={artwork.id} comments={comments} canComment={canInteract} guest={!user} />
     </ShowcaseDetail>
   )
 }

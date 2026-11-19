@@ -357,6 +357,25 @@
   gap: 1.75rem clamp(.8rem, 2vw, 1.8rem);
 }
 
+.artwork {
+  position: relative;
+  isolation: isolate;
+}
+
+.artworkReaction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: end;
+  gap: .35rem;
+  position: absolute;
+  inset-block-start: .7rem;
+  inset-inline-end: .7rem;
+  max-inline-size: calc(100% - 1.4rem);
+  z-index: 1;
+  pointer-events: none;
+}
+
 .artworkImage {
   overflow: hidden;
   aspect-ratio: 1.28;
@@ -392,6 +411,16 @@
 .artworkCaption .artworkTitle {
   margin-block: .15rem .25rem;
   font: 400 1.7rem/1.05 var(--serif);
+}
+
+.artworkComments {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.75rem;
+  color: var(--muted);
+  font-size: .8rem;
+  text-decoration: underline;
+  text-underline-offset: .2em;
 }
 
 .emptyGallery {

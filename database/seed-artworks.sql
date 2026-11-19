@@ -3,7 +3,7 @@ BEGIN;
 INSERT INTO artworks (
     slug, title, artist, artwork_date, category,
     image_src, image_alt, image_width, image_height,
-    description, tags, like_count, uploaded_at, source_url, rights
+    description, tags, uploaded_at, source_url, rights
 ) VALUES
 (
     'la-grande-jatte',
@@ -16,7 +16,7 @@ INSERT INTO artworks (
     820, 546,
     'Seurat menggambarkan suasana hari Minggu di tepi Sungai Seine. Titik-titik warna membentuk pepohonan, bayangan, dan pengunjung taman.',
     ARRAY['Pointilisme', 'Taman', 'Sungai'],
-    88, TIMESTAMPTZ '2026-11-18 09:00:00+08',
+    TIMESTAMPTZ '2026-11-18 09:00:00+08',
     'https://commons.wikimedia.org/wiki/File:Georges_Seurat_-_A_Sunday_on_La_Grande_Jatte_--_1884_-_Google_Art_Project.jpg',
     'Public domain'
 ), (
@@ -30,7 +30,7 @@ INSERT INTO artworks (
     599, 477,
     'Sapuan kuas melengkung memberi kesan gerak pada ladang gandum dan awan. Pohon sipres yang gelap menonjol di antara warna kuning dan biru.',
     ARRAY['Lanskap', 'Gandum', 'Pascaimpresionisme'],
-    96, TIMESTAMPTZ '2026-11-18 10:00:00+08',
+    TIMESTAMPTZ '2026-11-18 10:00:00+08',
     'https://www.metmuseum.org/art/collection/search/436535',
     'Public domain (The Met Open Access, CC0)'
 ), (
@@ -44,7 +44,7 @@ INSERT INTO artworks (
     600, 488,
     'Rangkaian bunga memenuhi sebagian besar lukisan, dengan sosok perempuan duduk di tepi kanan sambil memandang ke samping.',
     ARRAY['Potret', 'Bunga', 'Interior'],
-    71, TIMESTAMPTZ '2026-11-18 11:00:00+08',
+    TIMESTAMPTZ '2026-11-18 11:00:00+08',
     'https://www.metmuseum.org/art/collection/search/436121',
     'Public domain (The Met Open Access, CC0)'
 ), (
@@ -58,7 +58,7 @@ INSERT INTO artworks (
     600, 403,
     'Cetak kayu ini menampilkan perahu-perahu kecil di bawah ombak besar. Gunung Fuji terlihat di antara ombak, jauh di belakang.',
     ARRAY['Ukiyo-e', 'Cetak kayu', 'Laut'],
-    82, TIMESTAMPTZ '2026-11-18 12:00:00+08',
+    TIMESTAMPTZ '2026-11-18 12:00:00+08',
     'https://www.metmuseum.org/art/collection/search/45434',
     'Public domain (The Met Open Access, CC0)'
 ), (
@@ -72,7 +72,7 @@ INSERT INTO artworks (
     598, 367,
     'Motif hitam di sisi luar mangkuk porselen menampilkan penunggang kuda dan pepohonan.',
     ARRAY['Porselen', 'Mangkuk teh', 'Dekoratif'],
-    54, TIMESTAMPTZ '2026-11-18 13:00:00+08',
+    TIMESTAMPTZ '2026-11-18 13:00:00+08',
     'https://www.metmuseum.org/art/collection/search/198649',
     'Public domain (The Met Open Access, CC0)'
 ), (
@@ -86,7 +86,7 @@ INSERT INTO artworks (
     599, 409,
     'Cole menggambarkan kelokan sungai selepas badai. Awan gelap masih menggantung di atas hutan, sementara cahaya menyentuh dataran di seberangnya.',
     ARRAY['Lanskap', 'Sungai', 'Badai'],
-    63, TIMESTAMPTZ '2026-11-18 14:00:00+08',
+    TIMESTAMPTZ '2026-11-18 14:00:00+08',
     'https://www.metmuseum.org/art/collection/search/10497',
     'Public domain (The Met Open Access, CC0)'
 )
