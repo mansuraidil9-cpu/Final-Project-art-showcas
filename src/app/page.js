@@ -24,7 +24,7 @@ export default async function Home() {
     challengeQuery,
   ])
   return (
-    <div className={styles.home} id="atas">
+    <div className={`${styles.home} ${styles.entrancePage}`} id="atas">
       <div className={styles.shell}>
         <ShowcaseHeader user={user} currentPage="home" />
 
@@ -33,32 +33,26 @@ export default async function Home() {
             <div className={styles.heroCopy}>
               <p className={styles.eyebrow}>Galeri seni digital</p>
               <h1 id="judul-beranda">
-                Temukan Karya,<br />
-                <em>Kenali Kreatornya.</em>
+                Ruang bagi{' '}
+                <em>setiap karya.</em>
               </h1>
               <p className={styles.intro}>
-                Jelajahi karya lintas medium dan ikuti challenge dari para kurator.
+                Kenali kreator, temukan karya lintas medium, dan ikuti challenge seni.
               </p>
-              <a className={styles.textLink} href="#galeri">
+              <a className={styles.heroLink} href="#galeri">
                 Jelajahi Galeri <span className={`${styles.arrow} ${styles.arrowDown}`} aria-hidden="true" />
               </a>
             </div>
 
-            <figure className={styles.heroFigure}>
-              <div className={styles.heroImage}>
-                <Image
-                  src="/alteria/paris-rainy-day.jpg"
-                  alt="Dua orang berpayung melintasi jalan berbatu di Paris."
-                  fill
-                  preload
-                  sizes="(max-width: 760px) 94vw, 55vw"
-                />
-              </div>
-              <figcaption className={styles.heroCaption}>
-                <cite>Paris Street; Rainy Day</cite>
-                <span>Gustave Caillebotte, 1877</span>
-              </figcaption>
-            </figure>
+            <div className={styles.heroImage}>
+              <Image
+                src="/alteria/beranda-mona-lisa-oker.webp"
+                alt="Lukisan Mona Lisa karya Leonardo da Vinci dalam bingkai miring, dengan kuas dan sapuan cat melayang."
+                fill
+                preload
+                sizes="100vw"
+              />
+            </div>
           </section>
 
           <GalleryExplorer artworks={artworks} challenges={challenges} canLike={canLike} />

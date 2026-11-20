@@ -90,13 +90,18 @@
   gap: 1rem;
 }
 
-.solidButton {
+.solidButton,
+.heroLink {
   background: var(--accent);
   color: var(--paper);
+}
+
+.solidButton {
   padding: .68rem 1.1rem;
 }
 
-.solidButton:hover {
+.solidButton:hover,
+.heroLink:hover {
   background: var(--ink);
 }
 
@@ -107,17 +112,28 @@
   text-underline-offset: .25em;
 }
 
+.entrancePage {
+  container-type: inline-size;
+}
+
 .hero {
+  --hero-stage: #f4ecde;
+  position: relative;
+  isolation: isolate;
   display: grid;
-  grid-template-columns: .93fr 1.07fr;
   align-items: center;
-  gap: clamp(1.5rem, 4.5vw, 4.6rem);
-  padding-block: clamp(2.1rem, 4vw, 3.8rem) clamp(2rem, 4.4vw, 4.25rem);
-  border-bottom: 1px solid var(--rule);
+  min-height: clamp(31rem, calc(100svh - var(--header-height)), 64vw);
+  margin-inline: calc((100% - 100cqw) / 2);
+  overflow: hidden;
+  background: var(--hero-stage);
 }
 
 .heroCopy {
-  padding-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+  width: min(56%, 53rem);
+  margin-inline-start: max(clamp(1rem, 4vw, 4rem), calc((100% - 1320px) / 2));
+  padding-block: clamp(3rem, 6vw, 6.25rem);
 }
 
 .eyebrow {
@@ -129,18 +145,20 @@
 }
 
 .hero h1 {
-  margin: .6rem 0 1.2rem;
-  font: 400 clamp(3.25rem, 6.15vw, 6rem)/.92 var(--serif);
-  letter-spacing: -.032em;
+  margin-block: .8rem 1.3rem;
+  font: 400 clamp(4.75rem, 9.6vw, 10.75rem)/.87 var(--serif);
+  letter-spacing: -.04em;
 }
 
 .hero h1 em {
+  display: block;
+  margin-inline-start: .28em;
   color: var(--accent);
   font-weight: 400;
 }
 
 .intro {
-  max-width: 29ch;
+  max-width: 32ch;
   color: var(--muted);
   font-size: clamp(.92rem, 1.2vw, 1rem);
   line-height: 1.65;
@@ -161,8 +179,16 @@
   color: var(--accent);
 }
 
-.heroCopy .textLink {
-  margin-top: 1.3rem;
+.heroLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.1rem;
+  min-height: 2.85rem;
+  margin-top: 1.4rem;
+  padding: .65rem .9rem .65rem 1rem;
+  font-size: .84rem;
+  font-weight: 600;
 }
 
 .arrow {
@@ -206,7 +232,6 @@
   transform: rotate(-90deg);
 }
 
-.heroImage,
 .artworkImage,
 .challengeImage {
   position: relative;
@@ -214,7 +239,25 @@
 }
 
 .heroImage {
-  aspect-ratio: 1.58;
+  position: absolute;
+  inset: 7% 0 7% auto;
+  inline-size: 86%;
+  isolation: isolate;
+}
+
+.heroImage::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, var(--hero-stage), transparent 10% 90%, var(--hero-stage)),
+    linear-gradient(
+      90deg,
+      var(--hero-stage),
+      rgb(244 236 222 / .88) 13%,
+      rgb(244 236 222 / .38) 28%,
+      transparent 46%
+    );
+  content: "";
 }
 
 .home img {
@@ -222,7 +265,7 @@
 }
 
 .heroImage img {
-  object-position: 50% 45%;
+  object-position: 67% 50%;
 }
 
 .heroCaption {
@@ -531,21 +574,42 @@
     min-height: 2.75rem;
   }
 
-  .hero,
   .challengeCard {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .hero {
-    gap: 1.5rem;
+    min-height: 0;
   }
 
   .heroCopy {
-    padding-bottom: 0;
+    width: auto;
+    margin-inline: clamp(1rem, 4vw, 4rem);
+    padding-block: clamp(1.9rem, 6.4vw, 3.7rem) 1rem;
   }
 
   .hero h1 {
-    font-size: clamp(2.85rem, 11.2vw, 5.4rem);
+    font-size: clamp(3.65rem, 14.5vw, 6.25rem);
+  }
+
+  .hero h1 em {
+    margin-inline-start: 0;
+  }
+
+  .heroImage {
+    position: relative;
+    inset: auto;
+    inline-size: 100%;
+    aspect-ratio: 1.45;
+    overflow: hidden;
+  }
+
+  .heroImage::after {
+    background: linear-gradient(180deg, var(--hero-stage), transparent 23% 91%, var(--hero-stage));
+  }
+
+  .heroImage img {
+    object-position: 96% 51%;
   }
 
   .sectionHeader {
@@ -561,10 +625,6 @@
 @media (max-width: 500px) {
   .artworks {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .heroImage {
-    aspect-ratio: 1.35;
   }
 }
 
