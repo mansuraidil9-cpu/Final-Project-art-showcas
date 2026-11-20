@@ -10,6 +10,7 @@ export default function ChallengeCard({ challenge, statusLabel, heading: Heading
           src={challenge.coverImage}
           alt={challenge.coverAlt}
           fill
+          unoptimized={challenge.isUploaded}
           sizes="(max-width: 760px) 94vw, 44vw"
         />
       </div>

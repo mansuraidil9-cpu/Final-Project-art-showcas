@@ -16,3 +16,29 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+.avatar {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--rule);
+}
+
+.profileCopy {
+  display: grid;
+  gap: .65rem;
+  justify-items: start;
+}
+
+.bio {
+  max-width: 65ch;
+  color: var(--muted);
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.externalLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem 1rem;
+}

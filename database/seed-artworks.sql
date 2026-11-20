@@ -1,5 +1,9 @@
 BEGIN;
 
+INSERT INTO artwork_categories (name)
+VALUES ('Lukisan'), ('Seni cetak'), ('Keramik')
+ON CONFLICT (lower(name)) DO NOTHING;
+
 INSERT INTO artworks (
     slug, title, artist, artwork_date, category,
     image_src, image_alt, image_width, image_height,
@@ -10,7 +14,7 @@ INSERT INTO artworks (
     'A Sunday on La Grande Jatte',
     'Georges Seurat',
     '1884–1886',
-    'Lukisan',
+    (SELECT name FROM artwork_categories WHERE lower(name) = 'lukisan'),
     '/alteria/la-grande-jatte.jpg',
     'Orang-orang bersantai di taman tepi sungai pada hari cerah.',
     820, 546,
@@ -24,7 +28,7 @@ INSERT INTO artworks (
     'Wheat Field with Cypresses',
     'Vincent van Gogh',
     '1889',
-    'Lukisan',
+    (SELECT name FROM artwork_categories WHERE lower(name) = 'lukisan'),
     '/alteria/wheat-field.jpg',
     'Ladang gandum keemasan dengan pohon sipres di bawah awan bergelombang.',
     599, 477,
@@ -38,7 +42,7 @@ INSERT INTO artworks (
     'A Woman Seated beside a Vase of Flowers',
     'Edgar Degas',
     '1865',
-    'Lukisan',
+    (SELECT name FROM artwork_categories WHERE lower(name) = 'lukisan'),
     '/alteria/woman-with-flowers.jpg',
     'Seorang perempuan bertopang dagu di samping vas berisi bunga berwarna-warni.',
     600, 488,
@@ -52,7 +56,7 @@ INSERT INTO artworks (
     'Under the Wave off Kanagawa',
     'Katsushika Hokusai',
     'ca. 1830–32',
-    'Seni cetak',
+    (SELECT name FROM artwork_categories WHERE lower(name) = 'seni cetak'),
     '/alteria/great-wave.jpg',
     'Ombak biru besar melengkung di atas perahu dengan Gunung Fuji di kejauhan.',
     600, 403,
@@ -66,7 +70,7 @@ INSERT INTO artworks (
     'Teabowl',
     'Meissen Manufactory',
     'ca. 1720–25',
-    'Keramik',
+    (SELECT name FROM artwork_categories WHERE lower(name) = 'keramik'),
     '/alteria/teabowl.jpg',
     'Mangkuk teh porselen putih dengan motif penunggang kuda berwarna hitam.',
     598, 367,
@@ -80,7 +84,7 @@ INSERT INTO artworks (
     'The Oxbow',
     'Thomas Cole',
     '1836',
-    'Lukisan',
+    (SELECT name FROM artwork_categories WHERE lower(name) = 'lukisan'),
     '/alteria/the-oxbow.jpg',
     'Hutan gelap di kiri dan kelokan sungai di dataran terang di kanan.',
     599, 409,

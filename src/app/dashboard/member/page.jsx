@@ -3,6 +3,7 @@ import Link from 'next/link'
 import AccountPanel from '../../account-panel'
 import ArtworkFavorite from '../../artwork-favorite'
 import { getMemberArtworks, getMemberFavorites } from '../../../lib/artworks'
+import { getMemberChallengeSubmissions } from '@/lib/challenges'
 import { requireUser } from '../../../lib/session'
 import ArtworkDelete from './artwork-delete'
 import styles from './member-artworks.module.css'
@@ -58,7 +59,7 @@ function ArtworkCards({ artworks, saved = false }) {
 export default async function MemberDashboard({ searchParams }) {
   const user = await requireUser('member')
   const notice = notices.get((await searchParams)?.hasil)
-  const [artworks, favorites] = await Promise.all([
+  const [artworks, favorites, submissions] = await Promise.all([
     getMemberArtworks(user.id).catch(error => {
       console.error('Karya Member gagal dimuat.', error.code ?? error.name)
       return null
@@ -67,10 +68,14 @@ export default async function MemberDashboard({ searchParams }) {
       console.error('Karya favorit gagal dimuat.', error.code ?? error.name)
       return null
     }),
+    getMemberChallengeSubmissions(user.id),
   ])
 
   return (
     <AccountPanel title="Dashboard Member" description={`Halo, ${user.display_name}.`} wide>
+      <div className={styles.formActions}>
+        <Link href="/dashboard/member/profil">Edit profil dan akun</Link>
+      </div>
       <section className={styles.section} aria-labelledby="kelola-karya">
         <header className={styles.sectionHeader}>
           <h2 id="kelola-karya">Kelola Karya</h2>
@@ -99,6 +104,24 @@ export default async function MemberDashboard({ searchParams }) {
           <p className={styles.empty}>Belum ada karya favorit. <Link href="/galeri">Jelajahi galeri</Link>.</p>
         )}
         {favorites?.length > 0 && <ArtworkCards artworks={favorites} saved />}
+      </section>
+      <section className={styles.section} aria-labelledby="submisi-member">
+        <header className={styles.sectionHeader}><h2 id="submisi-member">Submisi Challenge</h2></header>
+        {submissions.length === 0 ? (
+          <p className={styles.empty}>Belum ada karya yang dikirim. <Link href="/challenge">Lihat challenge</Link>.</p>
+        ) : (
+          <ul className={styles.artworks}>
+            {submissions.map(item => (
+              <li key={item.id} className={styles.card}>
+                <div className={styles.cardBody}>
+                  <p>{item.withdrawn ? 'Ditarik' : item.rank ? `Juara ${item.rank}` : `Tenggat ${item.deadlineLabel}`}</p>
+                  <h3>{item.title}</h3>
+                  <div className={styles.cardActions}><Link href={`/challenge/${item.challengeId}`}>{item.challengeTitle}</Link></div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </AccountPanel>
   )

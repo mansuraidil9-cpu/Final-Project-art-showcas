@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import AccountPanel from '@/app/account-panel'
 import { getMemberArtwork } from '@/lib/artworks'
+import { getArtworkCategories } from '@/lib/categories'
 import { requireUser } from '@/lib/session'
 import ArtworkForm from '../../../artwork-form'
 import styles from '../../../member-artworks.module.css'
@@ -17,10 +18,11 @@ export default async function EditArtworkPage({ params }) {
   })
 
   if (artwork === null) notFound()
+  const categories = artwork ? await getArtworkCategories() : []
 
   return (
     <AccountPanel title="Edit Karya" description="Perbarui informasi karya di galeri." wide>
-      {artwork ? <ArtworkForm artwork={artwork} /> : (
+      {artwork ? <ArtworkForm artwork={artwork} categories={categories} /> : (
         <div className={styles.form}>
           <p className={styles.error} role="alert">Karya belum bisa dimuat.</p>
           <div className={styles.formActions}>

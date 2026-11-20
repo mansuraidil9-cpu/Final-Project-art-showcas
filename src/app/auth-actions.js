@@ -2,19 +2,14 @@
 
 import { redirect } from 'next/navigation'
 import { pool } from '../lib/db.mjs'
+import { isValidEmail } from '../lib/form-fields'
 import { hashPassword, verifyPassword } from '../lib/password.mjs'
 import { clearSession, dashboardPath, generateSession, requireUser, setSessionCookie } from '../lib/session'
-
-const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function textField(formData, name) {
   if (!(formData instanceof FormData)) return ''
   const value = formData.get(name)
   return typeof value === 'string' ? value : ''
-}
-
-function isValidEmail(email) {
-  return email.length <= 254 && emailPattern.test(email)
 }
 
 export async function signUp(_previousState, formData) {
@@ -90,10 +85,12 @@ export async function signIn(_previousState, formData) {
 
     if (!(await verifyPassword(password, user?.password_hash)) || !user) return invalidLogin
 
-    await pool.query(
-      'INSERT INTO sessions (token_hash, user_id, expires_at) VALUES ($1, $2, $3)',
-      [session.hash, user.id, session.expiresAt],
+    const { rowCount } = await pool.query(
+      `INSERT INTO sessions (token_hash, user_id, expires_at)
+       SELECT $1, id, $3 FROM users WHERE id = $2 AND password_hash = $4 FOR SHARE`,
+      [session.hash, user.id, session.expiresAt, user.password_hash],
     )
+    if (!rowCount) return invalidLogin
   } catch (error) {
     console.error('Login ALTERIA gagal', error.code ?? error.name)
     return { error: 'Masuk belum bisa diproses. Coba lagi sebentar.', values }

@@ -4,7 +4,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useActionState, useState } from 'react'
 import {
-  artworkCategories,
   maxArtworkDescriptionLength,
   maxArtworkImageBytes,
   maxArtworkTitleLength,
@@ -12,7 +11,7 @@ import {
 import { saveArtwork } from './artwork-actions'
 import styles from './member-artworks.module.css'
 
-export default function ArtworkForm({ artwork = null }) {
+export default function ArtworkForm({ artwork = null, categories }) {
   const editing = artwork !== null
   const [feedback, submit, pending] = useActionState(saveArtwork.bind(null, artwork?.id ?? null), null)
   const [fields, setFields] = useState(() => ({
@@ -75,7 +74,7 @@ export default function ArtworkForm({ artwork = null }) {
           <label htmlFor="artwork-category">Kategori</label>
           <select id="artwork-category" name="category" value={fields.category} onChange={updateField} required>
             <option value="" disabled>Pilih kategori</option>
-            {artworkCategories.map(category => <option key={category} value={category}>{category}</option>)}
+            {categories.map(category => <option key={category} value={category}>{category}</option>)}
           </select>
         </div>
 

@@ -1,17 +1,13 @@
 import { connection } from 'next/server'
+import { challengeStatusLabels } from '../../lib/challenge-dates'
 import { getPublicChallenges } from '../../lib/challenges'
 import { getCurrentUser } from '../../lib/session'
 import ChallengeCard from '../challenge-card'
 import styles from '../home.module.css'
 import ShowcaseHeader from '../showcase-header'
+import ShowcaseFooter from '../showcase-footer'
 
 export const metadata = { title: 'Challenge | ALTERIA' }
-
-const statusLabels = {
-  active: 'Sedang berlangsung',
-  upcoming: 'Akan datang',
-  ended: 'Selesai',
-}
 
 export default async function ChallengeIndex() {
   await connection()
@@ -24,7 +20,7 @@ export default async function ChallengeIndex() {
   ])
 
   return (
-    <div className={styles.home}>
+    <div className={styles.home} id="atas">
       <div className={styles.shell}>
         <ShowcaseHeader user={user} currentPage="challenge" />
         <main className={styles.standalone}>
@@ -35,8 +31,8 @@ export default async function ChallengeIndex() {
               challenge={challenge}
               heading="h2"
               statusLabel={challenge.status === 'upcoming'
-                ? `${statusLabels.upcoming}, mulai ${challenge.startLabel}`
-                : statusLabels[challenge.status]}
+                ? `${challengeStatusLabels.upcoming}, mulai ${challenge.startLabel}`
+                : challengeStatusLabels[challenge.status]}
             />
           )) : (
             <p className={styles.emptyGallery}>
@@ -44,6 +40,7 @@ export default async function ChallengeIndex() {
             </p>
           )}
         </main>
+        <ShowcaseFooter />
       </div>
     </div>
   )

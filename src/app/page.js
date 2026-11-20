@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { connection } from 'next/server'
 import { getGalleryArtworks } from '../lib/artworks'
-import { getActiveChallenge } from '../lib/challenges'
+import { getActiveChallenges } from '../lib/challenges'
 import { getCurrentUser } from '../lib/session'
 import GalleryExplorer from './gallery-explorer'
 import ShowcaseFooter from './showcase-footer'
@@ -10,13 +10,13 @@ import styles from './home.module.css'
 
 export default async function Home() {
   await connection()
-  const challengeQuery = getActiveChallenge().catch(error => {
+  const challengeQuery = getActiveChallenges().catch(error => {
     console.error('Challenge gagal dimuat.', error.code ?? error.name)
     return undefined
   })
   const user = await getCurrentUser()
   const canLike = user?.role === 'member'
-  const [artworks, challenge] = await Promise.all([
+  const [artworks, challenges] = await Promise.all([
     getGalleryArtworks(canLike ? user.id : null).catch(error => {
       console.error('Galeri gagal dimuat.', error.code ?? error.name)
       return undefined
@@ -61,7 +61,7 @@ export default async function Home() {
             </figure>
           </section>
 
-          <GalleryExplorer artworks={artworks} challenge={challenge} canLike={canLike} />
+          <GalleryExplorer artworks={artworks} challenges={challenges} canLike={canLike} />
         </main>
 
         <ShowcaseFooter />

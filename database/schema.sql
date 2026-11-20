@@ -152,4 +152,81 @@ CREATE INDEX IF NOT EXISTS artwork_comments_artwork_created_index
     ON artwork_comments (artwork_id, created_at, id);
 CREATE INDEX IF NOT EXISTS artwork_comments_user_id_index ON artwork_comments (user_id);
 
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS bio TEXT NOT NULL DEFAULT '',
+    ADD COLUMN IF NOT EXISTS profile_links TEXT[] NOT NULL DEFAULT '{}',
+    ADD COLUMN IF NOT EXISTS avatar_data BYTEA;
+
+ALTER TABLE challenges
+    ADD COLUMN IF NOT EXISTS owner_id BIGINT REFERENCES users (id) ON DELETE CASCADE,
+    ADD COLUMN IF NOT EXISTS cover_data BYTEA CONSTRAINT challenges_cover_pair_check
+        CHECK ((owner_id IS NULL) = (cover_data IS NULL));
+
+CREATE INDEX IF NOT EXISTS challenges_owner_id_index ON challenges (owner_id, starts_at DESC, id DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS challenges_uploaded_cover_unique ON challenges (cover_image)
+    WHERE owner_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS artworks_id_owner_unique ON artworks (id, owner_id);
+
+CREATE TABLE IF NOT EXISTS challenge_submissions (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    challenge_id BIGINT NOT NULL REFERENCES challenges (id) ON DELETE CASCADE,
+    member_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    artwork_id BIGINT NOT NULL,
+    submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    withdrawn_at TIMESTAMPTZ,
+    placement SMALLINT CHECK (placement BETWEEN 1 AND 3),
+    CHECK (withdrawn_at IS NULL OR placement IS NULL),
+    FOREIGN KEY (artwork_id, member_id) REFERENCES artworks (id, owner_id) ON DELETE CASCADE,
+    UNIQUE (challenge_id, placement)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS challenge_submissions_active_member_unique
+    ON challenge_submissions (challenge_id, member_id) WHERE withdrawn_at IS NULL;
+CREATE INDEX IF NOT EXISTS challenge_submissions_member_index ON challenge_submissions (member_id, submitted_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS challenge_submissions_artwork_index ON challenge_submissions (artwork_id, member_id);
+
+CREATE TABLE IF NOT EXISTS artwork_categories (
+    name TEXT PRIMARY KEY CHECK (name = btrim(name) AND char_length(name) BETWEEN 1 AND 80)
+);
+
+DO $categories$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conrelid = 'artworks'::regclass AND conname = 'artworks_category_fkey'
+    ) THEN
+        INSERT INTO artwork_categories (name)
+        SELECT DISTINCT category FROM artworks
+        ON CONFLICT DO NOTHING;
+
+        INSERT INTO artwork_categories (name)
+        SELECT name FROM unnest(ARRAY[
+            'Lukisan', 'Ilustrasi', 'Fotografi', 'Seni cetak', 'Keramik', 'Seni digital', 'Patung', 'Lainnya'
+        ]) AS defaults(name)
+        WHERE NOT EXISTS (SELECT 1 FROM artwork_categories AS existing WHERE lower(existing.name) = lower(defaults.name))
+        ON CONFLICT DO NOTHING;
+
+        ALTER TABLE artworks ADD CONSTRAINT artworks_category_fkey
+            FOREIGN KEY (category) REFERENCES artwork_categories (name) ON UPDATE CASCADE ON DELETE RESTRICT;
+    END IF;
+END;
+$categories$;
+
+CREATE UNIQUE INDEX IF NOT EXISTS artwork_categories_name_lower_unique ON artwork_categories (lower(name));
+CREATE INDEX IF NOT EXISTS artworks_category_index ON artworks (category);
+
+CREATE TABLE IF NOT EXISTS artwork_reports (
+    artwork_id BIGINT NOT NULL REFERENCES artworks (id) ON DELETE CASCADE,
+    member_id BIGINT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    reason TEXT NOT NULL CHECK (reason = btrim(reason) AND char_length(reason) BETWEEN 1 AND 500),
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'dismissed')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (artwork_id, member_id)
+);
+
+CREATE INDEX IF NOT EXISTS artwork_reports_pending_index ON artwork_reports (artwork_id, created_at)
+    WHERE status = 'pending';
+CREATE INDEX IF NOT EXISTS artwork_reports_member_index ON artwork_reports (member_id);
+
 COMMIT;

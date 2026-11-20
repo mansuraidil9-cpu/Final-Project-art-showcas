@@ -20,8 +20,19 @@ export default async function ProfilKreator({ params }) {
     <ShowcaseDetail backHref="/galeri" backLabel="Kembali ke Galeri" showFooter>
       <div className={homeStyles.standalone}>
         <header className={styles.identity}>
-          <p className={homeStyles.eyebrow}>{roleLabels[creator.role]}</p>
-          <h1 className={homeStyles.pageTitle}>{creator.displayName}</h1>
+          {creator.hasAvatar && (
+            <Image className={styles.avatar} src={`/media/profil/${id}`} alt={`Foto profil ${creator.displayName}`} width={112} height={112} unoptimized />
+          )}
+          <div className={styles.profileCopy}>
+            <p className={homeStyles.eyebrow}>{roleLabels[creator.role]}</p>
+            <h1 className={homeStyles.pageTitle}>{creator.displayName}</h1>
+            {creator.bio && <p className={styles.bio}>{creator.bio}</p>}
+            {creator.links.length > 0 && (
+              <ul className={styles.externalLinks} aria-label="Tautan kreator">
+                {creator.links.map(link => <li key={link}><a className={homeStyles.textLink} href={link}>{new URL(link).hostname}</a></li>)}
+              </ul>
+            )}
+          </div>
         </header>
 
         <section className={styles.portfolio} aria-labelledby="judul-karya-kreator">

@@ -12,7 +12,7 @@ export default function AccountPanel({ title, description, children, wide = fals
         </header>
         <main className={`${styles.panel} ${wide ? styles.widePanel : ''} py-12`}>
           <h1>{title}</h1>
-          <p className={styles.intro}>{description}</p>
+          {description && <p className={styles.intro}>{description}</p>}
           <div className="grid gap-4">
             {children}
             <form action={signOut}>

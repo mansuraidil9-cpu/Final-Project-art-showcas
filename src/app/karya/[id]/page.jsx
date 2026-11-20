@@ -1,6 +1,9 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { getArtworkById, getArtworkComments } from '../../../lib/artworks'
+import ActionForm from '@/app/dashboard/action-form'
+import fieldStyles from '@/app/dashboard/member/member-artworks.module.css'
+import { hasArtworkReport } from '@/lib/reports'
 import { getCurrentUser } from '../../../lib/session'
 import ArtworkByline from '../../artwork-byline'
 import ArtworkFavorite from '../../artwork-favorite'
@@ -8,6 +11,7 @@ import ArtworkLike from '../../artwork-like'
 import homeStyles from '../../home.module.css'
 import ShowcaseDetail from '../../showcase-detail'
 import ArtworkComments from './artwork-comments'
+import { reportArtwork } from './report-action'
 import styles from './artwork.module.css'
 
 export const metadata = { title: 'Detail Karya | ALTERIA' }
@@ -25,8 +29,12 @@ export default async function DetailKarya({ params }) {
 
   if (!artwork) notFound()
 
-  const comments = await getArtworkComments(artwork.id, memberId)
   const canInteract = memberId !== null && !artwork.isOwner
+  const canReport = canInteract && artwork.creatorId !== null
+  const [comments, reported] = await Promise.all([
+    getArtworkComments(artwork.id, memberId),
+    canReport ? hasArtworkReport(artwork.id, memberId) : false,
+  ])
 
   return (
     <ShowcaseDetail backHref="/galeri" backLabel="Kembali ke Galeri" showFooter>
@@ -71,6 +79,19 @@ export default async function DetailKarya({ params }) {
               {canInteract && <ArtworkFavorite artwork={artwork} />}
             </div>
           </div>
+          {canReport && (reported ? (
+            <p className={fieldStyles.hint + ' mt-4'} role="status">Karya ini sudah kamu laporkan.</p>
+          ) : (
+            <details className="mt-4">
+              <summary className={fieldStyles.deleteLink}>Laporkan karya</summary>
+              <ActionForm action={reportArtwork.bind(null, artwork.id)} submitLabel="Kirim laporan">
+                <label className={fieldStyles.field}>
+                  Alasan laporan
+                  <textarea name="reason" rows={3} maxLength={500} required />
+                </label>
+              </ActionForm>
+            </details>
+          ))}
         </div>
       </article>
       <ArtworkComments artworkId={artwork.id} comments={comments} canComment={canInteract} guest={!user} />

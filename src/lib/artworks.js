@@ -96,7 +96,8 @@ export async function getPublicCreator(id) {
   if (!isDatabaseId(id)) return null
 
   const { rows } = await pool.query(`
-    SELECT id::text AS id, display_name AS "displayName", role
+    SELECT id::text AS id, display_name AS "displayName", role, bio, profile_links AS links,
+           (avatar_data IS NOT NULL AND role = 'member') AS "hasAvatar"
     FROM users
     WHERE id = $1 AND (
       role = 'member' OR EXISTS (SELECT 1 FROM artworks WHERE owner_id = users.id)

@@ -9,7 +9,7 @@ import ArtworkLike from './artwork-like'
 import ChallengeCard from './challenge-card'
 import styles from './home.module.css'
 
-export default function GalleryExplorer({ artworks, challenge, canLike, galleryPage = false }) {
+export default function GalleryExplorer({ artworks, challenges, canLike, galleryPage = false }) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Semua')
   const [sort, setSort] = useState('popular')
@@ -35,12 +35,13 @@ export default function GalleryExplorer({ artworks, challenge, canLike, galleryP
     galleryMessage = 'Belum ada karya di galeri.'
   }
 
-  const challengeMatches = challenge && `${challenge.title} ${challenge.category}`
-    .toLocaleLowerCase('id').includes(search)
+  const matchingChallenges = (challenges ?? []).filter(challenge =>
+    `${challenge.title} ${challenge.category}`.toLocaleLowerCase('id').includes(search),
+  )
   let challengeMessage = 'Tidak ada challenge yang cocok.'
-  if (challenge === undefined) {
+  if (challenges === undefined) {
     challengeMessage = 'Challenge belum bisa dimuat.'
-  } else if (challenge === null) {
+  } else if (!challenges.length) {
     challengeMessage = 'Belum ada challenge aktif.'
   }
 
@@ -126,7 +127,7 @@ export default function GalleryExplorer({ artworks, challenge, canLike, galleryP
         ) : (
           <div className={styles.emptyGallery}>
             <p>{galleryMessage}</p>
-            {search && challengeMatches && (
+            {search && matchingChallenges.length > 0 && (
               <a className={styles.textLink} href="#challenge">
                 Lihat hasil challenge <span className={`${styles.arrow} ${styles.arrowDown}`} aria-hidden="true" />
               </a>
@@ -138,9 +139,9 @@ export default function GalleryExplorer({ artworks, challenge, canLike, galleryP
       {!galleryPage && (
         <section className={styles.challenge} id="challenge" aria-labelledby="judul-challenge">
           <h2 id="judul-challenge">Challenge Aktif</h2>
-          {challengeMatches
-            ? <ChallengeCard challenge={challenge} />
-            : <p className={styles.emptyGallery}>{challengeMessage}</p>}
+          {matchingChallenges.length > 0 ? matchingChallenges.map(challenge => (
+            <ChallengeCard key={challenge.id} challenge={challenge} statusLabel="Sedang berlangsung" />
+          )) : <p className={styles.emptyGallery}>{challengeMessage}</p>}
         </section>
       )}
     </>
