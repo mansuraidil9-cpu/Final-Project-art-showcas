@@ -64,7 +64,7 @@ function DeleteComment({ artworkId, commentId }) {
 export default function ArtworkComments({ artworkId, comments, canComment, guest }) {
   return (
     <section id="komentar" className={styles.comments} aria-labelledby="judul-komentar">
-      <h2 id="judul-komentar">Komentar</h2>
+      <h2 id="judul-komentar">Komentar ({comments.length.toLocaleString('id-ID')})</h2>
       <div className={styles.commentContent}>
         {canComment && <CommentForm artworkId={artworkId} />}
         {guest && <Link className={styles.commentSignIn} href="/login">Masuk untuk berkomentar</Link>}

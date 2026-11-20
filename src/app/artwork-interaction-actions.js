@@ -10,6 +10,12 @@ import {
 } from '../lib/artworks'
 import { requireUser } from '../lib/session'
 
+function refreshPublicArtwork(artworkId) {
+  revalidatePath('/')
+  revalidatePath('/galeri')
+  revalidatePath(`/karya/${artworkId}`)
+}
+
 export async function setLike(artworkId, desired) {
   const user = await requireUser('member')
 
@@ -22,9 +28,7 @@ export async function setLike(artworkId, desired) {
     return { error: 'Suka belum bisa diperbarui. Coba lagi.' }
   }
 
-  revalidatePath('/')
-  revalidatePath('/galeri')
-  revalidatePath(`/karya/${artworkId}`)
+  refreshPublicArtwork(artworkId)
   return null
 }
 
@@ -40,9 +44,7 @@ export async function setFavorite(artworkId, desired) {
     return { error: 'Favorit belum bisa diperbarui. Coba lagi.' }
   }
 
-  revalidatePath('/')
-  revalidatePath('/galeri')
-  revalidatePath(`/karya/${artworkId}`)
+  refreshPublicArtwork(artworkId)
   revalidatePath('/dashboard/member')
   return null
 }
@@ -67,7 +69,7 @@ export async function addComment(artworkId, formData) {
     return { error: 'Komentar belum terkirim. Coba lagi.' }
   }
 
-  revalidatePath(`/karya/${artworkId}`)
+  refreshPublicArtwork(artworkId)
   return null
 }
 
@@ -83,6 +85,6 @@ export async function deleteComment(artworkId, commentId) {
     return { error: 'Komentar belum bisa dihapus. Coba lagi.' }
   }
 
-  revalidatePath(`/karya/${artworkId}`)
+  refreshPublicArtwork(artworkId)
   return null
 }

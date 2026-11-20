@@ -14,6 +14,7 @@ export default function ShowcaseHeader({ user, currentPage }) {
       <nav className={styles.navigation} aria-label="Navigasi utama">
         <Link href="/galeri" aria-current={currentPage === 'galeri' ? 'page' : undefined}>Galeri</Link>
         <Link href="/challenge" aria-current={currentPage === 'challenge' ? 'page' : undefined}>Challenge</Link>
+        {user?.role === 'member' && <Link href="/dashboard/member#karya-favorit">Karya Favorit</Link>}
       </nav>
 
       <div className={styles.account}>

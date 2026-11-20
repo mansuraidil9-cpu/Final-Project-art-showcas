@@ -2,6 +2,7 @@ import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { getArtworkById, getArtworkComments } from '../../../lib/artworks'
 import { getCurrentUser } from '../../../lib/session'
+import ArtworkByline from '../../artwork-byline'
 import ArtworkFavorite from '../../artwork-favorite'
 import ArtworkLike from '../../artwork-like'
 import homeStyles from '../../home.module.css'
@@ -28,12 +29,12 @@ export default async function DetailKarya({ params }) {
   const canInteract = memberId !== null && !artwork.isOwner
 
   return (
-    <ShowcaseDetail backHref="/galeri" backLabel="Kembali ke Galeri">
+    <ShowcaseDetail backHref="/galeri" backLabel="Kembali ke Galeri" showFooter>
       <article className={styles.layout} aria-labelledby="judul-karya">
         <header className={styles.heading}>
           <p className={homeStyles.eyebrow}>{artwork.category}</p>
           <h1 id="judul-karya">{artwork.title}</h1>
-          <p className={styles.byline}>{artwork.artist}{artwork.date && ` · ${artwork.date}`}</p>
+          <ArtworkByline artwork={artwork} className={styles.byline} />
         </header>
 
         <figure className={styles.artwork}>
@@ -48,12 +49,7 @@ export default async function DetailKarya({ params }) {
               preload
             />
           </div>
-          {(artwork.rights || artwork.sourceUrl) && (
-            <figcaption className={styles.credit}>
-              {artwork.rights && <span>{artwork.rights}</span>}
-              {artwork.sourceUrl && <a href={artwork.sourceUrl}>Sumber karya</a>}
-            </figcaption>
-          )}
+          {artwork.rights && <figcaption className={styles.credit}>{artwork.rights}</figcaption>}
         </figure>
 
         <div className={styles.details}>

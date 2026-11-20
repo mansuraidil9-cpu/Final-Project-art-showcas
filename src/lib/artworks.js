@@ -4,7 +4,9 @@ import { isDatabaseId, pool } from './db.mjs'
 
 const galleryArtworkColumns = `
   artworks.id::text AS id, title, COALESCE(creator.display_name, artist) AS artist,
+  creator.id::text AS creator_id, creator.role AS creator_role,
   artwork_date, category, image_src, uploaded_at, tags, like_summary.like_count,
+  (SELECT COUNT(*) FROM artwork_comments WHERE artwork_id = artworks.id) AS comment_count,
   like_summary.liked, owner_id IS NOT NULL AS is_uploaded,
   COALESCE(owner_id = $1::bigint, false) AS is_owner,
   EXISTS (
@@ -27,7 +29,7 @@ const fromArtworks = `
 
 const selectArtworkDetail = `
   SELECT ${galleryArtworkColumns}, image_alt, image_width, image_height,
-         description, source_url, rights
+         description, rights
   ${fromArtworks}`
 
 const eligibleArtworkInteraction = `
@@ -41,10 +43,13 @@ function toGalleryArtwork(row) {
     id: row.id,
     title: row.title,
     artist: row.artist,
+    creatorId: row.creator_id,
+    creatorRole: row.creator_role,
     date: row.artwork_date,
     category: row.category,
     imageSrc: row.image_src,
     likes: Number(row.like_count),
+    commentCount: Number(row.comment_count),
     liked: row.liked,
     favorited: row.favorited,
     uploadedAt: row.uploaded_at.toISOString(),
@@ -63,7 +68,6 @@ function toArtworkDetail(row) {
     width: row.image_width,
     height: row.image_height,
     description: row.description,
-    sourceUrl: row.source_url,
     rights: row.rights,
   }
 }
@@ -86,6 +90,20 @@ export async function getArtworkById(id, viewerId = null) {
     [isDatabaseId(viewerId) ? viewerId : null, id],
   )
   return toArtworkDetail(rows[0])
+}
+
+export async function getPublicCreator(id) {
+  if (!isDatabaseId(id)) return null
+
+  const { rows } = await pool.query(`
+    SELECT id::text AS id, display_name AS "displayName", role
+    FROM users
+    WHERE id = $1 AND (
+      role = 'member' OR EXISTS (SELECT 1 FROM artworks WHERE owner_id = users.id)
+    )`,
+    [id],
+  )
+  return rows[0] ?? null
 }
 
 export async function getMemberArtworks(ownerId) {

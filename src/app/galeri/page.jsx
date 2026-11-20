@@ -3,6 +3,7 @@ import { getGalleryArtworks } from '../../lib/artworks'
 import { getCurrentUser } from '../../lib/session'
 import GalleryExplorer from '../gallery-explorer'
 import styles from '../home.module.css'
+import ShowcaseFooter from '../showcase-footer'
 import ShowcaseHeader from '../showcase-header'
 
 export const metadata = {
@@ -21,12 +22,13 @@ export default async function GalleryPage() {
   })
 
   return (
-    <div className={styles.home}>
+    <div className={styles.home} id="atas">
       <div className={styles.shell}>
         <ShowcaseHeader user={user} currentPage="galeri" />
         <main>
           <GalleryExplorer artworks={artworks} canLike={canLike} galleryPage />
         </main>
+        <ShowcaseFooter />
       </div>
     </div>
   )

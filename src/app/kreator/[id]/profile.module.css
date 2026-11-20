@@ -1,0 +1,18 @@
+.identity {
+  display: grid;
+  gap: .65rem;
+  padding-bottom: clamp(1.4rem, 3vw, 2.5rem);
+  border-bottom: 1px solid var(--rule);
+  overflow-wrap: anywhere;
+}
+
+.portfolio {
+  display: grid;
+  gap: clamp(1rem, 2.5vw, 1.8rem);
+  margin-top: clamp(1.5rem, 3.2vw, 2.8rem);
+}
+
+.work {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

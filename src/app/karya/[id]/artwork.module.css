@@ -29,6 +29,11 @@
   font-weight: 500;
 }
 
+.byline a {
+  text-decoration: underline;
+  text-underline-offset: .2em;
+}
+
 .artwork {
   grid-area: artwork;
 }
@@ -45,22 +50,9 @@
 }
 
 .credit {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: .3rem 1rem;
   margin-top: .6rem;
   color: var(--muted);
   font-size: .75rem;
-}
-
-.credit a {
-  text-decoration: underline;
-  text-underline-offset: .2em;
-}
-
-.credit a:hover {
-  color: var(--ink);
 }
 
 .details {

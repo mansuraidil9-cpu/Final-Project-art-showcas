@@ -1,10 +1,10 @@
 import Image from 'next/image'
-import Link from 'next/link'
 import { connection } from 'next/server'
 import { getGalleryArtworks } from '../lib/artworks'
 import { getActiveChallenge } from '../lib/challenges'
 import { getCurrentUser } from '../lib/session'
 import GalleryExplorer from './gallery-explorer'
+import ShowcaseFooter from './showcase-footer'
 import ShowcaseHeader from './showcase-header'
 import styles from './home.module.css'
 
@@ -64,12 +64,7 @@ export default async function Home() {
           <GalleryExplorer artworks={artworks} challenge={challenge} canLike={canLike} />
         </main>
 
-        <footer className={styles.footer}>
-          <Link className={styles.wordmark} href="/">ALTERIA</Link>
-          <a className={styles.textLink} href="#atas">
-            Kembali ke atas <span className={`${styles.arrow} ${styles.arrowUp}`} aria-hidden="true" />
-          </a>
-        </footer>
+        <ShowcaseFooter />
       </div>
     </div>
   )

@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import ArtworkByline from './artwork-byline'
 import ArtworkFavorite from './artwork-favorite'
 import ArtworkLike from './artwork-like'
 import ChallengeCard from './challenge-card'
@@ -103,9 +104,7 @@ export default function GalleryExplorer({ artworks, challenge, canLike, galleryP
                     <div>
                       <p className={styles.artworkCategory}>{artwork.category}</p>
                       <ArtworkHeading className={styles.artworkTitle}>{artwork.title}</ArtworkHeading>
-                      <p className={styles.artworkArtist}>
-                        {artwork.artist}{artwork.date && ` · ${artwork.date}`}
-                      </p>
+                      {!artwork.creatorId && <ArtworkByline artwork={artwork} className={styles.artworkArtist} />}
                     </div>
                     <span className={`${styles.arrow} ${styles.arrowOut}`} aria-hidden="true" />
                   </div>
@@ -114,11 +113,13 @@ export default function GalleryExplorer({ artworks, challenge, canLike, galleryP
                   <ArtworkLike artwork={artwork} canLike={canLike && !artwork.isOwner} variant="gallery" />
                   {canLike && !artwork.isOwner && <ArtworkFavorite artwork={artwork} variant="gallery" />}
                 </div>
-                {canLike && !artwork.isOwner && (
+                <div className={styles.artworkLinks}>
+                  {artwork.creatorId && <ArtworkByline artwork={artwork} className={styles.artworkUploader} />}
                   <Link className={styles.artworkComments} href={`/karya/${artwork.id}#komentar`}>
-                    Komentar<span className="sr-only"> untuk {artwork.title}</span>
+                    Komentar ({artwork.commentCount.toLocaleString('id-ID')})
+                    <span className="sr-only"> untuk {artwork.title}</span>
                   </Link>
-                )}
+                </div>
               </article>
             ))}
           </div>
