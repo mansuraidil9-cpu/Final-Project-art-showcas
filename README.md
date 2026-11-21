@@ -1,29 +1,76 @@
 # ALTERIA
 
-Galeri seni digital dengan empat peran. Guest melihat karya dan challenge. Member mengelola karya serta profil dan mengikuti challenge. Curator mengadakan challenge. Admin memverifikasi Curator dan mengelola platform.
+**Galeri seni digital** untuk menjelajahi karya lintas medium, memamerkan portofolio, dan mengikuti challenge seni.
+
+[Fitur](#fitur) · [Menjalankan proyek](#menjalankan-proyek) · [Akun Admin](#akun-admin) · [Diagram sistem](#diagram-sistem)
+
+![Beranda ALTERIA dengan ilustrasi Mona Lisa dan tombol Jelajahi Galeri](docs/beranda-alteria.webp)
+
+Dibangun dengan Next.js, React, JavaScript, Tailwind CSS, dan PostgreSQL. Sharp memproses gambar unggahan sebelum aplikasi menyimpannya.
+
+## Fitur
+
+| Peran | Aktivitas |
+| --- | --- |
+| **Tamu** | Mencari, memfilter, dan mengurutkan karya di galeri. Melihat detail karya, profil kreator, komentar, dan hasil challenge. |
+| **Member** | Mengelola karya, profil, dan akun sendiri. Menyukai karya, berkomentar, menyimpan karya ke **Karya Favorit**, melaporkan karya unggahan Member lain, dan mengikuti challenge. |
+| **Kurator (Curator)** | Melihat status verifikasi akun. Setelah disetujui Admin, Kurator dapat mengatur jadwal dalam WITA, mengelola challenge miliknya, meninjau submisi, dan mengumumkan pemenang. |
+| **Admin** | Melihat statistik, menyetujui atau menolak pendaftaran Kurator, mengelola akun dan kategori, serta menolak laporan atau menghapus karya yang dilaporkan. |
+
+Selama challenge aktif, Member dapat mengirim satu karya miliknya dan menarik submisi sebelum tenggat. Setelah challenge berakhir, Kurator dapat menetapkan maksimal tiga pemenang. Karya peserta dan hasilnya tampil di halaman **Challenge**.
+
+Unggahan karya, foto profil, dan banner challenge menerima JPEG, PNG, atau WebP hingga 5 MB. Aplikasi mengonversinya ke WebP dan menyimpannya di PostgreSQL.
 
 ## Menjalankan proyek
 
-1. Gunakan Node.js 20.9 atau lebih baru dan PostgreSQL. Jalankan `npm ci` dari folder proyek.
-2. Buat database bernama `alteria`. Buka **Query Tool** pada database tersebut di pgAdmin, lalu jalankan seluruh isi `database/schema.sql`. Jika sudah punya database ALTERIA, jalankan ulang file yang sama untuk memperbarui skema sambil mempertahankan data.
-3. Buat `.env.local` di samping `package.json` dan sesuaikan pengaturannya.
+Siapkan **Node.js 20.9 atau lebih baru** dan **PostgreSQL**. Langkah database di bawah menggunakan pgAdmin.
 
-   ```dotenv
-   PGHOST=localhost
-   PGPORT=5432
-   PGDATABASE=alteria
-   PGUSER=postgres
-   PGPASSWORD="GANTI_DENGAN_PASSWORD_POSTGRESQL"
-   ```
+### 1. Pasang dependensi
 
-   Untuk tanda dolar di kata sandi, tulis tanda itu sebagai `\$` agar Next.js membacanya sebagai karakter biasa.
-4. Jalankan `npm run dev`, lalu buka [localhost:3000](http://localhost:3000).
+Jika belum punya folder proyek, klon repositori dan buka foldernya.
 
-Untuk menambahkan data contoh, jalankan `database/seed-artworks.sql` dan `database/seed-challenge.sql` setelah skema.
+```sh
+git clone https://github.com/mansuraidil9-cpu/Final-Project-art-showcas.git
+cd Final-Project-art-showcas
+```
+
+Jalankan perintah ini dari folder proyek.
+
+```sh
+npm ci
+```
+
+### 2. Siapkan database
+
+Buat database `alteria` di PostgreSQL. Buka **Query Tool** untuk database tersebut di pgAdmin, lalu jalankan seluruh isi [database/schema.sql](database/schema.sql). Jika sudah memiliki database ALTERIA dari versi sebelumnya, jalankan file skema yang sama untuk memperbarui struktur tabel.
+
+Untuk mengisi galeri dan challenge dengan data contoh, jalankan [seed-artworks.sql](database/seed-artworks.sql) dan [seed-challenge.sql](database/seed-challenge.sql) setelah skema berhasil dijalankan.
+
+### 3. Atur koneksi
+
+Buat `.env.local` di folder yang sama dengan `package.json`. Sesuaikan nilai dengan konfigurasi PostgreSQL di komputermu.
+
+```dotenv
+PGHOST=localhost
+PGPORT=5432
+PGDATABASE=alteria
+PGUSER=postgres
+PGPASSWORD="GANTI_DENGAN_PASSWORD_POSTGRESQL"
+```
+
+Jika kata sandi di `.env.local` mengandung tanda `$`, tulis tanda itu sebagai `\$` agar Next.js membacanya sebagai karakter biasa.
+
+### 4. Buka ALTERIA
+
+```sh
+npm run dev
+```
+
+Buka alamat **Local** yang muncul di terminal, biasanya [http://localhost:3000](http://localhost:3000).
 
 ## Akun Admin
 
-Isi pengaturan berikut sementara di `.env.local` dengan email dan kata sandi pilihanmu.
+Member dan Kurator mendaftar lewat halaman **Daftar**. Untuk membuat akun Admin, tambahkan pengaturan berikut sementara ke `.env.local`. Gunakan email yang belum terdaftar dan kata sandi pilihanmu sepanjang 8–128 karakter.
 
 ```dotenv
 ALTERIA_ADMIN_NAME="Admin ALTERIA"
@@ -31,14 +78,24 @@ ALTERIA_ADMIN_EMAIL=admin@example.test
 ALTERIA_ADMIN_PASSWORD="GANTI_DENGAN_PASSWORD_ADMIN"
 ```
 
-Jalankan `node scripts/create-admin.mjs`, hapus `ALTERIA_ADMIN_PASSWORD` dari file, lalu masuk dari halaman **Masuk**.
+Jalankan skrip ini dari folder proyek.
 
-## Alur penggunaan
+```sh
+node scripts/create-admin.mjs
+```
 
-- **Member** membuka Dashboard untuk mengunggah karya, melihat favorit, mengatur profil publik atau akun, dan melihat submisi. Gambar karya, foto profil, dan banner menerima JPEG, PNG, atau WebP hingga 5 MB. Aplikasi menyimpannya sebagai WebP di PostgreSQL.
-- **Curator** mendaftar dari halaman **Daftar**. Setelah Admin menyetujui akun, buka **Dashboard Curator → Buat challenge**. Jadwal diisi dalam WITA. Selama challenge aktif, Member dapat mengirim satu karya miliknya dan menariknya kembali sebelum tenggat.
-- **Pemenang** diumumkan dari halaman **Kelola** milik Curator setelah challenge selesai. Pilih maksimal tiga karya, masing-masing untuk satu peringkat. Submisi dan hasil tampil di halaman publik Challenge.
-- **Admin** membuka Dashboard untuk melihat statistik, memverifikasi Curator, memfilter pengguna, dan mengelola kategori. Jika kategori masih dipakai, pilih kategori pengganti saat menghapusnya.
-- **Moderasi** dimulai dari tombol **Laporkan karya** di Detail Karya untuk unggahan Member lain. Admin dapat menolak laporan atau menghapus karya melalui **Buka moderasi**.
+Setelah terminal menampilkan **Akun Admin ALTERIA berhasil dibuat**, hapus baris `ALTERIA_ADMIN_PASSWORD` dari `.env.local`. Buka halaman **Masuk** dan gunakan email serta kata sandi yang kamu pilih.
 
-Jalankan `npm run lint` dan `npm run build` untuk memeriksa proyek. Kredit gambar contoh tersedia di [credits.json](public/alteria/credits.json).
+## Diagram sistem
+
+- [Diagram use case](docs/diagram-use-case.svg) menunjukkan akses dan tindakan yang tersedia untuk empat peran.
+- [Diagram aktivitas](docs/diagram-aktivitas.svg) menunjukkan alur dari kunjungan sebagai Tamu hingga pengguna keluar dari akun.
+
+## Pemeriksaan proyek
+
+```sh
+npm run lint
+npm run build
+```
+
+Sumber dan kredit karya contoh tercatat di [credits.json](public/alteria/credits.json).
