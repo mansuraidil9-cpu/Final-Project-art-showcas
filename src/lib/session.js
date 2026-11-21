@@ -40,7 +40,8 @@ export async function getCurrentUser() {
   if (!hash) return null
 
   const { rows } = await pool.query(
-    `SELECT u.id, u.display_name, u.email, u.role, u.curator_status
+    `SELECT u.id, u.display_name, u.email, u.role, u.curator_status,
+            (u.role = 'member' AND u.avatar_data IS NOT NULL) AS "hasAvatar"
      FROM sessions AS s
      JOIN users AS u ON u.id = s.user_id
      WHERE s.token_hash = $1 AND s.expires_at > CURRENT_TIMESTAMP`,
