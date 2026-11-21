@@ -1,4 +1,4 @@
-import Image from 'next/image'
+import Image, { getImageProps } from 'next/image'
 import { connection } from 'next/server'
 import { getGalleryArtworks } from '../lib/artworks'
 import { getActiveChallenges } from '../lib/challenges'
@@ -7,6 +7,13 @@ import GalleryExplorer from './gallery-explorer'
 import ShowcaseFooter from './showcase-footer'
 import ShowcaseHeader from './showcase-header'
 import styles from './home.module.css'
+
+const { props: mobileHero } = getImageProps({
+  src: '/alteria/beranda-mona-lisa-hp-menyatu.webp',
+  alt: '',
+  fill: true,
+  sizes: '100vw',
+})
 
 export default async function Home() {
   await connection()
@@ -25,9 +32,8 @@ export default async function Home() {
   ])
   return (
     <div className={`${styles.home} ${styles.entrancePage}`} id="atas">
+      <ShowcaseHeader user={user} currentPage="home" />
       <div className={styles.shell}>
-        <ShowcaseHeader user={user} currentPage="home" />
-
         <main>
           <section className={styles.hero} aria-labelledby="judul-beranda">
             <div className={styles.heroCopy}>
@@ -45,13 +51,17 @@ export default async function Home() {
             </div>
 
             <div className={styles.heroImage}>
-              <Image
-                src="/alteria/beranda-mona-lisa-oker.webp"
-                alt="Lukisan Mona Lisa karya Leonardo da Vinci dalam bingkai miring, dengan kuas dan sapuan cat melayang."
-                fill
-                preload
-                sizes="100vw"
-              />
+              <picture>
+                <source media="(max-width: 760px)" srcSet={mobileHero.srcSet} sizes={mobileHero.sizes} />
+                <Image
+                  src="/alteria/beranda-mona-lisa-oker.webp"
+                  alt="Lukisan Mona Lisa karya Leonardo da Vinci dalam bingkai miring, dengan kuas dan sapuan cat melayang."
+                  fill
+                  loading="eager"
+                  fetchPriority="high"
+                  sizes="100vw"
+                />
+              </picture>
             </div>
           </section>
 

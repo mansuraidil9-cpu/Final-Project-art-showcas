@@ -21,8 +21,8 @@ export default async function ChallengeIndex() {
 
   return (
     <div className={styles.home} id="atas">
+      <ShowcaseHeader user={user} currentPage="challenge" />
       <div className={styles.shell}>
-        <ShowcaseHeader user={user} currentPage="challenge" />
         <main className={styles.standalone}>
           <h1 className={styles.pageTitle}>Challenge</h1>
           {challenges?.length ? challenges.map(challenge => (

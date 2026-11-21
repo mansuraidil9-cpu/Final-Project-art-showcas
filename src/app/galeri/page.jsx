@@ -23,8 +23,8 @@ export default async function GalleryPage() {
 
   return (
     <div className={styles.home} id="atas">
+      <ShowcaseHeader user={user} currentPage="galeri" />
       <div className={styles.shell}>
-        <ShowcaseHeader user={user} currentPage="galeri" />
         <main>
           <GalleryExplorer artworks={artworks} canLike={canLike} galleryPage />
         </main>
