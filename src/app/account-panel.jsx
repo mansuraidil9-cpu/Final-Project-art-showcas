@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { signOut } from './auth-actions'
+import DashboardMotion from './dashboard/dashboard-motion'
 import styles from './auth.module.css'
 
 export default function AccountPanel({ title, description, children, wide = false }) {
@@ -13,12 +14,12 @@ export default function AccountPanel({ title, description, children, wide = fals
         <main className={`${styles.panel} ${wide ? styles.widePanel : ''} py-12`}>
           <h1>{title}</h1>
           {description && <p className={styles.intro}>{description}</p>}
-          <div className="grid gap-4">
+          <DashboardMotion>
             {children}
             <form action={signOut}>
               <button className={styles.submit} type="submit">Keluar</button>
             </form>
-          </div>
+          </DashboardMotion>
         </main>
       </div>
     </div>

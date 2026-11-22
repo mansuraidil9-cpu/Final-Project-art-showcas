@@ -187,13 +187,29 @@
   font-weight: 600;
 }
 
-.submit:hover {
+.submit:not(:disabled):is(:hover, :focus-visible) {
   background: var(--ink);
 }
 
 .submit:disabled {
   cursor: wait;
   opacity: .7;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel:not(.formPanel) .submit {
+    transition: background-color 160ms ease, transform 160ms ease;
+  }
+
+  @media (hover: hover) {
+    .panel:not(.formPanel) .submit:not(:disabled):hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .panel:not(.formPanel) .submit:not(:disabled):active {
+    transform: scale(.98);
+  }
 }
 
 .delete {

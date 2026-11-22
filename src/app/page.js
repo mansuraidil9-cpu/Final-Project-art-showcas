@@ -4,6 +4,8 @@ import { getGalleryArtworks } from '../lib/artworks'
 import { getActiveChallenges } from '../lib/challenges'
 import { getCurrentUser } from '../lib/session'
 import GalleryExplorer from './gallery-explorer'
+import HeroMotion from './hero-motion'
+import ScrollExperience from './scroll-experience'
 import ShowcaseFooter from './showcase-footer'
 import ShowcaseHeader from './showcase-header'
 import styles from './home.module.css'
@@ -31,11 +33,12 @@ export default async function Home() {
     challengeQuery,
   ])
   return (
-    <div className={`${styles.home} ${styles.entrancePage}`} id="atas">
+    <div className={`${styles.home} ${styles.entrancePage}`} id="atas" data-alteria-home>
       <ShowcaseHeader user={user} currentPage="home" />
       <div className={styles.shell}>
         <main>
-          <section className={styles.hero} aria-labelledby="judul-beranda">
+          <ScrollExperience />
+          <HeroMotion className={styles.hero} titleId="judul-beranda">
             <div className={styles.heroCopy}>
               <p className={styles.eyebrow}>Galeri seni digital</p>
               <h1 id="judul-beranda">
@@ -51,19 +54,25 @@ export default async function Home() {
             </div>
 
             <div className={styles.heroImage}>
-              <picture>
-                <source media="(max-width: 760px)" srcSet={mobileHero.srcSet} sizes={mobileHero.sizes} />
-                <Image
-                  src="/alteria/beranda-mona-lisa-oker.webp"
-                  alt="Lukisan Mona Lisa karya Leonardo da Vinci dalam bingkai miring, dengan kuas dan sapuan cat melayang."
-                  fill
-                  loading="eager"
-                  fetchPriority="high"
-                  sizes="100vw"
-                />
-              </picture>
+              <div className={styles.heroArtwork}>
+                <picture>
+                  <source media="(max-width: 760px)" srcSet={mobileHero.srcSet} sizes={mobileHero.sizes} />
+                  <Image
+                    data-portrait-source
+                    src="/alteria/beranda-mona-lisa-oker.webp"
+                    alt="Lukisan Mona Lisa karya Leonardo da Vinci dalam bingkai miring, dengan kuas dan sapuan cat melayang."
+                    fill
+                    loading="eager"
+                    fetchPriority="high"
+                    sizes="(max-width: 760px) 100vw, max(100vw, 178vh)"
+                  />
+                </picture>
+                <div className={styles.heroPortrait} aria-hidden="true">
+                  <canvas className={styles.heroPortraitCanvas} data-portrait-canvas />
+                </div>
+              </div>
             </div>
-          </section>
+          </HeroMotion>
 
           <GalleryExplorer artworks={artworks} challenges={challenges} canLike={canLike} />
         </main>

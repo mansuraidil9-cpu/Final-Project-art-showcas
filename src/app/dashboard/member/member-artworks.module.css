@@ -49,7 +49,7 @@
   background: var(--accent);
 }
 
-.primaryButton:hover {
+.primaryButton:not(:disabled):is(:hover, :focus-visible) {
   background: var(--ink);
 }
 
@@ -57,11 +57,11 @@
   background: #702c20;
 }
 
-.dangerButton:hover {
+.dangerButton:not(:disabled):is(:hover, :focus-visible) {
   background: #582219;
 }
 
-.primaryButton:disabled,
+:is(.primaryButton, .dangerButton):disabled,
 .confirmation button:disabled {
   cursor: wait;
   opacity: .65;
@@ -78,6 +78,42 @@
   min-width: 0;
   border: 1px solid var(--rule);
   background: #faf8f1;
+}
+
+.card:has(a[href], summary):focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px #24221d13;
+}
+
+@media (hover: hover) {
+  .card:has(a[href], summary):hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px #24221d13;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :is(.primaryButton, .dangerButton) {
+    transition: background-color 160ms ease, transform 160ms ease;
+  }
+
+  .card:has(a[href], summary) {
+    transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  }
+
+  @media (hover: hover) {
+    :is(.primaryButton, .dangerButton):not(:disabled):hover {
+      transform: translateY(-2px);
+    }
+
+    .card:has(a[href], summary):hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  :is(.primaryButton, .dangerButton):not(:disabled):active {
+    transform: scale(.98);
+  }
 }
 
 .thumbnail {
