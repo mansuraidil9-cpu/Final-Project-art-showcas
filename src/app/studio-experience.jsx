@@ -10,10 +10,20 @@ import styles from './studio-experience.module.css'
 const names = ['Beranda', 'Dimensi', 'Galeri', 'Penutup']
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
 
+const mainArtwork = {
+  id: null,
+  title: 'Mona Lisa',
+  artist: 'Leonardo da Vinci',
+  category: 'Lukisan',
+  imageSrc: '/alteria/beranda-mona-lisa-oker.webp',
+  isUploaded: false,
+}
+
 export default function StudioExperience({ artworks = [], challenges = [], canLike = false }) {
   const rootRef = useRef(null)
   const chaptersRef = useRef([])
-  const motionRef = useRef({ progress: 0, pointerX: 0, pointerY: 0, manual: false, orbitX: 0, orbitY: 0 })
+  const selectedRef = useRef({ locked: false, lastScroll: 0 })
+  const motionRef = useRef({ progress: 0, pointerX: 0, pointerY: 0, manual: false, orbitX: 0, orbitY: 0, galleryIndex: 0, dragOffset: 0 })
   const [chapter, setChapter] = useState(0)
   const [galleryIndex, setGalleryIndex] = useState(0)
   const [ready, setReady] = useState(false)
@@ -25,8 +35,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
 
   const works = artworks.slice(0, 3)
   const featured = works[galleryIndex] || null
-  const cover = artworks[0] || null
-  const favorites = artworks.filter(artwork => artwork.favorited)
+    const favorites = artworks.filter(artwork => artwork.favorited)
   const activeChallenge = challenges[0] || null
   const sceneImages = works.map(artwork => artwork.imageSrc)
   const onSceneReady = useCallback(() => setReady(true), [])
@@ -48,7 +57,14 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
       root.dataset.studioChapter = String(next)
       setChapter(previous => previous === next ? previous : next)
       const index = clamp(Math.floor((p - .54) / .28 * Math.max(works.length, 1)), 0, Math.max(works.length - 1, 0))
-      setGalleryIndex(previous => previous === index ? previous : index)
+      if (Math.abs(p - selectedRef.current.lastScroll) > .004) {
+        selectedRef.current.locked = false
+      }
+      selectedRef.current.lastScroll = p
+      if (!selectedRef.current.locked) {
+        motionRef.current.galleryIndex = index
+        setGalleryIndex(previous => previous === index ? previous : index)
+      }
     }
     function schedule() {
       if (!frame) frame = requestAnimationFrame(update)
@@ -98,6 +114,14 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
     }
   }, [detail, favoritesOpen])
 
+  const selectArtwork = useCallback(index => {
+    if (!works.length) return
+    const next = clamp(index, 0, works.length - 1)
+    selectedRef.current.locked = true
+    motionRef.current.galleryIndex = next
+    setGalleryIndex(next)
+  }, [works.length])
+
   function jumpTo(index) {
     const element = chaptersRef.current[index]
     if (!element) return
@@ -107,15 +131,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
     })
   }
   function jumpToWork(index) {
-    const root = rootRef.current
-    if (!root || !works.length) return
-    const top = root.getBoundingClientRect().top + scrollY
-    const distance = Math.max(root.offsetHeight, 1)
-    const progress = .54 + (index + .5) / works.length * .28
-    window.scrollTo({
-      top: top + distance * progress,
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-    })
+    selectArtwork(index)
   }
   function toggleManual() {
     setManual(previous => !previous)
@@ -131,18 +147,32 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
     <div ref={rootRef} className={styles.experience} data-studio-experience>
       <div className={styles.stage} aria-hidden="true">
         <div className={`${styles.scene} ${manual ? styles.manual : ''}`}>
-          <StudioSceneLoader images={sceneImages} heroImage={cover?.imageSrc || '/alteria/beranda-mona-lisa-oker.webp'} motionRef={motionRef} manual={manual} onReady={onSceneReady} onFailed={onSceneFailed} />
+          <StudioSceneLoader images={sceneImages} heroImage={mainArtwork.imageSrc} motionRef={motionRef} onSelectArtwork={selectArtwork} onReady={onSceneReady} onFailed={onSceneFailed} />
         </div>
         <div className={`${styles.fallback} ${ready ? styles.fallbackHidden : ''}`}>
           <div className={styles.fallbackFrame}>
             <Image
-              src={cover?.imageSrc || '/alteria/beranda-mona-lisa-oker.webp'}
+              src={mainArtwork.imageSrc}
               alt=""
               fill
-              unoptimized={Boolean(cover?.isUploaded)}
+              unoptimized={false}
               sizes="(max-width: 760px) 70vw, 36vw"
               priority
             />
+          </div>
+          <div className={styles.fallbackGallery} aria-hidden="true">
+            {works.map((artwork, index) => (
+              <div
+                key={artwork.id}
+                className={styles.fallbackGalleryFrame}
+                style={{
+                  transform: `translate3d(calc(-50% + ${(index - galleryIndex) * 26}vw), -50%, 0) rotate(${(index - galleryIndex) * -4}deg) scale(${index === galleryIndex ? 1 : .78})`,
+                  zIndex: works.length - Math.abs(index - galleryIndex),
+                }}
+              >
+                <Image src={artwork.imageSrc} alt="" fill unoptimized={Boolean(artwork.isUploaded)} sizes="(max-width: 760px) 55vw, 27vw" />
+              </div>
+            ))}
           </div>
           <span className={styles.fallbackMote} />
           <span className={styles.fallbackMote} />
@@ -157,7 +187,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
           <p>Temukan karya, kenali kreator, dan ikuti challenge seni dalam ruang pameran digital.</p>
           <div className={styles.actions}>
             <button type="button" className={styles.primary} onClick={() => jumpTo(1)}>Jelajahi Galeri <span aria-hidden="true">↗</span></button>
-            {cover && <button type="button" className={styles.secondary} onClick={() => setDetail(cover)}>Detail Karya Utama</button>}
+            <button type="button" className={styles.secondary} onClick={() => setDetail(mainArtwork)}>Detail Karya Utama</button>
           </div>
         </div>
         <div className={styles.scrollPrompt} aria-hidden="true" data-hidden={chapter !== 0}>
@@ -194,6 +224,13 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
               <button type="button" key={work.id} aria-label={`Lihat ${work.title}`} aria-current={index === galleryIndex ? 'true' : undefined} onClick={() => jumpToWork(index)} />
             ))}
           </div>
+          {works.length > 1 && (
+            <div className={styles.galleryNav} role="group" aria-label="Kontrol geser karya">
+              <button type="button" aria-label="Karya sebelumnya" disabled={galleryIndex === 0} onClick={() => selectArtwork(galleryIndex - 1)}>←</button>
+              <span>Klik lukisan di samping atau geser untuk memilih</span>
+              <button type="button" aria-label="Karya berikutnya" disabled={galleryIndex === works.length - 1} onClick={() => selectArtwork(galleryIndex + 1)}>→</button>
+            </div>
+          )}
           {featured ? (
             <>
               <span className={styles.medium}>{featured.category}</span>
@@ -254,9 +291,9 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
               <span className={styles.eyebrow}>DETAIL KARYA</span>
               <h2 id="studio-detail-title">{detail.title}</h2>
               <p>oleh {detail.artist}</p>
-              <dl><dt>Medium / kategori</dt><dd>{detail.category}</dd><dt>Ukuran dan finishing</dt><dd>Lihat informasi pada halaman detail karya</dd></dl>
-              <Link href={`/karya/${detail.id}`} className={styles.primary}>Buka detail lengkap ↗</Link>
-              {canLike && !detail.isOwner && <ArtworkFavorite artwork={detail} />}
+              <dl><dt>Medium / kategori</dt><dd>{detail.category}</dd><dt>Informasi lainnya</dt><dd>{detail.id ? 'Lihat informasi pada halaman detail karya' : 'Ilustrasi pada beranda'}</dd></dl>
+              {detail.id && <Link href={`/karya/${detail.id}`} className={styles.primary}>Buka detail lengkap ↗</Link>}
+              {detail.id && canLike && !detail.isOwner && <ArtworkFavorite artwork={detail} />}
             </div>
           </div>
         </div>

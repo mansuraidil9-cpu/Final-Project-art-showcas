@@ -21,7 +21,7 @@ function getLayout() {
   return { heroX:1.88, heroY:0, heroScale:1.01, dimX:-1.88, dimY:.04, dimScale:.94, galleryX:1.72, galleryY:.04, galleryScale:.97, finaleScale:1.02, baseZ:8.2 }
 }
 
-export default function StudioScene({ images = [], heroImage, motionRef, onReady, onFailed }) {
+export default function StudioScene({ images = [], heroImage, motionRef, onSelectArtwork, onReady, onFailed }) {
   const mountRef = useRef(null)
   const sourcesKey = images.join('|')
 
@@ -33,7 +33,7 @@ export default function StudioScene({ images = [], heroImage, motionRef, onReady
     let renderer
     let raf = 0
     let disposed = false
-    let drawing = false
+    let gesture = null
     let inView = true
     let visibilityObserver
     let hero
@@ -46,9 +46,11 @@ export default function StudioScene({ images = [], heroImage, motionRef, onReady
     let ribbon
     let canvas
     let border
-    const ownedGeometries = new Set()
+    let paintDrops = []    const ownedGeometries = new Set()
     const ownedMaterials = new Set()
     const ownedTextures = new Set()
+    const raycaster = new THREE.Raycaster()
+    const pointer = new THREE.Vector2()
     const loader = new THREE.TextureLoader()
     loader.setCrossOrigin('anonymous')
 
@@ -106,6 +108,41 @@ export default function StudioScene({ images = [], heroImage, motionRef, onReady
       loadImage(url,imageMaterial)
       return { group, plane, rim }
     }
+    function paintStroke(controlPoints, shades) {
+      const curve = new THREE.CatmullRomCurve3(controlPoints.map(point => new THREE.Vector3(...point)))
+      const positions = []
+      const colors = []
+      const indices = []
+      const count = 64
+      for (let index = 0; index <= count; index++) {
+        const t = index / count
+        const point = curve.getPoint(t)
+        const tangent = curve.getTangent(t)
+        const sideways = new THREE.Vector3(-tangent.y, tangent.x, 0).normalize()
+        const breadth = (.20 + .048 * Math.sin(t * 21)) * Math.pow(Math.sin(Math.PI * t), .7)
+        const shadeIndex = Math.min(Math.floor(t * (shades.length - 1)), shades.length - 2)
+        const blend = t * (shades.length - 1) - shadeIndex
+        const tone = new THREE.Color(shades[shadeIndex]).lerp(new THREE.Color(shades[shadeIndex + 1]), blend)
+        for (const sign of [-1, 1]) {
+          const side = sideways.clone().multiplyScalar(sign * breadth)
+          positions.push(point.x + side.x, point.y + side.y, point.z + sign * .014)
+          colors.push(tone.r, tone.g, tone.b)
+        }
+        if (index < count) {
+          const k = index * 2
+          indices.push(k, k + 1, k + 2, k + 1, k + 3, k + 2)
+        }
+      }
+      const geometry = makeGeometry(new THREE.BufferGeometry())
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
+      geometry.setIndex(indices)
+      geometry.computeVertexNormals()
+      return new THREE.Mesh(geometry, makeMaterial(new THREE.MeshStandardMaterial({
+        vertexColors: true, side: THREE.DoubleSide, roughness: .67, metalness: 0,
+      })))
+    }
+
     function cleanup() {
       if (disposed) return
       disposed = true
@@ -118,7 +155,7 @@ export default function StudioScene({ images = [], heroImage, motionRef, onReady
         renderer.domElement.removeEventListener('pointerdown', pointerDown)
         renderer.domElement.removeEventListener('pointermove', pointerMove)
         renderer.domElement.removeEventListener('pointerup', pointerUp)
-        renderer.domElement.removeEventListener('pointercancel', pointerUp)
+        renderer.domElement.removeEventListener('pointercancel', pointerCancel)
       }
       ownedGeometries.forEach(geometry => geometry.dispose())
       ownedMaterials.forEach(material => material.dispose())
@@ -131,22 +168,71 @@ export default function StudioScene({ images = [], heroImage, motionRef, onReady
       }
     }
     function pointerDown(event) {
-      if (!motionRef.current.manual) return
-      drawing = true
-      renderer.domElement.setPointerCapture(event.pointerId)
-      previousX = event.clientX
-      previousY = event.clientY
+      if (event.pointerType === 'mouse' && event.button !== 0) return
+      const isManual = motionRef.current.manual
+      const progress = motionRef.current.progress
+      if (!isManual && (progress < .52 || progress > .88 || gallery.length < 2)) return
+      gesture = {
+        id: event.pointerId, startX: event.clientX, startY: event.clientY,
+        lastX: event.clientX, lastY: event.clientY, manual: isManual,
+      }
+      try { renderer.domElement.setPointerCapture(event.pointerId) } catch {}
     }
-    let previousX = 0
-    let previousY = 0
     function pointerMove(event) {
-      if (!drawing || !motionRef.current.manual) return
-      motionRef.current.orbitY = clamp(motionRef.current.orbitY + (event.clientX - previousX) * .004, -1.25, 1.25)
-      motionRef.current.orbitX = clamp(motionRef.current.orbitX + (event.clientY - previousY) * .003, -.7, .7)
-      previousX = event.clientX
-      previousY = event.clientY
+      if (!gesture || event.pointerId !== gesture.id) return
+      if (gesture.manual) {
+        motionRef.current.orbitY = clamp(motionRef.current.orbitY + (event.clientX - gesture.lastX) * .004, -1.25, 1.25)
+        motionRef.current.orbitX = clamp(motionRef.current.orbitX + (event.clientY - gesture.lastY) * .003, -.7, .7)
+        gesture.lastX = event.clientX
+        gesture.lastY = event.clientY
+      } else {
+        const dx = event.clientX - gesture.startX
+        const dy = event.clientY - gesture.startY
+        if (Math.abs(dx) > Math.abs(dy)) {
+          motionRef.current.dragOffset = clamp(dx / Math.max(innerWidth * .38, 260), -1, 1)
+        }
+      }
     }
-    function pointerUp() { drawing = false }
+    function pointerUp(event) {
+      if (!gesture || event.pointerId !== gesture.id) return
+      const last = gesture
+      gesture = null
+      motionRef.current.dragOffset = 0
+      if (last.manual) return
+      const dx = event.clientX - last.startX
+      const dy = event.clientY - last.startY
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        const selected = motionRef.current.galleryIndex || 0
+        onSelectArtwork(clamp(selected + (dx < 0 ? 1 : -1), 0, gallery.length - 1))
+        return
+      }
+      if (Math.abs(dx) > 12 || Math.abs(dy) > 12) return
+      const rect = renderer.domElement.getBoundingClientRect()
+      pointer.set(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1,
+      )
+      raycaster.setFromCamera(pointer, camera)
+      const hits = raycaster.intersectObjects(gallery.filter(group => group.visible), true)
+      for (const hit of hits) {
+        const index = gallery.findIndex(group => {
+          let current = hit.object
+          while (current) {
+            if (current === group) return true
+            current = current.parent
+          }
+          return false
+        })
+        if (index !== -1) {
+          onSelectArtwork(index)
+          break
+        }
+      }
+    }
+    function pointerCancel() {
+      gesture = null
+      motionRef.current.dragOffset = 0
+    }
     function resize() {
       if (!renderer || !camera) return
       const width = innerWidth
@@ -208,33 +294,45 @@ export default function StudioScene({ images = [], heroImage, motionRef, onReady
       border = heroPart.rim
       scene.add(hero)
 
-      const ribbonMat = makeMaterial(new THREE.MeshStandardMaterial({ color:0xb88a44,metalness:.65,roughness:.28,side:THREE.DoubleSide }))
       ribbon = new THREE.Group()
-      const swirl = new THREE.Mesh(makeGeometry(new THREE.TorusGeometry(1.25,.057,7,82,Math.PI*1.35)),ribbonMat)
-      swirl.rotation.set(.65,.42,.22)
-      swirl.position.set(.92,-.52,.45)
-      ribbon.add(swirl)
+      ribbon.add(paintStroke([
+        [.76, -.84, .50], [1.22, -.46, .60], [1.55, .04, .76],
+        [1.94, .34, .70], [2.27, .12, .66],
+      ], ['#576846', '#A36C42', '#C68C54', '#E1B77A']))
+      ribbon.add(paintStroke([
+        [1.03, -.94, .64], [1.48, -.73, .69], [1.96, -.36, .83],
+        [2.25, .09, .81], [2.52, .29, .72],
+      ], ['#7A4930', '#A8623C', '#BE925E', '#586948']))
       hero.add(ribbon)
 
       brush = new THREE.Group()
-      const handleMat=makeMaterial(new THREE.MeshStandardMaterial({color:0x66411d,roughness:.5}))
-      const metalMat=makeMaterial(new THREE.MeshStandardMaterial({color:0xc7a05b,metalness:.75,roughness:.25}))
-      const tipMat=makeMaterial(new THREE.MeshStandardMaterial({color:0x432d21,roughness:1}))
-      const handle=new THREE.Mesh(makeGeometry(new THREE.CylinderGeometry(.045,.065,1.7,10)),handleMat)
-      brush.add(handle)
-      const ferrule=new THREE.Mesh(makeGeometry(new THREE.CylinderGeometry(.075,.068,.25,10)),metalMat)
-      ferrule.position.y=.9;brush.add(ferrule)
-      const tip=new THREE.Mesh(makeGeometry(new THREE.ConeGeometry(.072,.36,12)),tipMat)
-      tip.position.y=1.2; brush.add(tip)
-      brush.position.set(1.95,-.45,.72)
+      const handleMat = makeMaterial(new THREE.MeshStandardMaterial({ color:0x614124, roughness:.75 }))
+      const metalMat = makeMaterial(new THREE.MeshStandardMaterial({ color:0x9b7650, metalness:.25, roughness:.48 }))
+      const tipMat = makeMaterial(new THREE.MeshStandardMaterial({ color:0x443525, roughness:1 }))
+      brush.add(new THREE.Mesh(makeGeometry(new THREE.CylinderGeometry(.045,.065,1.7,10)),handleMat))
+      const ferrule = new THREE.Mesh(makeGeometry(new THREE.CylinderGeometry(.075,.068,.25,10)),metalMat)
+      ferrule.position.y=.9
+      brush.add(ferrule)
+      const tip = new THREE.Mesh(makeGeometry(new THREE.ConeGeometry(.072,.36,12)),tipMat)
+      tip.position.y=1.2
+      brush.add(tip)
+      brush.scale.setScalar(.68)
+      brush.position.set(2.0,-.53,.80)
       brush.rotation.set(.18,-.22,-.46)
       hero.add(brush)
 
-      const dropletsMat = makeMaterial(new THREE.MeshStandardMaterial({color:0xd4ac6b,metalness:.4,roughness:.3}))
-      for (let i=0;i<14;i++) {
-        const size=.032 + (i%4)*.018
-        const drop = new THREE.Mesh(makeGeometry(new THREE.IcosahedronGeometry(size,1)),dropletsMat)
-        drop.position.set(.6+Math.sin(i*1.7)*1.45,-.8+Math.cos(i*.9)*1.4,.6+(i%4)*.22)
+      const paintColors = [0xB56C40,0x637451,0xD4A467,0x87543B,0xE0C08C]
+      const paintMats = paintColors.map(color => makeMaterial(new THREE.MeshStandardMaterial({
+        color, roughness:.76, metalness:0,
+      })))
+      for (let i=0;i<19;i++) {
+        const size = .043 + (i%4)*.014
+        const drop = new THREE.Mesh(makeGeometry(new THREE.IcosahedronGeometry(size,1)),paintMats[i%paintMats.length])
+        drop.position.set(1.16+Math.sin(i*1.7)*1.13,-.69+Math.cos(i*.96)*1.19,.53+(i%4)*.19)
+        drop.scale.set(1.1,.64+(i%3)*.18,.45)
+        drop.rotation.z=i*.51
+        drop.userData.baseY=drop.position.y
+        paintDrops.push(drop)
         hero.add(drop)
       }
 
@@ -262,6 +360,7 @@ export default function StudioScene({ images = [], heroImage, motionRef, onReady
     let mouseX = 0
     let mouseY = 0
     let lastFrame = 0
+    let galleryFocus = 0
     function draw(now) {
       raf = 0
       if (disposed || reduce.matches || document.hidden || !inView) return
@@ -276,7 +375,7 @@ export default function StudioScene({ images = [], heroImage, motionRef, onReady
       mouseY += (motionRef.current.pointerY - mouseY)*.07
       const t12=smoothstep(.12,.34,current)
       const t23=smoothstep(.47,.62,current)
-      const t34=smoothstep(.79,.94,current)
+      const t34=smoothstep(.87,.97,current)
       const explode=smoothstep(.18,.36,current)*(1-smoothstep(.49,.61,current))
       const galleryHide=t23*(1-t34)
       const time=now*.001
@@ -297,17 +396,19 @@ export default function StudioScene({ images = [], heroImage, motionRef, onReady
       canvas.position.z = .07 + explode * (.65 + (focused === 'canvas' ? .35 : 0))
       ribbon.position.z = explode * (1.3 + (focused === 'ribbon' ? .42 : 0))
       ribbon.rotation.z=Math.sin(time*.4)*.08
-      brush.position.set(1.95+explode*.42,-.45+explode*.2+Math.sin(time)*.04,.72+explode*(1.55 + (focused === 'ribbon' ? .42 : 0)))
-      hero.children.slice(-14).forEach((drop,i)=>{drop.position.y+=Math.sin(time*1.2+i)*.0005})
+      brush.position.set(2.0+explode*.3,-.53+explode*.15+Math.sin(time)*.035,.80+explode*(1.2 + (focused === 'ribbon' ? .42 : 0)))
+      paintDrops.forEach((drop,i) => { drop.position.y = drop.userData.baseY + Math.sin(time * .9 + i) * .042 })
 
       camera.position.set(mouseX*.065,-mouseY*.05,layout.baseZ - 14*t23*(1-t34))
       camera.lookAt(0,0,-2*t23*(1-t34))
       light.position.set(2+mouseX*2,1-mouseY*1.6,5)
 
-      const artProgress=clamp((current-.54)/.28,0,1)*Math.max(gallery.length-1,0)
+      const targetFocus = clamp(motionRef.current.galleryIndex || 0, 0, Math.max(gallery.length - 1, 0))
+      galleryFocus += (targetFocus - galleryFocus) * .095
+      const artProgress = galleryFocus - (motionRef.current.dragOffset || 0)
       gallery.forEach((item,i)=>{
         const distance=i-artProgress
-        item.visible=t23>.04 && t34<.96 && Math.abs(distance)<2.5
+        item.visible=t23>.04 && t34<.985 && Math.abs(distance)<2.5
         item.position.set(layout.galleryX+distance*3.95,layout.galleryY-Math.abs(distance)*.35,-12-Math.abs(distance)*3.6)
         item.rotation.set(-.02,-distance*.42,Math.sin(time*.3+i)*.025)
         item.scale.setScalar(layout.galleryScale)
@@ -319,7 +420,7 @@ export default function StudioScene({ images = [], heroImage, motionRef, onReady
     renderer.domElement.addEventListener('pointerdown',pointerDown)
     renderer.domElement.addEventListener('pointermove',pointerMove)
     renderer.domElement.addEventListener('pointerup',pointerUp)
-    renderer.domElement.addEventListener('pointercancel',pointerUp)
+    renderer.domElement.addEventListener('pointercancel',pointerCancel)
     window.addEventListener('resize',resize,{passive:true})
     document.addEventListener('visibilitychange',visibilityChange)
     reduce.addEventListener('change',preferenceChange)
@@ -334,7 +435,7 @@ export default function StudioScene({ images = [], heroImage, motionRef, onReady
     }
     raf = requestAnimationFrame(draw)
     return cleanup
-  }, [sourcesKey,heroImage,motionRef,onReady,onFailed])
+  }, [sourcesKey,heroImage,motionRef,onSelectArtwork,onReady,onFailed])
 
   return <div ref={mountRef} style={{position:'absolute',inset:0,overflow:'hidden'}} aria-hidden="true" />
 }

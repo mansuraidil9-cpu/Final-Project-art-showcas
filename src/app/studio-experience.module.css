@@ -1,6 +1,7 @@
 .experience {
   position:relative;
   isolation:isolate;
+  overflow:clip;
   width:100cqw;
   margin-inline:calc((100% - 100cqw) / 2);
   color:#263024;
@@ -21,7 +22,7 @@
   inset:0;
   background:linear-gradient(120deg,transparent 24%,rgb(251 248 243 / 12%) 42%,transparent 67%);
 }
-.scene { position:absolute; inset:0; pointer-events:none; }
+.scene { position:absolute; inset:0; pointer-events:auto; }
 .scene.manual { pointer-events:auto; }
 .fallback {
   position:absolute;
@@ -230,3 +231,40 @@
 }
 
 .layerLabel { margin-top:1.2rem; font-weight:600; text-transform:uppercase; letter-spacing:.12em; font-size:.7rem!important; }
+
+/* Kontrol karya tetap bisa dipakai tanpa menggerakkan halaman. */
+.galleryNav {
+  display:flex; align-items:center; justify-content:space-between; gap:.7rem;
+  margin:-.5rem 0 1.15rem; color:#5B5549;
+}
+.galleryNav span { flex:1; text-align:center; font-size:.69rem; line-height:1.45; }
+.galleryNav button {
+  flex:none; display:grid; place-items:center; width:2.35rem; height:2.35rem;
+  border:1px solid rgb(125 84 39 / 25%); border-radius:50%; color:#263024;
+  background:#F1E5D6; font-size:1.15rem;
+}
+.galleryNav button:hover:not(:disabled) { background:#EAD9C5; }
+.galleryNav button:disabled { opacity:.32; cursor:not-allowed; }
+@media(max-width:767px) {
+  .galleryNav { margin-top:-.75rem; gap:.4rem; }
+  .galleryNav span { font-size:.64rem; }
+}
+
+/* Tampilan dua dimensi saat perangkat tidak mendukung WebGL. */
+.fallbackGallery { position:absolute; inset:0; opacity:0; visibility:hidden; }
+.experience[data-studio-chapter="2"] .fallbackGallery { opacity:1; visibility:visible; }
+.experience[data-studio-chapter="2"] .fallbackFrame { opacity:0; visibility:hidden; }
+.fallbackGalleryFrame {
+  position:absolute; top:47%; left:67%; width:clamp(180px,25vw,380px);
+  aspect-ratio:4/5; background:#EAD9C5;
+  border:12px ridge #8E5E39;
+  box-shadow:0 18px 45px rgb(38 48 36 / 28%);
+  transition:transform .6s cubic-bezier(.22,1,.36,1);
+}
+.fallbackGalleryFrame img { object-fit:cover; }
+@media(max-width:767px) {
+  .fallbackGalleryFrame { width:49vw; top:29%; left:52%; border-width:8px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .fallbackGalleryFrame { transition:none; }
+}
