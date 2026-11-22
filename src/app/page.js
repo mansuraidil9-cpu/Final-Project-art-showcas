@@ -59,7 +59,6 @@ export default async function Home() {
                 <picture>
                   <source media="(max-width: 760px)" srcSet={mobileHero.srcSet} sizes={mobileHero.sizes} />
                   <Image
-                    data-portrait-source
                     src="/alteria/beranda-mona-lisa-oker.webp"
                     alt="Lukisan Mona Lisa karya Leonardo da Vinci dalam bingkai miring, dengan kuas dan sapuan cat melayang."
                     fill
@@ -68,9 +67,6 @@ export default async function Home() {
                     sizes="(max-width: 760px) 100vw, max(100vw, 178vh)"
                   />
                 </picture>
-                <div className={styles.heroPortrait} aria-hidden="true">
-                  <canvas className={styles.heroPortraitCanvas} data-portrait-canvas />
-                </div>
               </div>
             </div>
           </HeroMotion>

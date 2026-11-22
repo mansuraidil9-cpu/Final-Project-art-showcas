@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import styles from './cinematic-gallery.module.css'
 
 const works = [
@@ -10,137 +10,131 @@ const works = [
   { image: '/alteria/la-grande-jatte.jpg', title: 'Warna & Ritme', note: 'Lihat lebih dekat warna dan cerita yang tersembunyi.' },
   { image: '/alteria/wheat-field.jpg', title: 'Ruang & Rasa', note: 'Sebuah perjalanan yang dimulai dari satu karya.' },
 ]
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
 
-const clamp = (n, a, b) => Math.max(a, Math.min(b, n))
-
+/** Galeri digeser horizontal, halaman tetap bisa discroll vertikal. */
 export default function CinematicGallery() {
-  const sectionRef = useRef(null)
-  const panelsRef = useRef([])
   const [active, setActive] = useState(0)
+  const [dragOffset, setDragOffset] = useState(0)
+  const start = useRef(null)
+  const suppressClick = useRef(false)
 
-  useEffect(() => {
-    const section = sectionRef.current
-    const home = document.querySelector('[data-alteria-home]')
-    const hero = home?.querySelector('main > section:first-of-type')
-    if (!section) return
-
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const small = window.matchMedia('(max-width: 760px)')
-    let target = 0
-    let shown = 0
-    let heroTarget = 0
-    let heroShown = 0
-    let frame = 0
-    let lastChapter = -1
-
-    function update() {
-      if (!section || document.hidden || reduced.matches) return
-      const rect = section.getBoundingClientRect()
-      target = clamp(-rect.top / Math.max(rect.height - innerHeight, 1), 0, 1)
-      if (hero) {
-        const bounds = hero.getBoundingClientRect()
-        heroTarget = clamp(-bounds.top / Math.max(bounds.height * .72, 1), 0, 1)
-      }
-      if (!frame) frame = requestAnimationFrame(draw)
+  function goTo(index) {
+    setActive(clamp(index, 0, works.length - 1))
+    setDragOffset(0)
+  }
+  function pointerDown(event) {
+    if (event.pointerType === 'touch' || event.button !== 0) return
+    start.current = { x: event.clientX, y: event.clientY, id: event.pointerId }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+  function pointerMove(event) {
+    if (!start.current || start.current.id !== event.pointerId) return
+    setDragOffset(clamp(event.clientX - start.current.x, -180, 180))
+  }
+  function pointerUp(event) {
+    if (!start.current || start.current.id !== event.pointerId) return
+    const diff = event.clientX - start.current.x
+    start.current = null
+    setDragOffset(0)
+    if (Math.abs(diff) > 45) {
+      suppressClick.current = true
+      goTo(active + (diff < 0 ? 1 : -1))
     }
-
-    function draw() {
-      frame = 0
-      if (reduced.matches || document.hidden) return
-      shown += (target - shown) * .14
-      heroShown += (heroTarget - heroShown) * .16
-      if (Math.abs(shown - target) < .0005) shown = target
-      if (Math.abs(heroShown - heroTarget) < .0005) heroShown = heroTarget
-
-      home?.style.setProperty('--alteria-hero-exit', heroShown.toFixed(4))
-      section.style.setProperty('--gallery-travel', shown.toFixed(4))
-      const travel = shown * 2
-      panelsRef.current.forEach((panel, i) => {
-        if (!panel) return
-        const distance = i - travel
-        const away = Math.abs(distance)
-        const mobile = small.matches
-        const x = distance * (mobile ? 74 : 58)
-        const y = away * (mobile ? 3 : 7)
-        const depth = 90 - away * (mobile ? 260 : 420)
-        const angle = clamp(-distance * 45, -65, 65)
-        const zoom = clamp(1 - away * .12, .72, 1)
-        panel.style.transform = 'translate3d(calc(-50% + ' + x.toFixed(2) + 'vw),calc(-50% + ' + y.toFixed(2) + 'vh),' + depth.toFixed(1) + 'px) rotateY(' + angle.toFixed(1) + 'deg) scale(' + zoom.toFixed(3) + ')'
-        panel.style.opacity = String(clamp(1.15 - away * .68, 0, 1))
-        panel.style.zIndex = String(10 - Math.round(away * 2))
-      })
-      const chapter = Math.round(travel)
-      if (chapter !== lastChapter) {
-        lastChapter = chapter
-        setActive(chapter)
-      }
-      if (shown !== target || heroShown !== heroTarget) frame = requestAnimationFrame(draw)
+  }
+  function touchStart(event) {
+    const touch = event.changedTouches[0]
+    start.current = { x: touch.clientX, y: touch.clientY, touch: true }
+  }
+  function touchEnd(event) {
+    if (!start.current?.touch) return
+    const touch = event.changedTouches[0]
+    const dx = touch.clientX - start.current.x
+    const dy = touch.clientY - start.current.y
+    start.current = null
+    if (Math.abs(dx) > 42 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+      goTo(active + (dx < 0 ? 1 : -1))
     }
-
-    function onMotionChange() {
-      cancelAnimationFrame(frame)
-      frame = 0
-      if (reduced.matches) {
-        home?.style.removeProperty('--alteria-hero-exit')
-        section.style.removeProperty('--gallery-travel')
-        panelsRef.current.forEach(panel => {
-          panel?.style.removeProperty('transform')
-          panel?.style.removeProperty('opacity')
-          panel?.style.removeProperty('z-index')
-        })
-        setActive(0)
-      } else update()
+  }
+  function keyboard(event) {
+    if (event.key === 'ArrowRight') {
+      event.preventDefault()
+      goTo(active + 1)
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault()
+      goTo(active - 1)
     }
-
-    update()
-    window.addEventListener('scroll', update, { passive: true })
-    window.addEventListener('resize', update, { passive: true })
-    document.addEventListener('visibilitychange', update)
-    reduced.addEventListener('change', onMotionChange)
-    small.addEventListener('change', update)
-    return () => {
-      cancelAnimationFrame(frame)
-      window.removeEventListener('scroll', update)
-      window.removeEventListener('resize', update)
-      document.removeEventListener('visibilitychange', update)
-      reduced.removeEventListener('change', onMotionChange)
-      small.removeEventListener('change', update)
-      home?.style.removeProperty('--alteria-hero-exit')
-    }
-  }, [])
+  }
 
   return (
-    <section ref={sectionRef} className={styles.experience} data-alteria-cinematic aria-label="Pameran seni tiga dimensi">
+    <section className={styles.experience} data-alteria-cinematic aria-label="Ruang pameran 3D ALTERIA">
       <div className={styles.stage}>
         <div className={styles.light} aria-hidden="true" />
-        <div className={styles.arch} aria-hidden="true" />
-        <div className={styles.floor} aria-hidden="true" />
         <div className={styles.heading}>
           <p className={styles.eyebrow}>ALTERIA — RUANG PAMERAN</p>
           <p className={styles.headingTitle}>Masuk ke dalam <em>cerita karya.</em></p>
+          <p className={styles.dragHint}>Geser lukisan untuk menjelajahi karya.</p>
         </div>
-        <div className={styles.perspective} aria-hidden="true">
-          {works.map((work, index) => (
-            <div className={styles.frame} key={work.image} ref={el => { panelsRef.current[index] = el }} data-first={index === 0 ? 'true' : undefined}>
-              <div className={styles.canvas}>
-                <Image src={work.image} alt="" fill sizes="(max-width: 760px) 80vw, 42vw" />
+        <div
+          className={styles.perspective}
+          role="group"
+          aria-label="Geser karya ke kiri atau kanan"
+          tabIndex={0}
+          onKeyDown={keyboard}
+          onPointerDown={pointerDown}
+          onPointerMove={pointerMove}
+          onPointerUp={pointerUp}
+          onPointerCancel={() => { start.current = null; setDragOffset(0) }}
+          onLostPointerCapture={() => { start.current = null; setDragOffset(0) }}
+          onTouchStart={touchStart}
+          onTouchEnd={touchEnd}
+          onClickCapture={event => {
+            if (suppressClick.current) {
+              event.stopPropagation()
+              suppressClick.current = false
+            }
+          }}
+        >
+          {works.map((work, index) => {
+            const distance = index - active - dragOffset / 420
+            const offset = Math.abs(distance)
+            return (
+              <div
+                className={styles.frame}
+                key={work.image}
+                aria-hidden="true"
+                style={{
+                  transform: `translate3d(calc(-50% + ${distance * 72}vw), calc(-50% + ${offset * 5}vh), ${90 - offset * 350}px) rotateY(${clamp(-distance * 43, -65, 65)}deg) scale(${clamp(1 - offset * .13, .75, 1)})`,
+                  opacity: clamp(1.12 - offset * .42, 0, 1),
+                  zIndex: 10 - Math.round(offset * 2),
+                }}
+              >
+                <div className={styles.canvas}>
+                  <Image src={work.image} alt="" fill sizes="(max-width: 760px) 80vw, 42vw" />
+                </div>
+                <span className={styles.frameLabel}>ALTERIA · 0{index + 1}</span>
               </div>
-              <span className={styles.frameLabel}>ALTERIA · 0{index + 1}</span>
-            </div>
-          ))}
+            )
+          })}
         </div>
         <div className={styles.bottom}>
-          <div className={styles.caption}>
+          <div className={styles.caption} aria-live="polite" aria-atomic="true">
             <span className={styles.eyebrow}>KARYA 0{active + 1} / 03</span>
             <h2>{works[active].title}</h2>
             <p>{works[active].note}</p>
             <Link className={styles.link} href="/galeri">Jelajahi semua karya <span aria-hidden="true">↗</span></Link>
           </div>
-          <div className={styles.progress} aria-label={'Karya ke-' + (active + 1) + ' dari 3'}>
-            <div className={styles.ticks} aria-hidden="true">
-              {works.map((work, i) => <span key={work.image} data-on={i === active ? 'true' : undefined} />)}
+          <div className={styles.controls}>
+            <div className={styles.buttons}>
+              <button type="button" onClick={() => goTo(active - 1)} disabled={active === 0} aria-label="Karya sebelumnya">←</button>
+              <button type="button" onClick={() => goTo(active + 1)} disabled={active === works.length - 1} aria-label="Karya berikutnya">→</button>
             </div>
-            <p>SCROLL UNTUK MENJELAJAH ↓</p>
+            <div className={styles.ticks} aria-label={`Karya ke-${active + 1} dari ${works.length}`}>
+              {works.map((work, i) => (
+                <button type="button" key={work.image} onClick={() => goTo(i)} className={styles.tick} aria-label={`Tampilkan karya ${i + 1}`} aria-current={active === i ? 'true' : undefined} />
+              ))}
+            </div>
+            <p className={styles.scrollHint}>SCROLL KE BAWAH UNTUK LANJUT ↓</p>
           </div>
         </div>
       </div>

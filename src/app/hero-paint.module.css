@@ -1,0 +1,59 @@
+/* Percikan warna dekoratif, tidak menggerakkan wajah Mona Lisa. */
+.paintFlight {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+}
+.droplet {
+  --size: 14px;
+  --color: #c38c43;
+  --x: 0px;
+  --duration: 7s;
+  --delay: 0s;
+  position: absolute;
+  top: 70%;
+  left: 65%;
+  width: var(--size);
+  height: calc(var(--size) * .58);
+  border-radius: 70% 28% 65% 40%;
+  background: radial-gradient(circle at 25% 23%, #fff4d5b3 2%, var(--color) 37%, #241c1260 100%);
+  box-shadow: 0 0 9px #a673343c, inset -2px -1px 3px #39220a60;
+  opacity: 0;
+  transform: translate3d(0, 0, 0) rotate(0deg);
+  animation: flyPaint var(--duration) linear var(--delay) infinite;
+  will-change: transform, opacity;
+}
+.droplet:nth-child(1) { left: 54%; top: 83%; --size: 15px; --color: #b98645; --duration: 7s; --delay: -1s; --x: 45px; }
+.droplet:nth-child(2) { left: 69%; top: 90%; --size: 9px; --color: #314c35; --duration: 8s; --delay: -4s; --x: -38px; }
+.droplet:nth-child(3) { left: 79%; top: 72%; --size: 22px; --color: #bd7541; --duration: 9s; --delay: -6s; --x: 48px; }
+.droplet:nth-child(4) { left: 88%; top: 86%; --size: 12px; --color: #d9ab65; --duration: 8.5s; --delay: -2s; --x: -30px; }
+.droplet:nth-child(5) { left: 96%; top: 69%; --size: 8px; --color: #a7672d; --duration: 6.5s; --delay: -3s; --x: -32px; }
+.droplet:nth-child(6) { left: 62%; top: 98%; --size: 13px; --color: #4e5a37; --duration: 10s; --delay: -7s; --x: 36px; }
+.droplet:nth-child(7) { left: 92%; top: 53%; --size: 18px; --color: #c9a268; --duration: 7.7s; --delay: -5s; --x: -44px; }
+.droplet:nth-child(8) { left: 58%; top: 63%; --size: 8px; --color: #ac6d30; --duration: 8.8s; --delay: -4s; --x: 33px; }
+.droplet:nth-child(9) { left: 83%; top: 96%; --size: 16px; --color: #ac833c; --duration: 9s; --delay: -1.4s; --x: -20px; }
+.droplet:nth-child(10) { left: 72%; top: 57%; --size: 7px; --color: #263a2d; --duration: 8.3s; --delay: -6.3s; --x: 42px; }
+.droplet:nth-child(11) { left: 91%; top: 93%; --size: 18px; --color: #c99a4b; --duration: 8.3s; --delay: -3.6s; --x: 57px; }
+.droplet:nth-child(12) { left: 60%; top: 76%; --size: 11px; --color: #d49f54; --duration: 7.9s; --delay: -2.2s; --x: -40px; }
+.droplet:nth-child(13) { left: 85%; top: 68%; --size: 8px; --color: #506242; --duration: 6.3s; --delay: -5.5s; --x: 29px; }
+.droplet:nth-child(14) { left: 75%; top: 87%; --size: 21px; --color: #8f642d; --duration: 9.5s; --delay: -8s; --x: -27px; }
+.droplet:nth-child(15) { left: 52%; top: 94%; --size: 8px; --color: #dac490; --duration: 9s; --delay: -5.6s; --x: 37px; }
+.droplet:nth-child(16) { left: 95%; top: 78%; --size: 13px; --color: #ad8348; --duration: 7.1s; --delay: -1.2s; --x: -37px; }
+.droplet:nth-child(17) { left: 68%; top: 67%; --size: 15px; --color: #45563a; --duration: 9.6s; --delay: -6.6s; --x: 25px; }
+.droplet:nth-child(18) { left: 80%; top: 81%; --size: 9px; --color: #b2783d; --duration: 7.3s; --delay: -3.9s; --x: 52px; }
+@keyframes flyPaint {
+  0% { opacity: 0; transform: translate3d(0, 20px, 0) rotate(-18deg) scale(.6); }
+  14% { opacity: .82; }
+  65% { opacity: .7; }
+  100% { opacity: 0; transform: translate3d(var(--x), -240px, 0) rotate(190deg) scale(1.15); }
+}
+@media (max-width: 760px) {
+  .droplet { opacity: .65; animation-duration: calc(var(--duration) * 1.25); }
+  .droplet:nth-child(3n) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .droplet { animation: none; opacity: 0; }
+}
