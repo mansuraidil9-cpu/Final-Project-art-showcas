@@ -1,51 +1,41 @@
 'use client'
 
 import { useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 
-/** Animasi ringan untuk konten beranda yang muncul saat scroll. */
 export default function ScrollExperience() {
+  const pathname = usePathname()
   useEffect(() => {
-    const root = document.querySelector('[data-alteria-home]')
+    const root = document
     if (!root) return
-
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const targets = [...root.querySelectorAll('main section:not(:first-child), main article, main h2')]
+    const targets = [...root.querySelectorAll('main article, main h2')]
     let observer
 
-    function initialize() {
+    function reset() {
       observer?.disconnect()
-      targets.forEach(element => {
-        element.removeAttribute('data-alteria-reveal')
-        element.removeAttribute('data-alteria-visible')
-      })
+      targets.forEach(el => el.removeAttribute('data-studio-reveal'))
       if (reduced.matches || !('IntersectionObserver' in window)) return
-
       observer = new IntersectionObserver(entries => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue
-          entry.target.setAttribute('data-alteria-visible', '')
+          entry.target.setAttribute('data-studio-reveal', 'visible')
           observer.unobserve(entry.target)
         }
-      }, { threshold: 0.08, rootMargin: '0px 0px 30px 0px' })
-
-      targets.forEach(element => {
-        if (element.getBoundingClientRect().top < window.innerHeight * 0.95) return
-        element.setAttribute('data-alteria-reveal', '')
-        observer.observe(element)
+      }, { threshold:.06, rootMargin:'0px 0px 20px 0px' })
+      targets.forEach(el => {
+        if (el.getBoundingClientRect().top < innerHeight * .94) return
+        el.setAttribute('data-studio-reveal', 'waiting')
+        observer.observe(el)
       })
     }
-
-    initialize()
-    reduced.addEventListener('change', initialize)
+    reset()
+    reduced.addEventListener('change', reset)
     return () => {
-      reduced.removeEventListener('change', initialize)
       observer?.disconnect()
-      targets.forEach(element => {
-        element.removeAttribute('data-alteria-reveal')
-        element.removeAttribute('data-alteria-visible')
-      })
+      reduced.removeEventListener('change', reset)
+      targets.forEach(el => el.removeAttribute('data-studio-reveal'))
     }
-  }, [])
-
+  }, [pathname])
   return null
 }

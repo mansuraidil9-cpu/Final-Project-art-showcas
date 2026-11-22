@@ -23,7 +23,7 @@ export default async function GalleryPage() {
 
   return (
     <div className={styles.home} id="atas">
-      <ShowcaseHeader user={user} currentPage="galeri" />
+      <ShowcaseHeader user={user} currentPage="galeri" favoritesCount={canLike ? (artworks ?? []).filter(artwork => artwork.favorited).length : undefined} />
       <div className={styles.shell}>
         <main>
           <GalleryExplorer artworks={artworks} canLike={canLike} galleryPage />

@@ -9,7 +9,7 @@ function getInitials(name) {
     .map(word => Array.from(word)[0]).join('').toUpperCase()
 }
 
-export default function ShowcaseHeader({ user, currentPage }) {
+export default function ShowcaseHeader({ user, currentPage, favoritesCount }) {
   const accountPath = user ? dashboardPath(user) : null
   const roleLabel = user ? roleLabels[user.role] : null
   const showRole = user?.role === 'admin' || user?.role === 'curator'
@@ -21,13 +21,11 @@ export default function ShowcaseHeader({ user, currentPage }) {
         <Link className={styles.wordmark} href="/" aria-current={currentPage === 'home' ? 'page' : undefined}>
           ALTERIA
         </Link>
-
         <nav className={styles.navigation} aria-label="Navigasi utama">
           <Link href="/galeri" aria-current={currentPage === 'galeri' ? 'page' : undefined}>Galeri</Link>
           <Link href="/challenge" aria-current={currentPage === 'challenge' ? 'page' : undefined}>Challenge</Link>
-          {user?.role === 'member' && <Link href="/dashboard/member#karya-favorit">Karya Favorit</Link>}
+          {user?.role === 'member' && <Link href="/dashboard/member#karya-favorit">Karya Favorit {Number.isInteger(favoritesCount) && <span className={styles.favoriteBadge}>{favoritesCount}</span>}</Link>}
         </nav>
-
         <div className={styles.account}>
           {user?.role === 'member' && hasCuratorAccess(user) && (
             <Link className={styles.accountRole} href="/dashboard/curator" aria-label="Buka dashboard Curator">Curator</Link>

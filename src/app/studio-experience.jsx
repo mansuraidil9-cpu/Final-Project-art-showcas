@@ -1,0 +1,279 @@
+'use client'
+
+import Image from 'next/image'
+import Link from 'next/link'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import ArtworkFavorite from './artwork-favorite'
+import StudioSceneLoader from './studio-scene-loader'
+import styles from './studio-experience.module.css'
+
+const names = ['Beranda', 'Dimensi', 'Galeri', 'Penutup']
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
+
+export default function StudioExperience({ artworks = [], challenges = [], canLike = false }) {
+  const rootRef = useRef(null)
+  const chaptersRef = useRef([])
+  const motionRef = useRef({ progress: 0, pointerX: 0, pointerY: 0, manual: false, orbitX: 0, orbitY: 0 })
+  const [chapter, setChapter] = useState(0)
+  const [galleryIndex, setGalleryIndex] = useState(0)
+  const [ready, setReady] = useState(false)
+  const [manual, setManual] = useState(false)
+  const [layer, setLayer] = useState('all')
+  const [detail, setDetail] = useState(null)
+  const [favoritesOpen, setFavoritesOpen] = useState(false)
+  const [toast, setToast] = useState('')
+
+  const works = artworks.slice(0, 3)
+  const featured = works[galleryIndex] || null
+  const cover = artworks[0] || null
+  const favorites = artworks.filter(artwork => artwork.favorited)
+  const activeChallenge = challenges[0] || null
+  const sceneImages = works.map(artwork => artwork.imageSrc)
+  const onSceneReady = useCallback(() => setReady(true), [])
+  const onSceneFailed = useCallback(() => setReady(false), [])
+
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    let frame = 0
+    function update() {
+      frame = 0
+      const rect = root.getBoundingClientRect()
+      const distance = Math.max(root.offsetHeight, 1)
+      const p = clamp(-rect.top / distance, 0, 1)
+      root.dataset.studioVisible = rect.bottom > 0 && rect.top < innerHeight ? 'true' : 'false'
+      motionRef.current.progress = p
+      root.style.setProperty('--studio-progress', String(p))
+      const next = p < .24 ? 0 : p < .54 ? 1 : p < .82 ? 2 : 3
+      root.dataset.studioChapter = String(next)
+      setChapter(previous => previous === next ? previous : next)
+      const index = clamp(Math.floor((p - .54) / .28 * Math.max(works.length, 1)), 0, Math.max(works.length - 1, 0))
+      setGalleryIndex(previous => previous === index ? previous : index)
+    }
+    function schedule() {
+      if (!frame) frame = requestAnimationFrame(update)
+    }
+    function pointerMove(event) {
+      if (motionRef.current.manual) return
+      motionRef.current.pointerX = (event.clientX / innerWidth - .5) * 2
+      motionRef.current.pointerY = (event.clientY / innerHeight - .5) * 2
+    }
+    update()
+    window.addEventListener('scroll', schedule, { passive:true })
+    window.addEventListener('resize', schedule, { passive:true })
+    window.addEventListener('pointermove', pointerMove, { passive:true })
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('resize', schedule)
+      window.removeEventListener('pointermove', pointerMove)
+    }
+  }, [works.length])
+
+  useEffect(() => {
+    motionRef.current.manual = manual
+  }, [manual])
+
+  useEffect(() => {
+    motionRef.current.focusLayer = layer
+  }, [layer])
+
+  useEffect(() => {
+    if (!toast) return
+    const timeout = setTimeout(() => setToast(''), 2600)
+    return () => clearTimeout(timeout)
+  }, [toast])
+
+  useEffect(() => {
+    if (!detail && !favoritesOpen) return
+    const oldOverflow = document.body.style.overflow
+    function closeOnEscape(event) {
+      if (event.key === 'Escape') { setDetail(null); setFavoritesOpen(false) }
+    }
+    document.body.style.overflow = 'hidden'
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.body.style.overflow = oldOverflow
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [detail, favoritesOpen])
+
+  function jumpTo(index) {
+    const element = chaptersRef.current[index]
+    if (!element) return
+    element.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      block: 'start',
+    })
+  }
+  function jumpToWork(index) {
+    const root = rootRef.current
+    if (!root || !works.length) return
+    const top = root.getBoundingClientRect().top + scrollY
+    const distance = Math.max(root.offsetHeight, 1)
+    const progress = .54 + (index + .5) / works.length * .28
+    window.scrollTo({
+      top: top + distance * progress,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+    })
+  }
+  function toggleManual() {
+    setManual(previous => !previous)
+    setToast(manual ? 'Mode mengikuti scroll aktif.' : 'Mode putar manual aktif.')
+  }
+  function resetView() {
+    motionRef.current.orbitX = 0
+    motionRef.current.orbitY = 0
+    setToast('Sudut pandang dikembalikan.')
+  }
+
+  return (
+    <div ref={rootRef} className={styles.experience} data-studio-experience>
+      <div className={styles.stage} aria-hidden="true">
+        <div className={`${styles.scene} ${manual ? styles.manual : ''}`}>
+          <StudioSceneLoader images={sceneImages} heroImage={cover?.imageSrc || '/alteria/beranda-mona-lisa-oker.webp'} motionRef={motionRef} manual={manual} onReady={onSceneReady} onFailed={onSceneFailed} />
+        </div>
+        <div className={`${styles.fallback} ${ready ? styles.fallbackHidden : ''}`}>
+          <div className={styles.fallbackFrame}>
+            <Image
+              src={cover?.imageSrc || '/alteria/beranda-mona-lisa-oker.webp'}
+              alt=""
+              fill
+              unoptimized={Boolean(cover?.isUploaded)}
+              sizes="(max-width: 760px) 70vw, 36vw"
+              priority
+            />
+          </div>
+          <span className={styles.fallbackMote} />
+          <span className={styles.fallbackMote} />
+          <span className={styles.fallbackMote} />
+        </div>
+      </div>
+
+      <section ref={el => { chaptersRef.current[0] = el }} className={`${styles.chapter} ${styles.hero}`} aria-labelledby="judul-beranda">
+        <div className={styles.heroCopy}>
+          <span className={styles.eyebrow}>GALERI SENI DIGITAL</span>
+          <h1 id="judul-beranda">Ruang bagi <em>setiap karya<span>.</span></em></h1>
+          <p>Temukan karya, kenali kreator, dan ikuti challenge seni dalam ruang pameran digital.</p>
+          <div className={styles.actions}>
+            <button type="button" className={styles.primary} onClick={() => jumpTo(1)}>Jelajahi Galeri <span aria-hidden="true">↗</span></button>
+            {cover && <button type="button" className={styles.secondary} onClick={() => setDetail(cover)}>Detail Karya Utama</button>}
+          </div>
+        </div>
+        <div className={styles.scrollPrompt} aria-hidden="true" data-hidden={chapter !== 0}>
+          <span>SCROLL UNTUK MENJELAJAH</span>
+          <span className={styles.scrollMouse}><i /></span>
+        </div>
+      </section>
+
+      <section ref={el => { chaptersRef.current[1] = el }} className={`${styles.chapter} ${styles.dimension}`} aria-labelledby="judul-dimensi">
+        <div className={styles.dimensionCard}>
+          <span className={styles.eyebrow}>02 — DIMENSI & LAPISAN</span>
+          <h2 id="judul-dimensi">Lapisan demi <em>lapisan.</em></h2>
+          <p>Perhatikan bagaimana bingkai, kanvas, dan warna memiliki ruangnya masing-masing.</p>
+          <p className={styles.layerLabel}>Sorot Lapisan</p>
+          <div className={styles.layerTags} role="group" aria-label="Sorot lapisan karya">
+            {[
+              ['all', 'Semua Lapisan'], ['frame', 'Bingkai'], ['canvas', 'Kanvas'], ['ribbon', 'Aliran Warna'],
+            ].map(([value, label]) => (
+              <button type="button" key={value} aria-pressed={layer === value} onClick={() => setLayer(value)}>{label}</button>
+            ))}
+          </div>
+          <p className={styles.detailNote}>Geser halaman untuk melihat karya dari sudut berbeda.</p>
+        </div>
+      </section>
+
+      <section ref={el => { chaptersRef.current[2] = el }} className={`${styles.chapter} ${styles.gallery}`} aria-labelledby="judul-kurasi">
+        <div className={styles.galleryCard}>
+          <div className={styles.cardTop}>
+            <span className={styles.eyebrow}>03 — KURASI GALERI</span>
+            <span className={styles.counter}>{works.length ? String(galleryIndex + 1).padStart(2,'0') : '00'} / {String(works.length).padStart(2,'0')}</span>
+          </div>
+          <div className={styles.switcher} role="group" aria-label="Pilih karya pameran">
+            {works.map((work, index) => (
+              <button type="button" key={work.id} aria-label={`Lihat ${work.title}`} aria-current={index === galleryIndex ? 'true' : undefined} onClick={() => jumpToWork(index)} />
+            ))}
+          </div>
+          {featured ? (
+            <>
+              <span className={styles.medium}>{featured.category}</span>
+              <h2 id="judul-kurasi">{featured.title}</h2>
+              <p className={styles.artist}>oleh {featured.artist}</p>
+              <p className={styles.description}>Karya pilihan yang tersedia di Galeri ALTERIA. Lihat detailnya untuk mengenal karya dan kreatornya.</p>
+              <div className={styles.cardActions}>
+                <button type="button" className={styles.primary} onClick={() => setDetail(featured)}>Lihat Detail</button>
+                <Link className={styles.secondary} href={`/karya/${featured.id}`}>Buka Halaman Karya</Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 id="judul-kurasi">Belum ada karya</h2>
+              <p className={styles.description}>Karya yang sudah dipublikasikan akan tampil di sini.</p>
+              <Link className={styles.primary} href="/galeri">Buka Galeri</Link>
+            </>
+          )}
+        </div>
+      </section>
+
+      <section ref={el => { chaptersRef.current[3] = el }} className={`${styles.chapter} ${styles.finale}`} aria-labelledby="judul-penutup">
+        <div className={styles.finaleCard}>
+          <span className={styles.eyebrow}>04 — RUANG BERKARYA</span>
+          <h2 id="judul-penutup">Tunjukkan karyamu di <em>ALTERIA<span>.</span></em></h2>
+          <p>{activeChallenge ? `Challenge: ${activeChallenge.title}. Temukan ketentuan dan kirim karya melalui halaman challenge.` : 'Jelajahi karya seniman lain atau ikuti challenge yang tersedia.'}</p>
+          <div className={styles.actions}>
+            <Link className={styles.primary} href="/challenge">Lihat Challenge <span aria-hidden="true">↗</span></Link>
+            <button type="button" className={styles.secondary} onClick={() => jumpTo(0)}>Kembali ke Atas</button>
+          </div>
+        </div>
+      </section>
+
+      <nav className={styles.rail} aria-label="Navigasi bab">
+        <div className={styles.railTrack}><div className={styles.railFill} /></div>
+        {names.map((name, index) => (
+          <button type="button" key={name} onClick={() => jumpTo(index)} aria-current={chapter === index ? 'step' : undefined}>
+            <span>{String(index + 1).padStart(2, '0')} {name}</span><i />
+          </button>
+        ))}
+      </nav>
+      <div className={styles.utility}>
+        <div className={styles.chapterPill}><strong>A</strong><span>{String(chapter + 1).padStart(2,'0')} · {names[chapter]}</span></div>
+        <div className={styles.utilityButtons}>
+          <button type="button" className={styles.favButton} onClick={() => setFavoritesOpen(true)}>Favorit <span>{favorites.length}</span></button>
+          {manual && <button type="button" onClick={resetView}>Reset Sudut</button>}
+          <button type="button" onClick={toggleManual} aria-pressed={manual}>{manual ? 'Putar Manual' : 'Auto Orbit'}</button>
+        </div>
+      </div>
+      {toast && <div className={styles.toast} role="status">{toast}</div>}
+
+      {detail && (
+        <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setDetail(null) }}>
+          <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="studio-detail-title">
+            <button type="button" className={styles.close} aria-label="Tutup detail karya" onClick={() => setDetail(null)}>×</button>
+            <div className={styles.modalArt}><Image src={detail.imageSrc} alt={detail.title} fill unoptimized={Boolean(detail.isUploaded)} sizes="(max-width: 720px) 90vw, 38vw" /></div>
+            <div className={styles.modalCopy}>
+              <span className={styles.eyebrow}>DETAIL KARYA</span>
+              <h2 id="studio-detail-title">{detail.title}</h2>
+              <p>oleh {detail.artist}</p>
+              <dl><dt>Medium / kategori</dt><dd>{detail.category}</dd><dt>Ukuran dan finishing</dt><dd>Lihat informasi pada halaman detail karya</dd></dl>
+              <Link href={`/karya/${detail.id}`} className={styles.primary}>Buka detail lengkap ↗</Link>
+              {canLike && !detail.isOwner && <ArtworkFavorite artwork={detail} />}
+            </div>
+          </div>
+        </div>
+      )}
+      {favoritesOpen && (
+        <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setFavoritesOpen(false) }}>
+          <div className={styles.favoritesPanel} role="dialog" aria-modal="true" aria-labelledby="judul-favorit">
+            <button className={styles.close} type="button" aria-label="Tutup favorit" onClick={() => setFavoritesOpen(false)}>×</button>
+            <span className={styles.eyebrow}>KOLEKSI TERSIMPAN</span>
+            <h2 id="judul-favorit">Karya Favorit</h2>
+            {favorites.length ? (
+              <ul>{favorites.map(artwork => <li key={artwork.id}><Link href={`/karya/${artwork.id}`}>{artwork.title}<small>{artwork.artist}</small></Link></li>)}</ul>
+            ) : <p>Belum ada karya favorit yang tersimpan.</p>}
+            {canLike && <Link className={styles.secondary} href="/dashboard/member#karya-favorit">Kelola karya favorit</Link>}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

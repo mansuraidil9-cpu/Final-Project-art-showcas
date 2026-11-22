@@ -1,22 +1,12 @@
-import Image, { getImageProps } from 'next/image'
 import { connection } from 'next/server'
 import { getGalleryArtworks } from '../lib/artworks'
 import { getActiveChallenges } from '../lib/challenges'
 import { getCurrentUser } from '../lib/session'
 import GalleryExplorer from './gallery-explorer'
-import HeroMotion from './hero-motion'
-import CinematicGallery from './cinematic-gallery'
-import ScrollExperience from './scroll-experience'
+import StudioExperience from './studio-experience'
 import ShowcaseFooter from './showcase-footer'
 import ShowcaseHeader from './showcase-header'
 import styles from './home.module.css'
-
-const { props: mobileHero } = getImageProps({
-  src: '/alteria/beranda-mona-lisa-hp-menyatu.webp',
-  alt: '',
-  fill: true,
-  sizes: '100vw',
-})
 
 export default async function Home() {
   await connection()
@@ -33,49 +23,16 @@ export default async function Home() {
     }),
     challengeQuery,
   ])
+  const favoriteCount = canLike ? (artworks ?? []).filter(artwork => artwork.favorited).length : undefined
+
   return (
     <div className={`${styles.home} ${styles.entrancePage}`} id="atas" data-alteria-home>
-      <ShowcaseHeader user={user} currentPage="home" />
+      <ShowcaseHeader user={user} currentPage="home" favoritesCount={favoriteCount} />
       <div className={styles.shell}>
         <main>
-          <ScrollExperience />
-          <HeroMotion className={styles.hero} titleId="judul-beranda">
-            <div className={styles.heroCopy}>
-              <p className={styles.eyebrow}>Galeri seni digital</p>
-              <h1 id="judul-beranda">
-                Ruang bagi{' '}
-                <em>setiap karya.</em>
-              </h1>
-              <p className={styles.intro}>
-                Kenali kreator, temukan karya lintas medium, dan ikuti challenge seni.
-              </p>
-              <a className={styles.heroLink} href="#galeri">
-                Jelajahi Galeri <span className={`${styles.arrow} ${styles.arrowDown}`} aria-hidden="true" />
-              </a>
-            </div>
-
-            <div className={styles.heroImage}>
-              <div className={styles.heroArtwork}>
-                <picture>
-                  <source media="(max-width: 760px)" srcSet={mobileHero.srcSet} sizes={mobileHero.sizes} />
-                  <Image
-                    src="/alteria/beranda-mona-lisa-oker.webp"
-                    alt="Lukisan Mona Lisa karya Leonardo da Vinci dalam bingkai miring, dengan kuas dan sapuan cat melayang."
-                    fill
-                    loading="eager"
-                    fetchPriority="high"
-                    sizes="(max-width: 760px) 100vw, max(100vw, 178vh)"
-                  />
-                </picture>
-              </div>
-            </div>
-          </HeroMotion>
-
-          <CinematicGallery />
-
+          <StudioExperience artworks={artworks ?? []} challenges={challenges ?? []} canLike={canLike} />
           <GalleryExplorer artworks={artworks} challenges={challenges} canLike={canLike} />
         </main>
-
         <ShowcaseFooter />
       </div>
     </div>

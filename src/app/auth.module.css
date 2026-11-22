@@ -7,16 +7,16 @@
 }
 
 .screen {
-  --paper: #f5f1e7;
-  --ink: #24221d;
-  --muted: #625a4d;
-  --rule: #bdb4a5;
-  --accent: #3a4434;
-  --serif: "Alteria Serif", Georgia, serif;
+  --paper: #F7EFE5;
+  --ink: #263024;
+  --muted: #5B5549;
+  --rule: rgb(125 84 39 / 19%);
+  --accent: #313D2F;
+  --serif: var(--font-studio-serif), Georgia, serif;
   flex: 1;
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-family: var(--font-studio-sans), Arial, sans-serif;
 }
 
 .screen :is(a, button, input):focus-visible {
@@ -251,3 +251,14 @@
     justify-self: center;
   }
 }
+
+/* Gaya studio pada formulir dan dashboard. */
+.screen { background:transparent; }
+.header { border-bottom:1px solid rgb(125 84 39 / 20%); }
+.panel.formPanel {
+  background:rgb(251 248 243 / 88%); backdrop-filter:blur(16px);
+  border:1px solid rgb(125 84 39 / 20%);
+  box-shadow:0 20px 50px -25px rgb(38 48 36 / 17%);
+}
+.field > input,.password { background:#FBF8F3; border-color:rgb(125 84 39 / 23%); }
+.submit { background:#313D2F; color:#FBF8F3; border-radius:2px; }
