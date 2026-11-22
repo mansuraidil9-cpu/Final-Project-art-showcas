@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import AccountPanel from '@/app/account-panel'
 import ActionForm from '@/app/dashboard/action-form'
+import { isValidEmail, newPasswordPattern, normalizeEmail } from '@/lib/account-validation.mjs'
 import { getPublicCreator } from '@/lib/artworks'
 import { requireUser } from '@/lib/session'
 import styles from '../member-artworks.module.css'
@@ -10,6 +11,7 @@ import { saveAccount, saveProfile } from './profile-actions'
 export default async function MemberProfilePage({ searchParams }) {
   const user = await requireUser('member')
   const [profile, search] = await Promise.all([getPublicCreator(user.id), searchParams])
+  const emailType = isValidEmail(normalizeEmail(user.email)) ? 'email' : 'text'
 
   return (
     <AccountPanel title="Profil dan Akun" wide>
@@ -51,7 +53,7 @@ export default async function MemberProfilePage({ searchParams }) {
         <ActionForm action={saveAccount} submitLabel="Simpan akun">
           <div className={styles.field}>
             <label htmlFor="account-email">Email</label>
-            <input id="account-email" type="email" name="email" defaultValue={user.email} maxLength={254} autoComplete="email" required />
+            <input id="account-email" type={emailType} inputMode="email" name="email" defaultValue={user.email} maxLength={254} autoComplete="email" required />
           </div>
           <div className={styles.field}>
             <label htmlFor="account-current">Kata sandi saat ini</label>
@@ -59,12 +61,12 @@ export default async function MemberProfilePage({ searchParams }) {
           </div>
           <div className={styles.field}>
             <label htmlFor="account-new">Kata sandi baru</label>
-            <input id="account-new" type="password" name="newPassword" minLength={8} maxLength={128} autoComplete="new-password" />
-            <p className={styles.hint}>Kosongkan jika hanya ingin mengubah email.</p>
+            <input id="account-new" type="password" name="newPassword" minLength={8} maxLength={128} pattern={newPasswordPattern} autoComplete="new-password" aria-describedby="account-password-hint" />
+            <p className={styles.hint} id="account-password-hint">8 sampai 128 karakter tanpa spasi atau karakter tak terlihat. Kosongkan jika hanya ingin mengubah email.</p>
           </div>
           <div className={styles.field}>
             <label htmlFor="account-confirm">Konfirmasi kata sandi baru</label>
-            <input id="account-confirm" type="password" name="confirmation" maxLength={128} autoComplete="new-password" />
+            <input id="account-confirm" type="password" name="confirmation" maxLength={128} pattern={newPasswordPattern} autoComplete="new-password" />
           </div>
         </ActionForm>
       </section>

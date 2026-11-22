@@ -1,5 +1,6 @@
 import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
+import { hasValidPasswordLength, isValidNewPassword } from "./account-validation.mjs";
 
 const deriveKey = promisify(scrypt);
 const saltLength = 16;
@@ -14,13 +15,11 @@ const storedHashPattern = /^scrypt-v1\$([A-Za-z0-9_-]{22})\$([A-Za-z0-9_-]{86})$
 const dummySalt = Buffer.alloc(saltLength);
 const dummyKey = Buffer.alloc(keyLength);
 
-function isValidPassword(password) {
-  return typeof password === "string" && password.length >= 8 && password.length <= 128;
-}
+export { isValidNewPassword };
 
 export async function hashPassword(password) {
-  if (!isValidPassword(password)) {
-    throw new TypeError("Kata sandi harus terdiri dari 8 sampai 128 karakter.");
+  if (!isValidNewPassword(password)) {
+    throw new TypeError("Kata sandi harus berisi 8 sampai 128 karakter tanpa spasi atau karakter tak terlihat.");
   }
 
   const salt = randomBytes(saltLength);
@@ -30,7 +29,7 @@ export async function hashPassword(password) {
 }
 
 export async function verifyPassword(password, storedHash) {
-  const validPassword = isValidPassword(password);
+  const validPassword = hasValidPasswordLength(password);
   const match = typeof storedHash === "string" ? storedHashPattern.exec(storedHash) : null;
   const salt = match ? Buffer.from(match[1], "base64url") : dummySalt;
   const storedKey = match ? Buffer.from(match[2], "base64url") : dummyKey;

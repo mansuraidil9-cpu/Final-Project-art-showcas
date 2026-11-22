@@ -1,6 +1,7 @@
 import nextEnv from "@next/env";
+import { isValidDisplayName, isValidEmail, normalizeEmail } from "../src/lib/account-validation.mjs";
 import { pool } from "../src/lib/db.mjs";
-import { hashPassword } from "../src/lib/password.mjs";
+import { hashPassword, isValidNewPassword } from "../src/lib/password.mjs";
 
 nextEnv.loadEnvConfig(process.cwd(), true);
 
@@ -10,20 +11,20 @@ function reportError(message) {
 }
 
 async function createAdmin() {
-  const email = (process.env.ALTERIA_ADMIN_EMAIL ?? "").trim().toLowerCase();
+  const email = normalizeEmail(process.env.ALTERIA_ADMIN_EMAIL ?? "");
   const password = process.env.ALTERIA_ADMIN_PASSWORD ?? "";
   const displayName = (process.env.ALTERIA_ADMIN_NAME ?? "Admin").trim();
 
-  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!isValidEmail(email)) {
     return reportError("Isi ALTERIA_ADMIN_EMAIL dengan alamat email yang valid.");
   }
 
-  if (password.length < 8 || password.length > 128) {
-    return reportError("Isi ALTERIA_ADMIN_PASSWORD dengan 8 sampai 128 karakter.");
+  if (!isValidNewPassword(password)) {
+    return reportError("Isi ALTERIA_ADMIN_PASSWORD dengan 8 sampai 128 karakter tanpa spasi atau karakter tak terlihat.");
   }
 
-  if (!displayName || displayName.length > 120) {
-    return reportError("Isi ALTERIA_ADMIN_NAME dengan nama sepanjang 1 sampai 120 karakter.");
+  if (!isValidDisplayName(displayName)) {
+    return reportError("Isi ALTERIA_ADMIN_NAME dengan nama yang terlihat dan maksimal 120 karakter.");
   }
 
   const passwordHash = await hashPassword(password);

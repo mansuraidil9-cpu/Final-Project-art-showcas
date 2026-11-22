@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useActionState, useState } from 'react'
+import { newPasswordPattern } from '../lib/account-validation.mjs'
 import { signIn, signUp } from './auth-actions'
 import styles from './auth.module.css'
 
@@ -36,6 +37,7 @@ function PasswordField({ name, label, autoComplete, minLength, hintId }) {
           autoComplete={autoComplete}
           minLength={minLength}
           maxLength={128}
+          pattern={autoComplete === 'new-password' ? newPasswordPattern : undefined}
           aria-describedby={hintId}
           required
         />
@@ -108,7 +110,7 @@ export default function AuthPage({ variant }) {
 
               {registering && (
                 <>
-                  <p className={styles.hint} id="password-hint">Minimal 8 karakter.</p>
+                  <p className={styles.hint} id="password-hint">8 sampai 128 karakter tanpa spasi atau karakter tak terlihat.</p>
                   <PasswordField
                     name="confirmation"
                     label="Konfirmasi kata sandi"

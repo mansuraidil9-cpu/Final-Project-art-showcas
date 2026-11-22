@@ -2,9 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { isValidDisplayName, isValidEmail, normalizeEmail } from '@/lib/account-validation.mjs'
 import { pool, transaction } from '@/lib/db.mjs'
-import { isValidEmail, readText } from '@/lib/form-fields'
-import { hashPassword, verifyPassword } from '@/lib/password.mjs'
+import { readText } from '@/lib/form-fields'
+import { hashPassword, isValidNewPassword, verifyPassword } from '@/lib/password.mjs'
 import { clearSession, requireUser } from '@/lib/session'
 import { readImageUpload } from '@/lib/uploads'
 
@@ -33,7 +34,7 @@ export async function saveProfile(_previous, formData) {
   const linksText = readText(formData, 'links')
   const links = parseLinks(linksText)
 
-  if (!name || name.length > 120) return { error: 'Isi nama tampilan dengan maksimal 120 karakter.' }
+  if (!isValidDisplayName(name)) return { error: 'Isi nama tampilan yang terlihat dan maksimal 120 karakter.' }
   if (bio.length > 500) return { error: 'Bio maksimal 500 karakter.' }
   if (!links || linksText.length > 2000) return { error: 'Isi maksimal lima tautan web HTTP atau HTTPS, satu per baris.' }
 
@@ -55,15 +56,16 @@ export async function saveProfile(_previous, formData) {
 
 export async function saveAccount(_previous, formData) {
   const user = await requireUser('member')
-  const email = readText(formData, 'email').toLowerCase()
-  const current = readText(formData, 'currentPassword', { trim: false })
-  const next = readText(formData, 'newPassword', { trim: false })
-  const confirmation = readText(formData, 'confirmation', { trim: false })
+  const enteredEmail = normalizeEmail(readText(formData, 'email', { trim: false }))
+  const newEmail = enteredEmail === normalizeEmail(user.email) ? null : enteredEmail
+  const current = formData.get('currentPassword')
+  const next = formData.get('newPassword') ?? ''
+  const confirmation = formData.get('confirmation') ?? ''
 
-  if (!isValidEmail(email)) return { error: 'Masukkan alamat email yang valid.' }
+  if (newEmail !== null && !isValidEmail(newEmail)) return { error: 'Masukkan alamat email yang valid.' }
   if (next || confirmation) {
-    if (next.length < 8 || next.length > 128 || next !== confirmation) {
-      return { error: 'Kata sandi baru harus berisi 8 sampai 128 karakter dan sama dengan konfirmasi.' }
+    if (!isValidNewPassword(next) || next !== confirmation) {
+      return { error: 'Kata sandi baru harus berisi 8 sampai 128 karakter tanpa spasi atau karakter tak terlihat, dan sama dengan konfirmasi.' }
     }
   }
 
@@ -81,7 +83,7 @@ export async function saveAccount(_previous, formData) {
         [user.id, oldHash],
       )
       if (!locked.rowCount) return false
-      await client.query('UPDATE users SET email = $2, password_hash = $3 WHERE id = $1', [user.id, email, newHash])
+      await client.query('UPDATE users SET email = COALESCE($2, email), password_hash = $3 WHERE id = $1', [user.id, newEmail, newHash])
       if (next) await client.query('DELETE FROM sessions WHERE user_id = $1', [user.id])
       return true
     })

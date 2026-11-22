@@ -2,9 +2,11 @@
 
 import { redirect } from 'next/navigation'
 import { pool } from '../lib/db.mjs'
-import { isValidEmail } from '../lib/form-fields'
-import { hashPassword, verifyPassword } from '../lib/password.mjs'
+import { isValidDisplayName, isValidEmail, normalizeEmail } from '../lib/account-validation.mjs'
+import { hashPassword, isValidNewPassword, verifyPassword } from '../lib/password.mjs'
 import { clearSession, dashboardPath, generateSession, requireUser, setSessionCookie } from '../lib/session'
+
+const loginEmailPattern = /^[^\s@\0]+@[^\s@\0]+\.[^\s@\0]+$/
 
 function textField(formData, name) {
   if (!(formData instanceof FormData)) return ''
@@ -14,7 +16,7 @@ function textField(formData, name) {
 
 export async function signUp(_previousState, formData) {
   const displayName = textField(formData, 'displayName').trim()
-  const email = textField(formData, 'email').trim().toLowerCase()
+  const email = normalizeEmail(textField(formData, 'email'))
   const password = textField(formData, 'password')
   const confirmation = textField(formData, 'confirmation')
   const role = textField(formData, 'role')
@@ -25,12 +27,12 @@ export async function signUp(_previousState, formData) {
     role: role === 'curator' ? 'curator' : 'member',
   }
 
-  if (!displayName || displayName.length > 120) {
-    return { error: 'Isi nama tampilan dengan maksimal 120 karakter.', values }
+  if (!isValidDisplayName(displayName)) {
+    return { error: 'Isi nama tampilan yang terlihat dalam satu baris, maksimal 120 karakter.', values }
   }
   if (!isValidEmail(email)) return { error: 'Masukkan alamat email yang valid.', values }
-  if (password.length < 8 || password.length > 128) {
-    return { error: 'Kata sandi harus berisi 8 sampai 128 karakter.', values }
+  if (!isValidNewPassword(password)) {
+    return { error: 'Kata sandi harus berisi 8 sampai 128 karakter tanpa spasi atau karakter tak terlihat.', values }
   }
   if (password !== confirmation) {
     return { error: 'Konfirmasi kata sandi harus sama dengan kata sandi.', values }
@@ -65,12 +67,12 @@ export async function signUp(_previousState, formData) {
 }
 
 export async function signIn(_previousState, formData) {
-  const email = textField(formData, 'email').trim().toLowerCase()
+  const email = normalizeEmail(textField(formData, 'email'))
   const password = textField(formData, 'password')
   const values = { email: email.slice(0, 254) }
   const invalidLogin = { error: 'Email atau kata sandi tidak cocok.', values }
 
-  if (!isValidEmail(email) || !password || password.length > 128) return invalidLogin
+  if (email.length > 254 || !loginEmailPattern.test(email) || !password || password.length > 128) return invalidLogin
 
   const session = generateSession()
   let user

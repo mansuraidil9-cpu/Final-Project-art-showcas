@@ -70,7 +70,7 @@ Buka alamat **Local** yang muncul di terminal, biasanya [http://localhost:3000](
 
 ## Akun Admin
 
-Member dan Kurator mendaftar lewat halaman **Daftar**. Untuk membuat akun Admin, tambahkan pengaturan berikut sementara ke `.env.local`. Gunakan email yang belum terdaftar dan kata sandi pilihanmu sepanjang 8–128 karakter.
+Member dan Kurator mendaftar lewat halaman **Daftar**. Untuk membuat akun Admin, tambahkan pengaturan berikut sementara ke `.env.local`. Gunakan email yang belum terdaftar dan kata sandi pilihanmu sepanjang 8–128 karakter tanpa spasi atau karakter tak terlihat.
 
 ```dotenv
 ALTERIA_ADMIN_NAME="Admin ALTERIA"
@@ -94,6 +94,7 @@ Setelah terminal menampilkan **Akun Admin ALTERIA berhasil dibuat**, hapus baris
 ## Pemeriksaan proyek
 
 ```sh
+npm test
 npm run lint
 npm run build
 ```
