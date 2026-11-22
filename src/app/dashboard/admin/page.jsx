@@ -22,18 +22,22 @@ export default async function AdminDashboard({ searchParams }) {
     getPlatformUsers(role),
     getArtworkCategories(),
     pool.query(
-      `SELECT id, display_name, email, created_at
+      `SELECT id, display_name, email, role,
+              COALESCE(curator_applied_at, created_at) AS applied_at,
+              curator_applied_at::text AS application_version
        FROM users
-       WHERE role = 'curator' AND curator_status = 'pending'
-       ORDER BY created_at, id`,
+       WHERE role IN ('member', 'curator') AND curator_status = 'pending'
+       ORDER BY applied_at, id`,
     ),
   ])
   const registrations = rows.map(row => ({
     id: row.id,
     name: row.display_name,
     email: row.email,
-    createdAt: row.created_at.toISOString(),
-    dateLabel: dateFormat.format(row.created_at),
+    role: row.role,
+    appliedAt: row.applied_at.toISOString(),
+    applicationVersion: row.application_version ?? '',
+    dateLabel: dateFormat.format(row.applied_at),
   }))
 
   return (

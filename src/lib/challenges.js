@@ -87,7 +87,7 @@ export async function createCuratorChallenge(curatorId, fields, banner) {
       starts_at, ends_at, cover_image, cover_alt, cover_data
     )
     SELECT id, $2, $3, 'Seni', $4, $5, $6, $7, $8, $9, $3, $10
-    FROM users WHERE id = $1 AND role = 'curator' AND curator_status = 'approved'
+    FROM users WHERE id = $1 AND role IN ('member', 'curator') AND curator_status = 'approved'
     RETURNING id::text`,
     [curatorId, randomUUID(), fields.title, fields.description, fields.rules, fields.prize,
       fields.startsAt, fields.endsAt, banner.src, banner.data],
@@ -104,7 +104,7 @@ function withLockedChallenge(id, change) {
 
 const challengeOwner = `
   c.owner_id = $2 AND EXISTS (
-    SELECT 1 FROM users u WHERE u.id = c.owner_id AND u.role = 'curator' AND u.curator_status = 'approved'
+    SELECT 1 FROM users u WHERE u.id = c.owner_id AND u.role IN ('member', 'curator') AND u.curator_status = 'approved'
   )`
 
 export function updateCuratorChallenge(id, curatorId, fields, banner) {
@@ -176,7 +176,8 @@ export function submitChallengeArtwork(id, memberId, artworkId) {
       FROM challenges c
       JOIN users u ON u.id = $2 AND u.role = 'member'
       JOIN artworks a ON a.id = $3 AND a.owner_id = u.id
-      WHERE c.id = $1 AND c.starts_at <= clock_timestamp() AND c.ends_at > clock_timestamp()
+      WHERE c.id = $1 AND c.owner_id IS DISTINCT FROM u.id
+        AND c.starts_at <= clock_timestamp() AND c.ends_at > clock_timestamp()
       ON CONFLICT (challenge_id, member_id) WHERE withdrawn_at IS NULL DO NOTHING`, [id, memberId, artworkId])
     return rowCount === 1
   })
@@ -212,8 +213,8 @@ export function publishChallengeWinners(id, curatorId, winners) {
 
     const { rowCount } = await client.query(`
       SELECT id FROM challenge_submissions
-      WHERE challenge_id = $1 AND id = ANY($2::bigint[]) AND withdrawn_at IS NULL
-      ORDER BY id FOR UPDATE`, [id, submissionIds])
+      WHERE challenge_id = $1 AND id = ANY($2::bigint[]) AND member_id <> $3 AND withdrawn_at IS NULL
+      ORDER BY id FOR UPDATE`, [id, submissionIds, curatorId])
     if (rowCount !== submissionIds.length) return false
 
     await client.query('UPDATE challenge_submissions SET placement = NULL WHERE challenge_id = $1 AND placement IS NOT NULL', [id])

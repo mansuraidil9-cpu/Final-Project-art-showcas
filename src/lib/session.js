@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { pool } from './db.mjs'
+import { hasCuratorAccess } from './user-roles'
 
 const cookieName = 'alteria_session'
 const sessionSeconds = 7 * 24 * 60 * 60
@@ -69,7 +70,8 @@ export async function requireUser(role) {
   const user = await getCurrentUser()
   if (!user) redirect('/login')
 
-  if (role && dashboardPath(user) !== `/dashboard/${role}`) {
+  const authorized = role === 'curator' ? hasCuratorAccess(user) : !role || user.role === role
+  if (!authorized) {
     redirect(dashboardPath(user))
   }
   return user

@@ -36,7 +36,7 @@ export default async function DetailChallenge({ params }) {
     canParticipate ? getMemberChallengeSubmissions(memberId, id) : [],
   ])
   const ownSubmission = ownSubmissions[0]
-  const canSubmit = canParticipate && challenge.status === 'active' && !ownSubmission
+  const canSubmit = canParticipate && challenge.status === 'active' && challenge.curatorId !== memberId && !ownSubmission
   const availableArtworks = canSubmit ? await getMemberArtworks(memberId) : []
   const winners = submissions.filter(item => item.rank !== null).sort((a, b) => a.rank - b.rank)
   const coverCredit = credits.find(artwork => `/alteria/${artwork.filename}` === challenge.coverImage)

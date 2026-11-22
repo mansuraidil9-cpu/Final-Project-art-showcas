@@ -129,8 +129,7 @@
   gap: .35rem;
 }
 
-.field label,
-.roles legend {
+.field label {
   font-size: .83rem;
   font-weight: 600;
 }
@@ -176,53 +175,6 @@
   margin-top: -.65rem;
   color: var(--muted);
   font-size: .76rem;
-}
-
-.roles {
-  min-inline-size: 0;
-}
-
-.roleOptions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: .55rem;
-  margin-top: .4rem;
-}
-
-.role {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
-  gap: .45rem;
-  padding: .72rem .65rem;
-  border: 1px solid var(--rule);
-  cursor: pointer;
-}
-
-.role:has(input:checked) {
-  border-color: var(--accent);
-  background: #e9ecdf;
-}
-
-.role input {
-  margin-top: .2rem;
-  accent-color: var(--accent);
-}
-
-.role strong,
-.role small {
-  display: block;
-}
-
-.role strong {
-  font-size: .82rem;
-}
-
-.role small {
-  margin-top: .16rem;
-  color: var(--muted);
-  font-size: .71rem;
-  line-height: 1.4;
 }
 
 .submit {
@@ -281,11 +233,5 @@
     width: min(100%, 33rem);
     margin-top: 0;
     justify-self: center;
-  }
-}
-
-@media (max-width: 350px) {
-  .roleOptions {
-    grid-template-columns: minmax(0, 1fr);
   }
 }

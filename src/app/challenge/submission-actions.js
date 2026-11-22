@@ -13,7 +13,7 @@ export async function submitArtwork(id, _previous, formData) {
 
   try {
     if (!await submitChallengeArtwork(id, user.id, artworkId)) {
-      return { error: 'Pengiriman ditolak. Challenge harus aktif dan kamu hanya bisa mengirim satu karya milikmu.' }
+      return { error: 'Kamu bisa mengirim satu karya milikmu ke challenge aktif yang diselenggarakan pengguna lain.' }
     }
   } catch (error) {
     console.error('Submisi gagal disimpan.', error.code ?? error.name)

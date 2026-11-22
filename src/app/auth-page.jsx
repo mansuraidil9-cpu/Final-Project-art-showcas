@@ -16,7 +16,7 @@ const screens = {
   },
   register: {
     title: 'Daftar',
-    description: 'Buat akun untuk mulai berbagi karya atau mengelola challenge.',
+    description: 'Buat akun Member. Kamu bisa mengajukan peran Curator dari dashboard.',
     action: 'Buat akun',
     question: 'Sudah punya akun?',
     link: { href: '/login', label: 'Masuk' },
@@ -116,36 +116,6 @@ export default function AuthPage({ variant }) {
                     label="Konfirmasi kata sandi"
                     autoComplete="new-password"
                   />
-
-                  <fieldset className={styles.roles}>
-                    <legend>Daftar sebagai</legend>
-                    <div className={styles.roleOptions}>
-                      <label className={styles.role}>
-                        <input
-                          type="radio"
-                          name="role"
-                          value="member"
-                          defaultChecked={feedback?.values.role !== 'curator'}
-                        />
-                        <span>
-                          <strong>Member</strong>
-                          <small>Unggah karya dan ikuti challenge.</small>
-                        </span>
-                      </label>
-                      <label className={styles.role}>
-                        <input
-                          type="radio"
-                          name="role"
-                          value="curator"
-                          defaultChecked={feedback?.values.role === 'curator'}
-                        />
-                        <span>
-                          <strong>Curator</strong>
-                          <small>Kelola challenge setelah akun disetujui Admin.</small>
-                        </span>
-                      </label>
-                    </div>
-                  </fieldset>
                 </>
               )}
 

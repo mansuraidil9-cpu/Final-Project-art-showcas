@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { dashboardPath } from '../lib/session'
-import { roleLabels } from '../lib/user-roles'
+import { hasCuratorAccess, roleLabels } from '../lib/user-roles'
 import styles from './home.module.css'
 
 function getInitials(name) {
@@ -29,6 +29,9 @@ export default function ShowcaseHeader({ user, currentPage }) {
         </nav>
 
         <div className={styles.account}>
+          {user?.role === 'member' && hasCuratorAccess(user) && (
+            <Link className={styles.accountRole} href="/dashboard/curator" aria-label="Buka dashboard Curator">Curator</Link>
+          )}
           {accountPath ? (
             <Link className={styles.accountProfile} href={accountPath} aria-label={accountLabel} title={accountLabel}>
               {showRole && <span className={styles.accountRole}>{roleLabel}</span>}

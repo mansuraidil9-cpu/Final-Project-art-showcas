@@ -19,6 +19,18 @@ const curatorStatusLabels = {
   rejected: 'Ditolak',
 }
 
+const memberCuratorLabels = {
+  pending: 'Pengajuan Curator menunggu',
+  approved: 'Curator',
+  rejected: 'Pengajuan Curator ditolak',
+}
+
+function formatUserRoles(user) {
+  const labels = user.role === 'member' ? memberCuratorLabels : curatorStatusLabels
+  const curatorLabel = labels[user.curator_status]
+  return curatorLabel ? `${roleLabels[user.role]} · ${curatorLabel}` : roleLabels[user.role]
+}
+
 export function PlatformStats({ stats }) {
   return (
     <section className={styles.section} aria-labelledby="statistik-platform">
@@ -34,6 +46,7 @@ export function PlatformStats({ stats }) {
           </div>
         ))}
       </dl>
+      <p className={styles.hint}>Member yang disetujui ikut dihitung sebagai Curator.</p>
     </section>
   )
 }
@@ -53,7 +66,7 @@ export function UserManagement({ users, role }) {
           {users.map(user => (
             <li className={styles.card} key={user.id}>
               <div className={styles.cardBody}>
-                <p>{roleLabels[user.role]}{user.curator_status && ` · ${curatorStatusLabels[user.curator_status]}`}</p>
+                <p>{formatUserRoles(user)}</p>
                 <h3>{user.display_name}</h3>
                 <p>{user.email}</p>
                 {user.role !== 'admin' && (

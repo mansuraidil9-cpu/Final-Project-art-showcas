@@ -19,6 +19,11 @@ export default async function CuratorDashboard({ searchParams }) {
 
   return (
     <AccountPanel title="Dashboard Curator" description={`Halo, ${user.display_name}.`} wide>
+      {user.role === 'member' && (
+        <div className={styles.formActions}>
+          <Link href="/dashboard/member">Kembali ke Dashboard Member</Link>
+        </div>
+      )}
       <section className={styles.section} aria-labelledby="kelola-challenge">
         <header className={styles.sectionHeader}>
           <h2 id="kelola-challenge">Kelola Challenge</h2>

@@ -19,12 +19,9 @@ export async function signUp(_previousState, formData) {
   const email = normalizeEmail(textField(formData, 'email'))
   const password = textField(formData, 'password')
   const confirmation = textField(formData, 'confirmation')
-  const role = textField(formData, 'role')
-  const curatorStatus = role === 'curator' ? 'pending' : null
   const values = {
     displayName: displayName.slice(0, 120),
     email: email.slice(0, 254),
-    role: role === 'curator' ? 'curator' : 'member',
   }
 
   if (!isValidDisplayName(displayName)) {
@@ -37,22 +34,19 @@ export async function signUp(_previousState, formData) {
   if (password !== confirmation) {
     return { error: 'Konfirmasi kata sandi harus sama dengan kata sandi.', values }
   }
-  if (role !== 'member' && role !== 'curator') {
-    return { error: 'Pilih Member atau Curator untuk mendaftar.', values }
-  }
 
   const session = generateSession()
   try {
     const passwordHash = await hashPassword(password)
     await pool.query(
       `WITH new_user AS (
-         INSERT INTO users (display_name, email, password_hash, role, curator_status)
-         VALUES ($1, $2, $3, $4, $5)
+         INSERT INTO users (display_name, email, password_hash, role)
+         VALUES ($1, $2, $3, 'member')
          RETURNING id
        )
        INSERT INTO sessions (token_hash, user_id, expires_at)
-       SELECT $6, id, $7 FROM new_user`,
-      [displayName, email, passwordHash, role, curatorStatus, session.hash, session.expiresAt],
+       SELECT $4, id, $5 FROM new_user`,
+      [displayName, email, passwordHash, session.hash, session.expiresAt],
     )
   } catch (error) {
     if (error.code === '23505' && error.constraint === 'users_email_lower_unique') {
@@ -63,7 +57,7 @@ export async function signUp(_previousState, formData) {
   }
 
   await setSessionCookie(session.token)
-  redirect(dashboardPath({ role, curator_status: curatorStatus }))
+  redirect('/dashboard/member')
 }
 
 export async function signIn(_previousState, formData) {

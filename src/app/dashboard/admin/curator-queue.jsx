@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
+import { roleLabels } from '@/lib/user-roles'
 import { reviewCurator } from './curator-decisions'
 import styles from './curator-queue.module.css'
 
@@ -32,11 +33,12 @@ export default function CuratorQueue({ registrations }) {
                 <p className={styles.name}>{registration.name}</p>
                 <p className={styles.email}>{registration.email}</p>
                 <p className={styles.date}>
-                  Mendaftar <time dateTime={registration.createdAt}>{registration.dateLabel}</time>
+                  Akun {roleLabels[registration.role]} · Tanggal pengajuan <time dateTime={registration.appliedAt}>{registration.dateLabel}</time>
                 </p>
               </div>
               <form className={styles.actions} action={review}>
                 <input type="hidden" name="userId" value={registration.id} />
+                <input type="hidden" name="applicationVersion" value={registration.applicationVersion} />
                 <button
                   className={styles.approve}
                   type="submit"
@@ -60,7 +62,7 @@ export default function CuratorQueue({ registrations }) {
             </li>
           ))}
         </ul>
-      ) : <p className={styles.empty}>Belum ada pendaftaran Curator yang menunggu.</p>}
+      ) : <p className={styles.empty}>Belum ada pengajuan Curator yang menunggu.</p>}
     </section>
   )
 }

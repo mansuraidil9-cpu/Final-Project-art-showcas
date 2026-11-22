@@ -10,13 +10,30 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash TEXT NOT NULL CHECK (password_hash <> ''),
     role TEXT NOT NULL CHECK (role IN ('member', 'curator', 'admin')),
     curator_status TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT users_curator_status_check CHECK (
-        (role = 'curator' AND curator_status IS NOT NULL
-            AND curator_status IN ('pending', 'approved', 'rejected'))
-        OR (role <> 'curator' AND curator_status IS NULL)
-    )
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS curator_applied_at TIMESTAMPTZ,
+    DROP CONSTRAINT IF EXISTS users_curator_status_check;
+
+DO $migration$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_catalog.pg_constraint
+        WHERE conrelid = 'users'::regclass AND conname = 'users_curator_access_check'
+    ) THEN
+        ALTER TABLE users ADD CONSTRAINT users_curator_access_check CHECK (
+            (curator_status IS NULL OR curator_status IN ('pending', 'approved', 'rejected'))
+            AND CASE role
+                WHEN 'member' THEN (curator_status IS NULL) = (curator_applied_at IS NULL)
+                WHEN 'curator' THEN curator_status IS NOT NULL AND curator_applied_at IS NULL
+                ELSE curator_status IS NULL AND curator_applied_at IS NULL
+            END
+        );
+    END IF;
+END;
+$migration$;
 
 CREATE UNIQUE INDEX IF NOT EXISTS users_email_lower_unique
     ON users (lower(email));

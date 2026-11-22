@@ -1,19 +1,23 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { pool } from '../../../lib/db.mjs'
+import { isDatabaseId, pool } from '../../../lib/db.mjs'
 import { requireUser } from '../../../lib/session'
 
 export async function reviewCurator(_previous, formData) {
   await requireUser('admin')
 
-  const id = formData instanceof FormData ? formData.get('userId') : null
-  const decision = formData instanceof FormData ? formData.get('decision') : null
+  if (!(formData instanceof FormData)) {
+    return { error: true, text: 'Permintaan verifikasi tidak valid.' }
+  }
+
+  const id = formData.get('userId')
+  const decision = formData.get('decision')
+  const applicationVersion = formData.get('applicationVersion')
 
   if (
-    typeof id !== 'string' ||
-    !/^[1-9]\d{0,18}$/.test(id) ||
-    BigInt(id) > 9223372036854775807n ||
+    !isDatabaseId(id) ||
+    typeof applicationVersion !== 'string' ||
     (decision !== 'approved' && decision !== 'rejected')
   ) {
     return { error: true, text: 'Permintaan verifikasi tidak valid.' }
@@ -24,8 +28,9 @@ export async function reviewCurator(_previous, formData) {
     const result = await pool.query(
       `UPDATE users
        SET curator_status = $1
-       WHERE id = $2 AND role = 'curator' AND curator_status = 'pending'`,
-      [decision, id],
+       WHERE id = $2 AND role IN ('member', 'curator') AND curator_status = 'pending'
+         AND curator_applied_at::text IS NOT DISTINCT FROM NULLIF($3, '')`,
+      [decision, id, applicationVersion],
     )
     rowCount = result.rowCount
   } catch (error) {
@@ -33,11 +38,11 @@ export async function reviewCurator(_previous, formData) {
     return { error: true, text: 'Keputusan belum tersimpan. Coba lagi sebentar.' }
   }
 
-  revalidatePath('/dashboard/admin')
-  if (rowCount === 0) return { error: true, text: 'Pendaftaran ini sudah diproses atau sudah dihapus.' }
+  revalidatePath('/', 'layout')
+  if (rowCount === 0) return { error: true, text: 'Pengajuan ini sudah berubah atau sudah diproses.' }
 
   return {
     error: false,
-    text: decision === 'approved' ? 'Pendaftaran Curator disetujui.' : 'Pendaftaran Curator ditolak.',
+    text: decision === 'approved' ? 'Pengajuan Curator disetujui.' : 'Pengajuan Curator ditolak.',
   }
 }

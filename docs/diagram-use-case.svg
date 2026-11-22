@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="1170" viewBox="0 0 1480 1170" role="img" aria-labelledby="title description">
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="1262" viewBox="0 0 1480 1262" role="img" aria-labelledby="title description">
   <title id="title">Diagram Use Case ALTERIA</title>
-  <desc id="description">Empat aktor, Tamu, Member, Kurator, dan Admin, terhubung ke use case dalam batas sistem ALTERIA. Catatan di bawah diagram menjelaskan akses publik, sesi, dan syarat challenge.</desc>
+  <desc id="description">Empat aktor, Tamu, Member, Kurator, dan Admin, terhubung ke use case dalam batas sistem ALTERIA. Member dapat mengajukan akses Kurator dari akunnya dan Admin meninjau pengajuan.</desc>
   <style>
     text { font-family: "Noto Sans", "DejaVu Sans", sans-serif; fill: #292b24; }
     .page-title { font-family: "Noto Serif", Georgia, serif; font-size: 45px; font-weight: 600; }
@@ -14,11 +14,11 @@
     .association { stroke: #626c5c; stroke-width: 1.65; }
     .use-case { fill: #fffdf7; stroke: #6d7867; stroke-width: 1.5; }
   </style>
-  <rect width="1480" height="1170" fill="#f6f3ea" />
+  <rect width="1480" height="1262" fill="#f6f3ea" />
   <text class="page-title" x="155" y="78">Diagram Use Case ALTERIA</text>
-  <rect id="system-boundary" x="155" y="122" width="1170" height="934" fill="#fcfaf4" stroke="#525d4c" stroke-width="2" />
+  <rect id="system-boundary" x="155" y="122" width="1170" height="998" fill="#fcfaf4" stroke="#525d4c" stroke-width="2" />
   <text class="system-title" x="183" y="155">Sistem ALTERIA</text>
-  <path d="M 183,168 H 1297 M 183,544 H 1297 M 740,182 V 1036" fill="none" stroke="#d9d6c9" stroke-width="1.2" />
+  <path d="M 183,168 H 1297 M 183,544 H 1297 M 740,182 V 1100" fill="none" stroke="#d9d6c9" stroke-width="1.2" />
 
   <g id="public">
     <text class="group-title" x="440" y="199" text-anchor="middle">Akses publik dan akun</text>
@@ -50,7 +50,7 @@
     <g class="case" data-use-case="Daftar akun">
       <ellipse class="use-case" cx="440" cy="433" rx="208" ry="27" />
       <text class="case-title" x="440" y="432" text-anchor="middle">Daftar akun</text>
-      <text class="case-detail" x="440" y="448" text-anchor="middle">Pilih peran Member atau Kurator</text>
+      <text class="case-detail" x="440" y="448" text-anchor="middle">Buat akun Member</text>
     </g>
     <g class="case" data-use-case="Masuk ke akun">
       <ellipse class="use-case" cx="440" cy="498" rx="208" ry="27" />
@@ -71,12 +71,13 @@
     </g>
     <g class="case" data-use-case="Lihat status verifikasi">
       <ellipse class="use-case" cx="1040" cy="238" rx="208" ry="27" />
-      <text class="case-title" x="1040" y="244" text-anchor="middle">Lihat status verifikasi</text>
+      <text class="case-title" x="1040" y="237" text-anchor="middle">Lihat status verifikasi</text>
+      <text class="case-detail" x="1040" y="253" text-anchor="middle">Akun Kurator dari versi sebelumnya</text>
     </g>
     <g class="case" data-use-case="Hapus akun sendiri">
       <ellipse class="use-case" cx="1040" cy="303" rx="208" ry="27" />
       <text class="case-title" x="1040" y="302" text-anchor="middle">Hapus akun sendiri</text>
-      <text class="case-detail" x="1040" y="318" text-anchor="middle">Jika pendaftaran Kurator ditolak</text>
+      <text class="case-detail" x="1040" y="318" text-anchor="middle">Akun Kurator lama yang ditolak</text>
     </g>
     <g class="case" data-use-case="Buat challenge">
       <ellipse class="use-case" cx="1040" cy="368" rx="208" ry="27" />
@@ -95,14 +96,15 @@
   </g>
   <g id="member">
     <text class="group-title" x="440" y="580" text-anchor="middle">Karya dan partisipasi</text>
-    <line class="association" x1="101" y1="814" x2="232" y2="622" />
-    <line class="association" x1="101" y1="814" x2="232" y2="686" />
-    <line class="association" x1="101" y1="814" x2="232" y2="750" />
-    <line class="association" x1="101" y1="814" x2="232" y2="814" />
-    <line class="association" x1="101" y1="814" x2="232" y2="878" />
-    <line class="association" x1="101" y1="814" x2="232" y2="942" />
-    <line class="association" x1="101" y1="814" x2="232" y2="1006" />
-    <g id="actor-member" transform="translate(78 814)">
+    <line class="association" x1="101" y1="846" x2="232" y2="622" />
+    <line class="association" x1="101" y1="846" x2="232" y2="686" />
+    <line class="association" x1="101" y1="846" x2="232" y2="750" />
+    <line class="association" x1="101" y1="846" x2="232" y2="814" />
+    <line class="association" x1="101" y1="846" x2="232" y2="878" />
+    <line class="association" x1="101" y1="846" x2="232" y2="942" />
+    <line class="association" x1="101" y1="846" x2="232" y2="1006" />
+    <line class="association" x1="101" y1="846" x2="232" y2="1070" />
+    <g id="actor-member" transform="translate(78 846)">
       <circle class="actor-shape" cx="0" cy="-27" r="11" />
       <path class="actor-shape" d="M 0,-16 V 23 M -23,0 H 23 M 0,23 L -18,47 M 0,23 L 18,47" />
       <text class="actor-title" text-anchor="middle" y="76">Member</text>
@@ -142,6 +144,11 @@
       <text class="case-title" x="440" y="1005" text-anchor="middle">Laporkan karya</text>
       <text class="case-detail" x="440" y="1021" text-anchor="middle">Unggahan Member lain</text>
     </g>
+    <g class="case" data-use-case="Ajukan akses Curator">
+      <ellipse class="use-case" cx="440" cy="1070" rx="208" ry="27" />
+      <text class="case-title" x="440" y="1069" text-anchor="middle">Ajukan akses Curator</text>
+      <text class="case-detail" x="440" y="1085" text-anchor="middle">Cek status atau ajukan ulang di dashboard</text>
+    </g>
   </g>
   <g id="admin">
     <text class="group-title" x="1040" y="580" text-anchor="middle">Administrasi platform</text>
@@ -159,9 +166,9 @@
       <ellipse class="use-case" cx="1040" cy="633" rx="208" ry="27" />
       <text class="case-title" x="1040" y="639" text-anchor="middle">Lihat statistik platform</text>
     </g>
-    <g class="case" data-use-case="Verifikasi pendaftaran Kurator">
+    <g class="case" data-use-case="Tinjau pengajuan akses Curator">
       <ellipse class="use-case" cx="1040" cy="723" rx="208" ry="27" />
-      <text class="case-title" x="1040" y="722" text-anchor="middle">Verifikasi pendaftaran Kurator</text>
+      <text class="case-title" x="1040" y="722" text-anchor="middle">Tinjau pengajuan akses Curator</text>
       <text class="case-detail" x="1040" y="738" text-anchor="middle">Setujui atau tolak pengajuan</text>
     </g>
     <g class="case" data-use-case="Kelola akun pengguna">
@@ -181,8 +188,9 @@
     </g>
   </g>
   <g id="access-notes" class="note">
-    <text x="155" y="1087"><tspan font-weight="bold">Akses bersama.</tspan> Semua peran dapat melihat halaman publik. Member, Kurator, dan Admin dapat masuk dan keluar dari akun.</text>
-    <text x="155" y="1115"><tspan font-weight="bold">Member.</tspan> Satu karya milik sendiri per challenge aktif. Submisi dapat ditarik sebelum tenggat.</text>
-    <text x="155" y="1143"><tspan font-weight="bold">Kurator.</tspan> Kurator perlu persetujuan Admin sebelum membuat challenge, mengelolanya, atau mengumumkan pemenang.</text>
+    <text x="155" y="1151"><tspan font-weight="bold">Akses bersama.</tspan> Semua peran dapat melihat halaman publik. Member, Kurator, dan Admin dapat masuk dan keluar dari akun.</text>
+    <text x="155" y="1179"><tspan font-weight="bold">Member.</tspan> Satu karya milik sendiri per challenge aktif. Submisi dapat ditarik sebelum tenggat.</text>
+    <text x="155" y="1207"><tspan font-weight="bold">Pengajuan Curator.</tspan> Admin menyetujui atau menolak pengajuan Member sebelum akses pengelolaan challenge dibuka.</text>
+    <text x="155" y="1235"><tspan font-weight="bold">Setelah disetujui.</tspan> Akun yang sama memperoleh label Curator dan tetap bisa memakai fitur Member serta foto profilnya.</text>
   </g>
 </svg>

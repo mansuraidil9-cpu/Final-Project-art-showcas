@@ -5,7 +5,9 @@ import ArtworkFavorite from '../../artwork-favorite'
 import { getMemberArtworks, getMemberFavorites } from '../../../lib/artworks'
 import { getMemberChallengeSubmissions } from '@/lib/challenges'
 import { requireUser } from '../../../lib/session'
+import ActionForm from '../action-form'
 import ArtworkDelete from './artwork-delete'
+import { applyForCurator } from './curator-application'
 import styles from './member-artworks.module.css'
 
 export const metadata = { title: 'Dashboard Member | ALTERIA' }
@@ -15,6 +17,36 @@ const notices = new Map([
   ['diedit', 'Perubahan karya berhasil disimpan.'],
   ['dihapus', 'Karya berhasil dihapus.'],
 ])
+
+function CuratorApplication({ status }) {
+  const isRejected = status === 'rejected'
+
+  return (
+    <section className={styles.section} aria-labelledby="akses-curator">
+      <header className={styles.sectionHeader}>
+        <h2 id="akses-curator">Akses Curator</h2>
+      </header>
+      {status === null && (
+        <p className={styles.hint}>Ajukan akses untuk membuat challenge dan meninjau karya peserta.</p>
+      )}
+      {status === 'pending' && (
+        <p className={styles.notice} role="status">Pengajuanmu sedang ditinjau Admin.</p>
+      )}
+      {isRejected && (
+        <p className={styles.error}>Pengajuanmu ditolak. Kamu bisa mengajukan lagi.</p>
+      )}
+      {(status === null || isRejected) && (
+        <ActionForm
+          action={applyForCurator.bind(null, status)}
+          submitLabel={isRejected ? 'Ajukan ulang akses Curator' : 'Ajukan akses Curator'}
+        />
+      )}
+      {status === 'approved' && (
+        <Link className={styles.primaryButton} href="/dashboard/curator">Buka Dashboard Curator</Link>
+      )}
+    </section>
+  )
+}
 
 function ArtworkCards({ artworks, saved = false }) {
   return (
@@ -76,6 +108,7 @@ export default async function MemberDashboard({ searchParams }) {
       <div className={styles.formActions}>
         <Link href="/dashboard/member/profil">Edit profil dan akun</Link>
       </div>
+      <CuratorApplication status={user.curator_status} />
       <section className={styles.section} aria-labelledby="kelola-karya">
         <header className={styles.sectionHeader}>
           <h2 id="kelola-karya">Kelola Karya</h2>
