@@ -15,7 +15,7 @@ Dibangun dengan Next.js, React, JavaScript, Tailwind CSS, dan PostgreSQL. Sharp 
 | **Tamu** | Mencari, memfilter, dan mengurutkan karya di galeri. Melihat detail karya, profil kreator, komentar, dan hasil challenge. |
 | **Member** | Mengelola karya, profil, dan akun sendiri. Menyukai karya, berkomentar, menyimpan karya ke **Karya Favorit**, melaporkan karya unggahan Member lain, dan mengikuti challenge. |
 | **Kurator (Curator)** | Melihat status verifikasi akun. Setelah disetujui Admin, Kurator dapat mengatur jadwal dalam WITA, mengelola challenge miliknya, meninjau submisi, dan mengumumkan pemenang. |
-| **Admin** | Melihat statistik, menyetujui atau menolak pendaftaran Kurator, mengelola akun dan kategori, serta menolak laporan atau menghapus karya yang dilaporkan. |
+| **Admin** | Mengganti foto profil sendiri, melihat statistik, menyetujui atau menolak pendaftaran Kurator, mengelola akun dan kategori, serta menolak laporan atau menghapus karya yang dilaporkan. |
 
 Selama challenge aktif, Member dapat mengirim satu karya miliknya dan menarik submisi sebelum tenggat. Setelah challenge berakhir, Kurator dapat menetapkan maksimal tiga pemenang. Karya peserta dan hasilnya tampil di halaman **Challenge**.
 

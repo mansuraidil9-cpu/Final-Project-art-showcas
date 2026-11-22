@@ -32,8 +32,8 @@ export default function ShowcaseHeader({ user, currentPage }) {
           {accountPath ? (
             <Link className={styles.accountProfile} href={accountPath} aria-label={accountLabel} title={accountLabel}>
               {showRole && <span className={styles.accountRole}>{roleLabel}</span>}
-              {user.hasAvatar ? (
-                <Image className={styles.accountAvatar} src={`/media/profil/${user.id}`} alt="" width={44} height={44} unoptimized />
+              {user.avatarSrc ? (
+                <Image className={styles.accountAvatar} src={user.avatarSrc} alt="" width={44} height={44} unoptimized />
               ) : (
                 <span className={styles.accountAvatar} aria-hidden="true">{getInitials(user.display_name) || roleLabel[0]}</span>
               )}

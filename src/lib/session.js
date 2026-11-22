@@ -41,13 +41,20 @@ export async function getCurrentUser() {
 
   const { rows } = await pool.query(
     `SELECT u.id, u.display_name, u.email, u.role, u.curator_status,
-            (u.role = 'member' AND u.avatar_data IS NOT NULL) AS "hasAvatar"
+            (u.role IN ('member', 'admin') AND u.avatar_data IS NOT NULL) AS "hasAvatar",
+            CASE WHEN u.role = 'admin' THEN md5(u.avatar_data) END AS "adminAvatarVersion"
      FROM sessions AS s
      JOIN users AS u ON u.id = s.user_id
      WHERE s.token_hash = $1 AND s.expires_at > CURRENT_TIMESTAMP`,
     [hash],
   )
-  return rows[0] ?? null
+  const user = rows[0]
+  if (!user?.hasAvatar) return user ?? null
+
+  const avatarSrc = user.role === 'admin'
+    ? `/media/profil/admin?v=${user.adminAvatarVersion}`
+    : `/media/profil/${user.id}`
+  return { ...user, avatarSrc }
 }
 
 export function dashboardPath(user) {

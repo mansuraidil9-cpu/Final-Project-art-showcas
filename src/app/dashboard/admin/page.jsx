@@ -1,8 +1,10 @@
+import Link from 'next/link'
 import { getPlatformStats, getPlatformUsers } from '@/lib/administration'
 import { getArtworkCategories } from '@/lib/categories'
 import AccountPanel from '../../account-panel'
 import { pool } from '../../../lib/db.mjs'
 import { requireUser } from '../../../lib/session'
+import styles from '../member/member-artworks.module.css'
 import CuratorQueue from './curator-queue'
 import { CategoryManagement, PlatformStats, UserManagement } from './admin-sections'
 
@@ -36,6 +38,9 @@ export default async function AdminDashboard({ searchParams }) {
 
   return (
     <AccountPanel title="Dashboard Admin" description={`Halo, ${user.display_name}.`} wide>
+      <div className={styles.formActions}>
+        <Link href="/dashboard/admin/profil">Ubah foto profil</Link>
+      </div>
       <PlatformStats stats={stats} />
       <CuratorQueue registrations={registrations} />
       <UserManagement users={users} role={role} />
