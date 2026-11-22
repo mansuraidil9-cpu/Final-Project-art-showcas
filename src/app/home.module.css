@@ -878,3 +878,20 @@
 
   .entrancePage { scroll-behavior: smooth; }
 }
+
+/* Gerak Mona Lisa saat pengunjung beralih dari beranda ke ruang pameran. */
+@media (prefers-reduced-motion: no-preference) {
+  .home[data-alteria-home] .heroImage { perspective: 1300px; }
+  .home[data-alteria-home] .heroCopy {
+    opacity: calc(1 - var(--alteria-hero-exit, 0) * .87);
+    transform: translate3d(calc(var(--alteria-hero-exit, 0) * -4vw), calc(var(--alteria-hero-exit, 0) * -4vh), 0);
+  }
+  .home[data-alteria-home] .heroArtwork {
+    transform-origin: 60% 50%;
+    transform: translate3d(calc(var(--alteria-hero-exit, 0) * 7vw), calc(var(--alteria-hero-exit, 0) * 3vh), 0)
+      rotateY(calc(var(--alteria-hero-exit, 0) * -18deg))
+      rotateZ(calc(var(--alteria-hero-exit, 0) * 3deg))
+      scale(calc(1 - var(--alteria-hero-exit, 0) * .12));
+    opacity: calc(1 - var(--alteria-hero-exit, 0) * .55);
+  }
+}

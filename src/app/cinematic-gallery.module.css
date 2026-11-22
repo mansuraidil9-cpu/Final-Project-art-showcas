@@ -1,0 +1,144 @@
+/* Ruang pameran 3D yang dikendalikan scroll, tanpa WebGL tambahan. */
+.experience {
+  position: relative;
+  width: 100cqw;
+  height: 340svh;
+  margin-inline: calc((100% - 100cqw) / 2);
+  isolation: isolate;
+  background: #17261e;
+  color: #f8f1e6;
+}
+.stage {
+  position: sticky;
+  inset-block-start: 0;
+  height: 100svh;
+  min-height: 28rem;
+  overflow: hidden;
+  isolation: isolate;
+  background: radial-gradient(ellipse 65% 75% at 52% 41%, #485c46, #293d30 44%, #14221b 100%);
+}
+.light {
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 20%, #fff0b614 38%, transparent 61%);
+  transform: translateX(calc(6% - var(--gallery-travel, 0) * 14%));
+}
+.arch {
+  position: absolute;
+  inset: 13% 5% 14%;
+  border-inline: 1px solid #f6d8a536;
+  background: repeating-linear-gradient(90deg, transparent 0 19%, #cfb58c1c calc(19% + 1px), transparent calc(19% + 2px));
+  pointer-events: none;
+  opacity: .75;
+  mask-image: linear-gradient(transparent, #000 16% 80%, transparent);
+}
+.floor {
+  position: absolute;
+  inset: auto -25% -26%;
+  height: 52%;
+  transform: perspective(420px) rotateX(71deg);
+  background: repeating-linear-gradient(90deg, transparent 0 12%, #d3b77d22 calc(12% + 1px), transparent calc(12% + 2px));
+  pointer-events: none;
+}
+.heading {
+  position: absolute;
+  z-index: 12;
+  top: clamp(7rem, 17svh, 10.5rem);
+  left: clamp(1.2rem, 6vw, 6rem);
+  max-width: 30rem;
+  pointer-events: none;
+}
+.eyebrow {
+  color: #e3c99e;
+  font-family: Arial, sans-serif;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .17em;
+}
+.headingTitle {
+  margin-top: .75rem;
+  font: 400 clamp(2.2rem, 4.1vw, 4rem)/1 Georgia, serif;
+  letter-spacing: -.045em;
+}
+.headingTitle em { color: #e8c894; font-weight: 400; }
+.perspective {
+  position: absolute;
+  inset: 0;
+  perspective: 1350px;
+  perspective-origin: 50% 46%;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+.frame {
+  position: absolute;
+  top: 47%;
+  left: 58%;
+  width: clamp(17rem, 40vw, 39rem);
+  aspect-ratio: 1.36;
+  border: clamp(9px, 1.3vw, 17px) ridge #a47745;
+  outline: 2px solid #e1bd83;
+  outline-offset: -6px;
+  background: #4b331a;
+  box-shadow: 0 18px 65px #040a07b8, 0 0 0 1px #c4a06d;
+  transform: translate3d(-50%, -50%, 90px);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  opacity: 0;
+}
+.frame[data-first="true"] { opacity: 1; }
+.canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 4px solid #2a2018;
+  background: #d9c8a4;
+}
+.canvas img { object-fit: cover; }
+.frameLabel {
+  position: absolute;
+  right: .8rem;
+  bottom: .8rem;
+  padding: .3rem .5rem;
+  background: #181814bb;
+  font: .6rem Georgia, serif;
+  letter-spacing: .1em;
+}
+.bottom {
+  position: absolute;
+  z-index: 13;
+  inset: auto clamp(1.5rem, 6vw, 6rem) clamp(2rem, 6vh, 4rem);
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+.caption { max-width: 25rem; min-height: 9rem; }
+.caption h2 { margin: .4rem 0; font: 400 clamp(2rem, 3.8vw, 3.7rem)/1 Georgia, serif; }
+.caption p { margin: 0 0 .9rem; font-size: .88rem; color: #e0d8c9; }
+.link { display: inline-flex; gap: .8rem; padding-block: .4rem; color: #f4d8a8; border-bottom: 1px solid #e3c99e; font-size: .82rem; }
+.link:hover { color: white; }
+.progress { text-align: right; font: .64rem Arial, sans-serif; letter-spacing: .1em; color: #d9ceb6; }
+.ticks { display: flex; justify-content: flex-end; gap: .4rem; }
+.ticks span { width: 2.4rem; height: 2px; background: #e5d8b43d; }
+.ticks span[data-on="true"] { background: #f0d19c; }
+@media (max-width: 760px) {
+  .experience { height: 300svh; }
+  .stage { min-height: 0; }
+  .heading { top: clamp(7rem, 16svh, 9rem); left: 5%; }
+  .headingTitle { font-size: clamp(2rem, 8vw, 3rem); }
+  .frame { top: 49%; left: 50%; width: 80vw; aspect-ratio: 1.2; border-width: 9px; }
+  .perspective { perspective: 850px; }
+  .bottom { left: 5%; right: 5%; bottom: 3svh; }
+  .caption { max-width: 100%; min-height: 8.2rem; }
+  .caption h2 { font-size: 2rem; }
+  .caption p { font-size: .78rem; }
+  .progress { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .experience { height: auto; }
+  .stage { position: relative; height: 85svh; }
+  .frame:not([data-first="true"]) { display: none; }
+}

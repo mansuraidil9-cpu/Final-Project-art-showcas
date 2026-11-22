@@ -5,6 +5,7 @@ import { getActiveChallenges } from '../lib/challenges'
 import { getCurrentUser } from '../lib/session'
 import GalleryExplorer from './gallery-explorer'
 import HeroMotion from './hero-motion'
+import CinematicGallery from './cinematic-gallery'
 import ScrollExperience from './scroll-experience'
 import ShowcaseFooter from './showcase-footer'
 import ShowcaseHeader from './showcase-header'
@@ -73,6 +74,8 @@ export default async function Home() {
               </div>
             </div>
           </HeroMotion>
+
+          <CinematicGallery />
 
           <GalleryExplorer artworks={artworks} challenges={challenges} canLike={canLike} />
         </main>
