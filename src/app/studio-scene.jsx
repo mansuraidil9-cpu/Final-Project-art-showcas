@@ -46,7 +46,8 @@ export default function StudioScene({ images = [], heroImage, motionRef, onSelec
     let ribbon
     let canvas
     let border
-    let paintDrops = []    const ownedGeometries = new Set()
+    let paintDrops = []
+    const ownedGeometries = new Set()
     const ownedMaterials = new Set()
     const ownedTextures = new Set()
     const raycaster = new THREE.Raycaster()
