@@ -106,7 +106,8 @@ export default async function MemberDashboard({ searchParams }) {
   return (
     <AccountPanel title="Dashboard Member" description={`Halo, ${user.display_name}.`} wide>
       <div className={styles.formActions}>
-        <Link href="/dashboard/member/profil">Edit profil dan akun</Link>
+        <Link href="/dashboard/member/profil">Edit profil</Link>
+        <Link href="/dashboard/member/akun">Pengaturan akun</Link>
       </div>
       <CuratorApplication status={user.curator_status} />
       <section className={styles.section} aria-labelledby="kelola-karya">

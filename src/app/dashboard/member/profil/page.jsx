@@ -2,22 +2,21 @@ import Image from 'next/image'
 import Link from 'next/link'
 import AccountPanel from '@/app/account-panel'
 import ActionForm from '@/app/dashboard/action-form'
-import { isValidEmail, newPasswordPattern, normalizeEmail } from '@/lib/account-validation.mjs'
 import { getPublicCreator } from '@/lib/artworks'
 import { requireUser } from '@/lib/session'
 import styles from '../member-artworks.module.css'
-import { saveAccount, saveProfile } from './profile-actions'
+import { saveProfile } from './profile-actions'
 
-export default async function MemberProfilePage({ searchParams }) {
+export default async function MemberProfilePage() {
   const user = await requireUser('member')
-  const [profile, search] = await Promise.all([getPublicCreator(user.id), searchParams])
-  const emailType = isValidEmail(normalizeEmail(user.email)) ? 'email' : 'text'
+  const profile = await getPublicCreator(user.id)
 
   return (
-    <AccountPanel title="Profil dan Akun" wide>
+    <AccountPanel title="Edit Profil" wide>
       <div className={styles.formActions}>
         <Link href="/dashboard/member">Kembali ke Dashboard Member</Link>
         <Link href={`/kreator/${user.id}`}>Lihat profil publik</Link>
+        <Link href="/dashboard/member/akun">Pengaturan akun</Link>
       </div>
       <section className={styles.section} aria-labelledby="profil-publik">
         <header className={styles.sectionHeader}><h2 id="profil-publik">Profil Publik</h2></header>
@@ -44,29 +43,6 @@ export default async function MemberProfilePage({ searchParams }) {
             <label htmlFor="profile-photo">Foto profil</label>
             <input id="profile-photo" name="avatar" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="avatar-hint" />
             <p className={styles.hint} id="avatar-hint">JPEG, PNG, atau WebP hingga 5 MB.</p>
-          </div>
-        </ActionForm>
-      </section>
-      <section className={styles.section} aria-labelledby="akun-privat">
-        <header className={styles.sectionHeader}><h2 id="akun-privat">Akun Privat</h2></header>
-        {search?.hasil === 'akun' && <p className={styles.notice} role="status">Email akun berhasil diperbarui.</p>}
-        <ActionForm action={saveAccount} submitLabel="Simpan akun">
-          <div className={styles.field}>
-            <label htmlFor="account-email">Email</label>
-            <input id="account-email" type={emailType} inputMode="email" name="email" defaultValue={user.email} maxLength={254} autoComplete="email" required />
-          </div>
-          <div className={styles.field}>
-            <label htmlFor="account-current">Kata sandi saat ini</label>
-            <input id="account-current" type="password" name="currentPassword" maxLength={128} autoComplete="current-password" required />
-          </div>
-          <div className={styles.field}>
-            <label htmlFor="account-new">Kata sandi baru</label>
-            <input id="account-new" type="password" name="newPassword" minLength={8} maxLength={128} pattern={newPasswordPattern} autoComplete="new-password" aria-describedby="account-password-hint" />
-            <p className={styles.hint} id="account-password-hint">8 sampai 128 karakter tanpa spasi atau karakter tak terlihat. Kosongkan jika hanya ingin mengubah email.</p>
-          </div>
-          <div className={styles.field}>
-            <label htmlFor="account-confirm">Konfirmasi kata sandi baru</label>
-            <input id="account-confirm" type="password" name="confirmation" maxLength={128} pattern={newPasswordPattern} autoComplete="new-password" />
           </div>
         </ActionForm>
       </section>
