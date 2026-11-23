@@ -15,14 +15,16 @@ const mainArtwork = {
   title: 'Mona Lisa',
   artist: 'Leonardo da Vinci',
   category: 'Lukisan',
-  imageSrc: '/alteria/beranda-mona-lisa-oker.webp',
+  // Reproduksi bersih, tanpa bingkai/dekorasi bawaan di dalam foto.
+  // Sumber: Wikimedia Commons (public domain), resolusi 960 × 1435.
+  imageSrc: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Leonardo_da_Vinci_-_Mona_Lisa.jpg/960px-Leonardo_da_Vinci_-_Mona_Lisa.jpg',
   isUploaded: false,
 }
 
 export default function StudioExperience({ artworks = [], challenges = [], canLike = false }) {
   const rootRef = useRef(null)
   const chaptersRef = useRef([])
-  const selectedRef = useRef({ locked: false, lastScroll: 0 })
+  const selectedRef = useRef({ locked: false })
   const motionRef = useRef({ progress: 0, pointerX: 0, pointerY: 0, manual: false, orbitX: 0, orbitY: 0, galleryIndex: 0, dragOffset: 0 })
   const [chapter, setChapter] = useState(0)
   const [galleryIndex, setGalleryIndex] = useState(0)
@@ -35,7 +37,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
 
   const works = artworks.slice(0, 3)
   const featured = works[galleryIndex] || null
-    const favorites = artworks.filter(artwork => artwork.favorited)
+  const favorites = artworks.filter(artwork => artwork.favorited)
   const activeChallenge = challenges[0] || null
   const sceneImages = works.map(artwork => artwork.imageSrc)
   const onSceneReady = useCallback(() => setReady(true), [])
@@ -50,17 +52,38 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
       const rect = root.getBoundingClientRect()
       const distance = Math.max(root.offsetHeight, 1)
       const p = clamp(-rect.top / distance, 0, 1)
-      root.dataset.studioVisible = rect.bottom > 0 && rect.top < innerHeight ? 'true' : 'false'
+      // Hilangkan navigasi studio sesaat sebelum galeri reguler menempati
+      // bagian tengah viewport. Ketika scroll naik, UI 3D aktif kembali.
+      const regularGallery = root.nextElementSibling
+      const regularGalleryEntering = regularGallery?.id === 'galeri'
+        && regularGallery.getBoundingClientRect().top <= innerHeight * .62
+      const studioVisible = rect.bottom > 0 && rect.top < innerHeight
+        && !regularGalleryEntering
+      root.dataset.studioVisible = studioVisible ? 'true' : 'false'
       motionRef.current.progress = p
       root.style.setProperty('--studio-progress', String(p))
-      const next = p < .24 ? 0 : p < .54 ? 1 : p < .82 ? 2 : 3
+
+      // Perubahan bab berdasarkan posisi section, bukan ambang persentase
+      // terhadap total tinggi. Section 04 kini selalu aktif saat memasuki
+      // area fokus layar, terlepas dari variasi tinggi viewport.
+      const focusLine = innerHeight * .52
+      let next = 0
+      for (let i = 0; i < chaptersRef.current.length; i++) {
+        const section = chaptersRef.current[i]
+        if (section && section.getBoundingClientRect().top <= focusLine) next = i
+      }
       root.dataset.studioChapter = String(next)
       setChapter(previous => previous === next ? previous : next)
-      const index = clamp(Math.floor((p - .54) / .28 * Math.max(works.length, 1)), 0, Math.max(works.length - 1, 0))
-      if (Math.abs(p - selectedRef.current.lastScroll) > .004) {
-        selectedRef.current.locked = false
-      }
-      selectedRef.current.lastScroll = p
+
+      // Pilihan otomatis dihitung dari section Galeri itu sendiri.
+      const galleryChapter = chaptersRef.current[2]
+      const galleryRect = galleryChapter?.getBoundingClientRect()
+      const galleryProgress = galleryRect
+        ? clamp((focusLine - galleryRect.top) / Math.max(galleryRect.height,1),0,.99999)
+        : 0
+      const index = clamp(Math.floor(galleryProgress * Math.max(works.length,1)),
+        0, Math.max(works.length-1,0))
+      if (next !== 2) selectedRef.current.locked = false
       if (!selectedRef.current.locked) {
         motionRef.current.galleryIndex = index
         setGalleryIndex(previous => previous === index ? previous : index)
@@ -155,7 +178,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
               src={mainArtwork.imageSrc}
               alt=""
               fill
-              unoptimized={false}
+              unoptimized
               sizes="(max-width: 760px) 70vw, 36vw"
               priority
             />
@@ -286,7 +309,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
         <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setDetail(null) }}>
           <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="studio-detail-title">
             <button type="button" className={styles.close} aria-label="Tutup detail karya" onClick={() => setDetail(null)}>×</button>
-            <div className={styles.modalArt}><Image src={detail.imageSrc} alt={detail.title} fill unoptimized={Boolean(detail.isUploaded)} sizes="(max-width: 720px) 90vw, 38vw" /></div>
+            <div className={styles.modalArt}><Image src={detail.imageSrc} alt={detail.title} fill unoptimized={Boolean(detail.isUploaded || !detail.id)} sizes="(max-width: 720px) 90vw, 38vw" /></div>
             <div className={styles.modalCopy}>
               <span className={styles.eyebrow}>DETAIL KARYA</span>
               <h2 id="studio-detail-title">{detail.title}</h2>

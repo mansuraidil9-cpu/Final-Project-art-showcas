@@ -35,7 +35,7 @@
   left:69%;
   top:50%;
   width:clamp(220px,28vw,400px);
-  aspect-ratio:.82;
+  aspect-ratio:.672;
   transform:translate(-50%,-50%) rotate(-7deg);
   border:clamp(10px,1.6vw,19px) ridge #80512B;
   outline:2px solid #C69A5C;
@@ -110,7 +110,18 @@
 .layerTags { display:flex; flex-wrap:wrap; gap:.45rem; padding-top:1rem; margin-top:1.25rem; border-top:1px solid #B88A4433; }
 .layerTags span { padding:.45rem .7rem; background:#F1E5D6; border:1px solid #B88A4433; border-radius:999px; color:#313D2F; font-size:.72rem; }
 .dimensionCard .detailNote { margin-top:1rem; font-style:italic; font-size:.77rem; }
-.galleryCard { width:min(37%,460px); padding:clamp(1.35rem,2.8vw,2.35rem); margin-left:max(0px,calc((100vw - 1480px)/2)); position:sticky; top:24vh; }
+.galleryCard {
+  width:min(37%,460px);
+  padding:clamp(1.25rem,2.5vw,2.05rem);
+  margin-left:max(0px,calc((100vw - 1480px)/2));
+  position:sticky;
+  top:clamp(6.5rem,12vh,8rem);
+  max-height:calc(100svh - 14rem);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:#B88A4480 transparent;
+}
 .cardTop { display:flex; justify-content:space-between; align-items:center; gap:.7rem; }
 .counter { font:600 1.1rem var(--font-studio-serif),Georgia,serif; }
 .switcher { display:flex; gap:.4rem; margin:1rem 0 1.6rem; }
@@ -133,6 +144,7 @@
   opacity:0; pointer-events:none; transition:opacity .3s;
 }
 .experience[data-studio-visible="true"] .rail { opacity:1; pointer-events:auto; }
+.experience[data-studio-visible="false"] .rail { opacity:0; pointer-events:none; }
 .rail button { display:flex; align-items:center; gap:.7rem; font-size:.68rem; font-weight:600; color:#5B5549; }
 .rail button i { flex:none; width:10px; height:10px; border:1px solid #313D2F88; border-radius:50%; background:#F7EFE5; transition:background .3s,transform .3s; }
 .rail button[aria-current="step"] i { background:#B88A44; transform:scale(1.3); }
@@ -144,6 +156,7 @@
   opacity:0; pointer-events:none; transition:opacity .3s;
 }
 .experience[data-studio-visible="true"] .utility { opacity:1; pointer-events:none; }
+.experience[data-studio-visible="false"] .utility { opacity:0; pointer-events:none; }
 .chapterPill,.utilityButtons { display:flex; gap:.55rem; align-items:center; }
 .chapterPill strong { display:grid; place-items:center; width:38px; height:38px; border-radius:50%; background:#263024; color:#FBF8F3; font:600 1.1rem var(--font-studio-serif),Georgia,serif; }
 .chapterPill span,.utilityButtons button {
@@ -187,8 +200,13 @@
   .hero .actions { gap:.65rem; margin-top:1.1rem; }
   .dimension { align-items:end; justify-content:center; padding-bottom:8rem; }
   .dimensionCard { width:min(100%,430px); margin:0; padding:1.3rem; }
-  .gallery { align-items:end; justify-content:center; padding-bottom:7rem; }
-  .galleryCard { position:relative; top:auto; width:min(100%,430px); margin:0; padding:1.3rem; }
+  .gallery { align-items:end; justify-content:center; padding-bottom:clamp(7.75rem,15svh,11rem); }
+  .galleryCard {
+    position:relative; top:auto; width:min(100%,430px);
+    max-height:calc(100svh - 12rem);
+    margin:0 0 2rem; padding:1.3rem;
+    overflow-y:auto;
+  }
   .galleryCard h2 { font-size:2.1rem; }
   .finaleCard { padding:2rem 1.2rem; }
   .finaleCard h2 { font-size:2.65rem; }
@@ -256,8 +274,10 @@
 .experience[data-studio-chapter="2"] .fallbackFrame { opacity:0; visibility:hidden; }
 .fallbackGalleryFrame {
   position:absolute; top:47%; left:67%; width:clamp(180px,25vw,380px);
-  aspect-ratio:4/5; background:#EAD9C5;
-  border:12px ridge #8E5E39;
+  aspect-ratio:1.28; background:#EAD9C5;
+  border:12px solid #815333;
+  outline:2px solid #C5A06E;
+  outline-offset:-6px;
   box-shadow:0 18px 45px rgb(38 48 36 / 28%);
   transition:transform .6s cubic-bezier(.22,1,.36,1);
 }

@@ -939,5 +939,22 @@
   font:600 .67rem var(--font-studio-sans),sans-serif;
 }
 
-/* Galeri biasa punya lapisan tersendiri agar panggung 3D tidak muncul di belakang kartu. */
-.gallery { position:relative; z-index:3; background:#F7EFE5; }
+/* Galeri reguler menjadi satu bidang penuh, tidak terpotong oleh .shell.
+   Layer ini menutup panggung 3D ketika pengunjung melewati studio. */
+.gallery {
+  position:relative;
+  z-index:3;
+  isolation:isolate;
+  background:transparent;
+}
+.gallery::before {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset-block:0;
+  inset-inline-start:50%;
+  width:100vw;
+  transform:translateX(-50%);
+  pointer-events:none;
+  background:linear-gradient(180deg, #F7EFE5 0%, #F7EFE5 100%);
+}
