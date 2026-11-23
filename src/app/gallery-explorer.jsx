@@ -13,6 +13,25 @@ import homeStyles from './home.module.css'
 
 const categoriesList = ['Semua', 'Lukisan', 'Seni cetak', 'Keramik']
 
+// SVG memastikan ikon hati dan bookmark tampil konsisten di semua perangkat.
+function HeartIcon({ filled = false }) {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  )
+}
+
+function BookmarkIcon({ filled = false }) {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
+  )
+}
+
 function GalleryReactions({ artwork, canLike, state, busy, onReact }) {
   const liked = state?.liked ?? artwork.liked
   const favorited = state?.favorited ?? artwork.favorited
@@ -23,21 +42,23 @@ function GalleryReactions({ artwork, canLike, state, busy, onReact }) {
       {canLike && !artwork.isOwner ? (
         <button type="button" className={styles.likeButton} aria-pressed={Boolean(liked)}
           aria-label={(liked ? 'Batalkan apresiasi' : 'Apresiasi') + ' karya ' + artwork.title}
+          title={liked ? 'Batalkan apresiasi' : 'Apresiasi karya'}
           disabled={disabled} onClick={() => onReact(artwork, 'like', !liked)}>
-          <span aria-hidden="true">{liked ? '♥' : '♡'}</span> Apresiasi
+          <HeartIcon filled={Boolean(liked)} />
           <span className={styles.likeCount}>{Number(count).toLocaleString('id-ID')}</span>
         </button>
       ) : (
         <span className={styles.likeStatic} aria-label={count + ' apresiasi'}>
-          <span aria-hidden="true">♡</span> {Number(count).toLocaleString('id-ID')}
+          <HeartIcon />
+          <span className={styles.likeCount}>{Number(count).toLocaleString('id-ID')}</span>
         </span>
       )}
       {canLike && !artwork.isOwner && (
         <button type="button" className={styles.saveButton} aria-pressed={Boolean(favorited)}
           aria-label={(favorited ? 'Hapus dari Favorit' : 'Simpan Favorit') + ' karya ' + artwork.title}
+          title={favorited ? 'Hapus dari Karya Favorit' : 'Simpan ke Karya Favorit'}
           disabled={disabled} onClick={() => onReact(artwork, 'favorite', !favorited)}>
-          <span aria-hidden="true">{favorited ? '▮' : '▯'}</span>
-          {favorited ? 'Tersimpan' : 'Simpan Favorit'}
+          <BookmarkIcon filled={Boolean(favorited)} />
         </button>
       )}
     </div>

@@ -169,6 +169,15 @@
 .pendingBadge {background:#f0e9d9;color:#6d5938;border-color:rgba(166,124,70,.32);}
 .profileBio {max-width:48ch;color:var(--member-muted);font-size:.8rem;line-height:1.7;margin-top:.55rem;}
 .inlineActions {display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-top:1.25rem;}
+/* Ikon hanya pada Edit Profil & Pengaturan akun di header Member. */
+.memberIntro .inlineActions :is(.secondaryButton,.subtleButton) {gap:.55rem;}
+.memberIntro .inlineActions :is(.secondaryButton,.subtleButton) svg {
+  display:block;
+  width:1.05rem;
+  height:1.05rem;
+  flex:none;
+}
+
 .primaryButton,.secondaryButton,.subtleButton,.primarySmall,.secondarySmall {
   display:inline-flex;
   align-items:center;

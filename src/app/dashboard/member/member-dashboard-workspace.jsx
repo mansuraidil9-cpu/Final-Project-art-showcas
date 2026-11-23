@@ -10,6 +10,27 @@ import { saveProfile } from './profil/profile-actions'
 import authStyles from '../../auth.module.css'
 import styles from './member-dashboard.module.css'
 
+// Ikon vektor, tetap tajam di desktop maupun HP.
+function EditProfileIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  )
+}
+
+function AccountSettingsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+      stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9.8 3h4.4l.5 2.4c.5.2 1 .5 1.4.8l2.3-.8 2.2 3.8-1.9 1.6c.1.7.1 1.2 0 1.8l1.9 1.6-2.2 3.8-2.3-.8a8 8 0 0 1-1.4.8l-.5 2.4H9.8l-.5-2.4a7.4 7.4 0 0 1-1.4-.8l-2.3.8-2.2-3.8 1.9-1.6a8 8 0 0 1 0-1.8L3.4 9.8 5.6 6l2.3.8c.4-.3.9-.6 1.4-.8L9.8 3Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  )
+}
+
 function initialsOf(name) {
   return String(name || 'Member').trim().split(/\s+/).slice(0, 2)
     .map(word => Array.from(word)[0] || '').join('').toUpperCase() || 'M'
@@ -440,8 +461,12 @@ export default function MemberDashboardWorkspace({
                 </div>
                 {profile.bio && <p className={styles.profileBio}>{profile.bio}</p>}
                 <div className={styles.inlineActions}>
-                  <button type="button" className={styles.secondaryButton} onClick={() => setModal('profile')}>Edit profil</button>
-                  <Link href="/dashboard/member/akun" className={styles.subtleButton}>Pengaturan akun</Link>
+                  <button type="button" className={styles.secondaryButton} onClick={() => setModal('profile')}>
+                    <EditProfileIcon /> Edit profil
+                  </button>
+                  <Link href="/dashboard/member/akun" className={styles.subtleButton}>
+                    <AccountSettingsIcon /> Pengaturan akun
+                  </Link>
                 </div>
               </div>
             </div>
