@@ -120,6 +120,12 @@ export default function GalleryExplorer({ artworks, challenges, canLike, gallery
                     Komentar ({artwork.commentCount.toLocaleString('id-ID')})
                     <span className="sr-only"> untuk {artwork.title}</span>
                   </Link>
+                  {canLike && artwork.creatorId !== null && !artwork.isOwner && (
+                    <Link className={styles.artworkReport} href={`/karya/${artwork.id}#laporkan-karya`}>
+                      Laporkan
+                      <span className="sr-only"> karya {artwork.title}</span>
+                    </Link>
+                  )}
                 </div>
               </article>
             ))}

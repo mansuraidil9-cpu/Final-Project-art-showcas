@@ -112,7 +112,7 @@ export default async function MemberDashboard({ searchParams }) {
       <CuratorApplication status={user.curator_status} />
       <section className={styles.section} aria-labelledby="kelola-karya">
         <header className={styles.sectionHeader}>
-          <h2 id="kelola-karya">Kelola Karya</h2>
+          <h2 id="kelola-karya" className="scroll-mt-28">Kelola Karya</h2>
           <Link className={styles.primaryButton} href="/dashboard/member/karya/baru">
             Unggah karya
           </Link>

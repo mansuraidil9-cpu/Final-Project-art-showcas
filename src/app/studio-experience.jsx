@@ -253,6 +253,11 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
               <div className={styles.cardActions}>
                 <button type="button" className={styles.primary} onClick={() => setDetail(featured)}>Lihat Detail</button>
                 <Link className={styles.secondary} href={`/karya/${featured.id}`}>Buka Halaman Karya</Link>
+                {canLike && featured.creatorId !== null && !featured.isOwner && (
+                  <Link className={styles.secondary} href={`/karya/${featured.id}#laporkan-karya`}>
+                    Laporkan karya
+                  </Link>
+                )}
               </div>
             </>
           ) : (
@@ -307,6 +312,9 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
               <dl><dt>Medium / kategori</dt><dd>{detail.category}</dd><dt>Informasi lainnya</dt><dd>{detail.id ? 'Lihat informasi pada halaman detail karya' : 'Ilustrasi pada beranda'}</dd></dl>
               {detail.id && <Link href={`/karya/${detail.id}`} className={styles.primary}>Buka detail lengkap ↗</Link>}
               {detail.id && canLike && !detail.isOwner && <ArtworkFavorite artwork={detail} />}
+              {detail.id && canLike && detail.creatorId !== null && !detail.isOwner && (
+                <Link href={`/karya/${detail.id}#laporkan-karya`} className={styles.secondary}>Laporkan karya</Link>
+              )}
             </div>
           </div>
         </div>

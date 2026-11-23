@@ -11,6 +11,7 @@ import ArtworkLike from '../../artwork-like'
 import homeStyles from '../../home.module.css'
 import ShowcaseDetail from '../../showcase-detail'
 import ArtworkComments from './artwork-comments'
+import ArtworkReportDetails from './artwork-report-details'
 import { reportArtwork } from './report-action'
 import styles from './artwork.module.css'
 
@@ -80,9 +81,9 @@ export default async function DetailKarya({ params }) {
             </div>
           </div>
           {canReport && (reported ? (
-            <p className={fieldStyles.hint + ' mt-4'} role="status">Karya ini sudah kamu laporkan.</p>
+            <p id="laporkan-karya" className={fieldStyles.hint + ' mt-4 scroll-mt-28'} role="status">Karya ini sudah kamu laporkan.</p>
           ) : (
-            <details className="mt-4">
+            <ArtworkReportDetails>
               <summary className={fieldStyles.deleteLink}>Laporkan karya</summary>
               <ActionForm action={reportArtwork.bind(null, artwork.id)} submitLabel="Kirim laporan">
                 <label className={fieldStyles.field}>
@@ -90,7 +91,7 @@ export default async function DetailKarya({ params }) {
                   <textarea name="reason" rows={3} maxLength={500} required />
                 </label>
               </ActionForm>
-            </details>
+            </ArtworkReportDetails>
           ))}
         </div>
       </article>

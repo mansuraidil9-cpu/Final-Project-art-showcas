@@ -628,7 +628,8 @@
 }
 
 .artworkUploader,
-.artworkComments {
+.artworkComments,
+.artworkReport {
   color: var(--muted);
   font-size: .8rem;
 }
@@ -639,12 +640,14 @@
 }
 
 .artworkUploader a,
-.artworkComments {
+.artworkComments,
+.artworkReport {
   text-decoration: underline;
   text-underline-offset: .2em;
 }
 
-.artworkComments {
+.artworkComments,
+.artworkReport {
   display: inline-flex;
   align-items: center;
   min-block-size: 2.75rem;
@@ -741,15 +744,21 @@
   .navigation {
     grid-column: 1 / -1;
     grid-row: 2;
-    flex-wrap: wrap;
-    gap: clamp(.8rem, 5vw, 1.5rem);
-    row-gap: .15rem;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .3rem;
+    font-size: clamp(.65rem, 2.85vw, .81rem);
   }
 
   .navigation a {
-    display: inline-flex;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
+    text-align: center;
+    gap: .15rem;
     min-height: 2.75rem;
+    line-height: 1.2;
   }
 
   .challengeCard {

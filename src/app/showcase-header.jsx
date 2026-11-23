@@ -25,7 +25,12 @@ export default function ShowcaseHeader({ user, currentPage, favoritesCount }) {
         <nav className={styles.navigation} aria-label="Navigasi utama">
           <Link href="/galeri" aria-current={currentPage === 'galeri' ? 'page' : undefined}>Galeri</Link>
           <Link href="/challenge" aria-current={currentPage === 'challenge' ? 'page' : undefined}>Challenge</Link>
-          {user?.role === 'member' && <Link href="/dashboard/member#karya-favorit">Karya Favorit {Number.isInteger(favoritesCount) && <span className={styles.favoriteBadge}>{favoritesCount}</span>}</Link>}
+          {user?.role === 'member' && (
+            <>
+              <Link href="/dashboard/member#kelola-karya">Karya Saya</Link>
+              <Link href="/dashboard/member#karya-favorit">Karya Favorit {Number.isInteger(favoritesCount) && <span className={styles.favoriteBadge}>{favoritesCount}</span>}</Link>
+            </>
+          )}
         </nav>
         <div className={styles.account}>
           {user?.role === 'member' && hasCuratorAccess(user) && (
