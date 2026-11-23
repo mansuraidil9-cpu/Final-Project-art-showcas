@@ -34,6 +34,30 @@
   gap:clamp(.8rem,2vw,1.35rem);
   min-width:0;
 }
+/* Logout langsung terlihat di header. Komponen dan action signOut tetap asli. */
+.headerLogout {display:flex;align-items:center;flex:none;}
+.headerLogout form {
+  display:flex;
+  margin:0;
+  padding:0;
+  border:0;
+}
+.headerLogout button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:2.75rem;
+  padding:.65rem .9rem;
+  border:1px solid var(--member-hairline);
+  border-radius:2px;
+  background:var(--member-olive);
+  color:var(--member-ivory);
+  font-size:.79rem;
+  font-weight:600;
+  white-space:nowrap;
+}
+.headerLogout button:not(:disabled):hover {background:#1e241b;}
+.headerLogout button:disabled {opacity:.55;cursor:wait;}
 .profileMenu {position:relative;}
 .avatarTrigger {
   display:block;
@@ -533,6 +557,9 @@
   .curatorCard {align-items:flex-start;flex-direction:column;}
 }
 @media(max-width:580px){
+  .memberShell > header {flex-wrap:wrap;padding-block:.75rem;}
+  .topActions {gap:.5rem;flex-wrap:wrap;}
+  .headerLogout button {min-height:2.5rem;padding:.55rem .75rem;}
   .dashboardMain {gap:2.5rem;padding-top:2rem;}
   .memberIdentity {gap:.9rem;align-items:flex-start;}
   .avatarLarge {width:78px;height:78px;padding:4px;}

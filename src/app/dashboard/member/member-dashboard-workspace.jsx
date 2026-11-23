@@ -420,11 +420,11 @@ export default function MemberDashboardWorkspace({
                     <Link href="/dashboard/member/akun">Pengaturan akun</Link>
                     <Link href={'/kreator/' + user.id}>Lihat profil publik</Link>
                   </div>
-                  {logout}
                 </div>
               )}
             </div>
             {homeLink}
+            <div className={styles.headerLogout}>{logout}</div>
           </div>
         </header>
 
