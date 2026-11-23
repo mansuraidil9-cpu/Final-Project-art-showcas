@@ -238,27 +238,41 @@
   border:1px solid var(--museum-rule);
   background:var(--museum-ivory);
 }
-.gallerySection .frameImage img {object-fit:contain;}
-.frameHint {
-  position:absolute;
-  bottom:clamp(1rem,2vw,1.65rem);
-  left:50%;
-  transform:translate(-50%,5px);
-  width:max-content;
-  max-width:calc(100% - 2rem);
-  padding:.52rem .8rem;
-  background:rgba(251,248,243,.96);
-  border:1px solid var(--museum-rule);
+.gallerySection .frameImage img {
+  /* Foto memenuhi kotak sehingga tidak muncul pita kosong atas-bawah. */
+  object-fit:cover;
+  object-position:center;
+}
+.artworkActionRow {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:.6rem;
+  margin-top:auto;
+  padding-top:.85rem;
+  border-top:1px solid var(--museum-rule);
+}
+.detailButton {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.4rem;
+  min-height:2.35rem;
+  padding:.5rem .85rem;
+  border:1px solid var(--museum-ink);
+  border-radius:2px;
+  background:var(--museum-ivory);
   color:var(--museum-ink);
   font-size:.74rem;
   font-weight:600;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .2s,transform .2s;
+  white-space:nowrap;
 }
-.frameButton:is(:hover,:focus-visible) .frameHint {
-  opacity:1;
-  transform:translate(-50%,0);
+.detailButton:hover {background:#e9ecdf;}
+.artworkActionRow .reactions {
+  margin:0;
+  padding:0;
+  border:0;
 }
 .artworkInfo {
   display:flex;
@@ -611,5 +625,5 @@
   .lightboxCopy .reactions > * {width:auto;}
 }
 @media(prefers-reduced-motion:reduce) {
-  .artworkCard,.frameHint {transition:none;}
+  .artworkCard {transition:none;}
 }

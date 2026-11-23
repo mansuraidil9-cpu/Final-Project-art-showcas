@@ -76,7 +76,6 @@ function MuseumArtworkCard({ artwork, canLike, state, busy, onReact, onOpen, Hea
               sizes="(max-width: 580px) 90vw, (max-width: 960px) 45vw, 28vw" />
           </span>
         </span>
-        <span className={styles.frameHint}>Lihat Detail ↗</span>
       </button>
       <div className={styles.artworkInfo}>
         <div className={styles.metaLine}>
@@ -89,8 +88,14 @@ function MuseumArtworkCard({ artwork, canLike, state, busy, onReact, onOpen, Hea
         <div className={styles.byline}>
           <ArtworkByline artwork={artwork} />
         </div>
-        <GalleryReactions artwork={artwork} canLike={canLike} state={state}
-          busy={busy} onReact={onReact} />
+        <div className={styles.artworkActionRow}>
+          <button type="button" className={styles.detailButton}
+            onClick={() => onOpen(artwork.id)} aria-label={'Lihat detail ' + artwork.title}>
+            Lihat Detail <span aria-hidden="true">↗</span>
+          </button>
+          <GalleryReactions artwork={artwork} canLike={canLike} state={state}
+            busy={busy} onReact={onReact} />
+        </div>
         <div className={styles.cardFoot}>
           <Link href={'/karya/' + artwork.id + '#komentar'}>
             Komentar ({Number(artwork.commentCount || 0).toLocaleString('id-ID')})

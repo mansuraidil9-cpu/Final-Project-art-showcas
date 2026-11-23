@@ -6,6 +6,7 @@ import { useActionState, useCallback, useEffect, useMemo, useRef, useState } fro
 import { useRouter } from 'next/navigation'
 import ArtworkFavorite from '../../artwork-favorite'
 import ArtworkDelete from './artwork-delete'
+import ImageCropUpload from '../../image-crop-upload'
 import { saveProfile } from './profil/profile-actions'
 import authStyles from '../../auth.module.css'
 import styles from './member-dashboard.module.css'
@@ -113,6 +114,7 @@ function ProfileEditor({ profile, initialName, avatarSrc, onCancel, onPreview, o
   const [bio, setBio] = useState(profile.bio || '')
   const [links, setLinks] = useState((profile.links || []).join('\n'))
   const [initialMode, setInitialMode] = useState(false)
+  const [avatarResetSignal, setAvatarResetSignal] = useState(0)
   const [error, setError] = useState('')
   const inputRef = useRef(null)
 
@@ -120,25 +122,11 @@ function ProfileEditor({ profile, initialName, avatarSrc, onCancel, onPreview, o
     if (feedback?.success) onSaved(name)
   }, [feedback, name, onSaved])
 
-  function validateImage(event) {
-    const file = event.currentTarget.files?.[0]
-    if (!file) return
-    const valid = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type)
-    const message = !valid ? 'Pilih JPG, PNG, atau WebP.' :
-      file.size > 5 * 1024 * 1024 ? 'Ukuran gambar maksimal 5 MB.' : ''
-    setError(message)
-    if (message) {
-      event.currentTarget.value = ''
-      return
-    }
-    setInitialMode(false)
-    onPreview({ file, initials: false })
-  }
-
   function useInitials() {
     setInitialMode(true)
     setError('')
     if (inputRef.current) inputRef.current.value = ''
+    setAvatarResetSignal(value => value + 1)
     onPreview({ file: null, initials: true })
   }
 
@@ -149,14 +137,21 @@ function ProfileEditor({ profile, initialName, avatarSrc, onCancel, onPreview, o
         <Avatar src={avatarSrc} name={name} large />
         <div className={styles.photoEditorActions}>
           <strong>Foto Profil</strong>
-          <p>JPG, PNG, atau WebP, maksimal 5 MB. Pratinjau langsung muncul di kedua avatar dan popover.</p>
+          <p>Pilih foto, atur besar-kecil dan posisinya, lalu terapkan sebelum menyimpan profil.</p>
+          <ImageCropUpload
+            id="member-avatar-upload"
+            name="avatar"
+            label="Unggah Foto"
+            shape="circle"
+            inputRef={inputRef}
+            resetSignal={avatarResetSignal}
+            onApplied={file => {
+              setInitialMode(false)
+              onPreview({ file, initials: false })
+            }}
+            onError={setError}
+          />
           <div className={styles.inlineActions}>
-            <label className={styles.primarySmall}>
-              Unggah Foto
-              <input ref={inputRef} type="file" name="avatar"
-                accept="image/jpeg,image/png,image/webp" onChange={validateImage}
-                className={styles.visuallyHiddenInput} />
-            </label>
             <button type="button" className={styles.secondarySmall} onClick={useInitials}>
               Gunakan Inisial
             </button>
@@ -226,7 +221,7 @@ function GalleryCards({ artworks, saved = false, onPreview }) {
             <p className={styles.artworkCategory}>{artwork.category}</p>
             <h3>{artwork.title}</h3>
             <p className={styles.artworkLikes}>{Number(artwork.likes || 0).toLocaleString('id-ID')} apresiasi</p>
-            <div className={styles.artworkActions}>
+            <div className={saved ? styles.artworkActions : `${styles.artworkActions} ${styles.manageArtworkActions}`}>
               <Link href={'/karya/' + artwork.id}>Detail</Link>
               {saved ? <ArtworkFavorite artwork={artwork} variant="dashboard" /> : (
                 <>

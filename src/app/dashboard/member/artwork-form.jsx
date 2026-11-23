@@ -5,10 +5,10 @@ import Link from 'next/link'
 import { useActionState, useState } from 'react'
 import {
   maxArtworkDescriptionLength,
-  maxArtworkImageBytes,
   maxArtworkTitleLength,
 } from '@/lib/artwork-fields'
 import { saveArtwork } from './artwork-actions'
+import ImageCropUpload from '../../image-crop-upload'
 import styles from './member-artworks.module.css'
 
 export default function ArtworkForm({ artwork = null, categories }) {
@@ -25,13 +25,6 @@ export default function ArtworkForm({ artwork = null, categories }) {
   function updateField(event) {
     const { name, value } = event.currentTarget
     setFields(current => ({ ...current, [name]: value }))
-  }
-
-  function checkImage(event) {
-    const input = event.currentTarget
-    const message = input.files[0]?.size > maxArtworkImageBytes ? 'Ukuran gambar maksimal 5 MB.' : ''
-    input.setCustomValidity(message)
-    setImageError(message)
   }
 
   return (
@@ -106,26 +99,19 @@ export default function ArtworkForm({ artwork = null, categories }) {
             />
           </figure>
         ) : (
-          <div className={styles.field}>
-            <label htmlFor="artwork-image">Gambar karya</label>
-            <input
-              id="artwork-image"
-              name="image"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={checkImage}
-              aria-describedby={imageError ? 'artwork-image-help artwork-image-error' : 'artwork-image-help'}
-              aria-invalid={Boolean(imageError)}
-              required
-            />
-            <p className={styles.hint} id="artwork-image-help">Format JPEG, PNG, atau WebP. Maksimal 5 MB.</p>
-            {imageError && <p id="artwork-image-error" className={styles.error} role="alert">{imageError}</p>}
-          </div>
+          <ImageCropUpload
+            id="artwork-image"
+            name="image"
+            label="Gambar karya"
+            shape="landscape"
+            required
+            onError={setImageError}
+          />
         )}
       </fieldset>
 
       <div className={styles.formActions}>
-        <button className={styles.primaryButton} type="submit" disabled={pending}>
+        <button className={styles.primaryButton} type="submit" disabled={pending || Boolean(imageError)}>
           {pending ? 'Menyimpan…' : editing ? 'Simpan perubahan' : 'Unggah karya'}
         </button>
         <Link href="/dashboard/member">Kembali ke Kelola Karya</Link>

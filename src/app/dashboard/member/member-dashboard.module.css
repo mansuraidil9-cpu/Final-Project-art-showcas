@@ -357,6 +357,41 @@
 .artworkActions > a,.artworkActions > button {min-height:2.2rem;text-decoration:underline;text-underline-offset:.15rem;}
 .artworkActions form {margin:0;}
 .artworkActions form button {font-size:.74rem;}
+/* Pada kartu Karya Saya, tautan Detail/Edit dan tombol Hapus
+   harus punya tinggi serta posisi yang sama. */
+.manageArtworkActions {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;
+  gap:.5rem;
+}
+.manageArtworkActions > :is(a,button) {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  min-height:2.5rem;
+  padding:.5rem .3rem;
+  border:1px solid var(--member-hairline);
+  border-radius:2px;
+  background:var(--member-ivory);
+  color:var(--member-olive);
+  font:600 .76rem/1.3 var(--font-studio-sans),Arial,sans-serif;
+  text-decoration:none;
+  white-space:nowrap;
+}
+.manageArtworkActions > :is(a,button):hover {
+  border-color:rgba(44,51,39,.36);
+  background:#f0e8dc;
+}
+.manageArtworkActions > button {
+  color:#873f32;
+}
+.manageArtworkActions > form {
+  grid-column:1/-1;
+  min-width:0;
+  margin:0;
+}
 .emptyState {
   display:flex;
   flex-direction:column;

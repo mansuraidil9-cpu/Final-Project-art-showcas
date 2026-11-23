@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import ImageCropUpload from '@/app/image-crop-upload'
 import Link from 'next/link'
 import AccountPanel from '@/app/account-panel'
 import ActionForm from '@/app/dashboard/action-form'
@@ -40,11 +41,8 @@ export default async function MemberProfilePage() {
               <Image src={`/media/profil/${user.id}`} alt="" width={120} height={120} unoptimized />
             </figure>
           )}
-          <div className={styles.field}>
-            <label htmlFor="profile-photo">Foto profil</label>
-            <input id="profile-photo" name="avatar" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="avatar-hint" />
-            <p className={styles.hint} id="avatar-hint">JPEG, PNG, atau WebP hingga 5 MB.</p>
-          </div>
+          <ImageCropUpload id="profile-photo" name="avatar"
+            label="Foto profil" shape="circle" />
         </ActionForm>
       </section>
       <ProfileLogout />
