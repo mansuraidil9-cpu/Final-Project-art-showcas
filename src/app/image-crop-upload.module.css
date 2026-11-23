@@ -83,6 +83,65 @@
 .editor > .hint {
   justify-self:start;
 }
+.controlBlock {
+  display:grid;
+  gap:.7rem;
+  width:100%;
+  min-width:0;
+  justify-items:center;
+  padding:1rem 0;
+  border-top:1px solid rgba(44,51,39,.15);
+}
+.controlBlock > strong {
+  justify-self:start;
+  color:#2C3327;
+  font-size:.82rem;
+  font-weight:700;
+}
+.controlBlock > .hint {justify-self:start;}
+.choiceRow {
+  display:grid;
+  gap:.4rem;
+  width:100%;
+  max-width:25rem;
+  font-size:.76rem;
+  font-weight:600;
+  color:#4f5749;
+}
+.choiceRow select {
+  width:100%;
+  min-height:2.65rem;
+  border:1px solid rgba(44,51,39,.22);
+  border-radius:2px;
+  padding:.48rem .7rem;
+  background:#FBF8F3;
+  color:#2C3327;
+  font:inherit;
+  font-weight:500;
+}
+.cropGrid {
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  border:1px solid rgba(255,255,255,.72);
+  background:
+    linear-gradient(90deg,
+      transparent calc(33.333% - .5px),
+      rgba(255,255,255,.48) 33.333%,
+      transparent calc(33.333% + .5px),
+      transparent calc(66.666% - .5px),
+      rgba(255,255,255,.48) 66.666%,
+      transparent calc(66.666% + .5px)),
+    linear-gradient(0deg,
+      transparent calc(33.333% - .5px),
+      rgba(255,255,255,.48) 33.333%,
+      transparent calc(33.333% + .5px),
+      transparent calc(66.666% - .5px),
+      rgba(255,255,255,.48) 66.666%,
+      transparent calc(66.666% + .5px));
+}
+.circlePreview .cropGrid {border-radius:50%;}
 .landscapePreview,.circlePreview {
   display:grid;
   place-items:center;
