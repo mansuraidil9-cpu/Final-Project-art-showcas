@@ -1,14 +1,16 @@
 /* Galeri Karya — gaya editorial museum.
    Semua selector terisolasi di Galeri; tidak memodifikasi navbar,
    studio 3D, Challenge Aktif, atau CSS global. */
-.gallerySection {
+.gallerySection,
+.lightboxBackdrop {
+  /* Modal berada di luar <section> Galeri, jadi perlu token warna sendiri. */
   --museum-ink:#2C3327;
-  --museum-muted:#65675e;
+  --museum-muted:#565a50;
   --museum-ivory:#FBF8F3;
   --museum-bronze:#9A7B4F;
   --museum-rule:rgba(44,51,39,.14);
-  color:var(--museum-ink);
 }
+.gallerySection {color:var(--museum-ink);}
 .galleryHeading {
   display:flex;
   flex-wrap:wrap;
@@ -215,30 +217,31 @@
   position:relative;
   width:100%;
   border:0;
-  padding:clamp(.7rem,1.4vw,1.15rem);
-  background:#f0e9df;
+  padding:0;
+  background:var(--museum-ivory);
   cursor:zoom-in;
   text-align:left;
 }
 .matFrame {
+  /* Satu mat gading. Jangan menumpuk bingkai berwarna di luarnya. */
   display:block;
-  padding:clamp(.6rem,1vw,.85rem);
-  border:1px solid rgba(44,51,39,.15);
+  padding:clamp(.7rem,1.5vw,1.1rem);
+  border:0;
   background:var(--museum-ivory);
-  box-shadow:0 5px 20px -15px rgba(31,36,28,.35);
+  box-shadow:none;
 }
 .frameImage {
   display:block;
   position:relative;
   aspect-ratio:4/3;
   overflow:hidden;
-  border:1px solid rgba(44,51,39,.09);
-  background:#e6ded2;
+  border:1px solid var(--museum-rule);
+  background:var(--museum-ivory);
 }
 .gallerySection .frameImage img {object-fit:contain;}
 .frameHint {
   position:absolute;
-  bottom:clamp(1.4rem,2.5vw,2.2rem);
+  bottom:clamp(1rem,2vw,1.65rem);
   left:50%;
   transform:translate(-50%,5px);
   width:max-content;
@@ -462,7 +465,7 @@
 }
 .lightboxMat {
   width:100%;
-  padding:clamp(.7rem,1.5vw,1.3rem);
+  padding:clamp(.8rem,1.6vw,1.3rem);
   border:1px solid var(--museum-rule);
   background:var(--museum-ivory);
   box-shadow:0 12px 35px -20px rgba(31,36,28,.24);
@@ -472,8 +475,8 @@
   width:100%;
   aspect-ratio:4/3;
   overflow:hidden;
-  background:#e4dbce;
-  border:1px solid var(--museum-rule);
+  background:var(--museum-ivory);
+  border:0;
 }
 .lightbox .lightboxImage img {object-fit:contain;}
 .lightboxNavigation {
@@ -507,13 +510,13 @@
   overflow-y:auto;
   padding:clamp(1.5rem,3vw,2.8rem);
 }
-.mediumLabel {font-size:.68rem;color:var(--museum-muted);font-weight:700;letter-spacing:.15em;text-transform:uppercase;}
+.mediumLabel {font-size:.73rem;color:#555c52;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}
 .lightbox .lightboxCopy h2 {
   margin:.3rem 0 0;
   font:400 clamp(2.4rem,4vw,3.6rem)/1.04 var(--serif),Georgia,serif;
   overflow-wrap:anywhere;
 }
-.detailArtist {color:var(--museum-muted);font-size:.87rem;}
+.detailArtist {color:#545a50;font-size:.92rem;line-height:1.6;}
 .curatorial {
   width:100%;
   margin-top:1.45rem;
@@ -521,7 +524,7 @@
   border-top:1px solid var(--museum-rule);
 }
 .curatorial > span {display:block;color:var(--museum-bronze);font-size:.65rem;font-weight:700;letter-spacing:.17em;}
-.curatorial p {margin-top:.65rem;color:var(--museum-muted);font-size:.86rem;line-height:1.75;}
+.curatorial p {margin-top:.65rem;color:#444a41;font-size:.95rem;line-height:1.8;}
 .specs {
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
@@ -531,8 +534,8 @@
   padding-top:1.25rem;
   border-top:1px solid var(--museum-rule);
 }
-.specs dt {font-size:.64rem;font-weight:700;color:#8d8b80;letter-spacing:.1em;text-transform:uppercase;}
-.specs dd {margin-top:.4rem;font-size:.78rem;font-weight:600;overflow-wrap:anywhere;}
+.specs dt {font-size:.69rem;font-weight:700;color:#666a60;letter-spacing:.08em;text-transform:uppercase;}
+.specs dd {margin-top:.4rem;font-size:.88rem;font-weight:600;color:var(--museum-ink);overflow-wrap:anywhere;}
 .lightboxCopy .reactions {
   width:100%;
   margin-top:1.4rem;
