@@ -2,153 +2,388 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { setLike, setFavorite } from './artwork-interaction-actions'
+import { readGalleryArtworkDetails } from './gallery-artwork-details'
 import ArtworkByline from './artwork-byline'
-import ArtworkFavorite from './artwork-favorite'
-import ArtworkLike from './artwork-like'
 import ChallengeCard from './challenge-card'
-import styles from './home.module.css'
+import styles from './gallery-museum.module.css'
+import homeStyles from './home.module.css'
+
+const categoriesList = ['Semua', 'Lukisan', 'Seni cetak', 'Keramik']
+
+function GalleryReactions({ artwork, canLike, state, busy, onReact }) {
+  const liked = state?.liked ?? artwork.liked
+  const favorited = state?.favorited ?? artwork.favorited
+  const count = state?.likes ?? artwork.likes
+  const disabled = busy?.id === artwork.id
+  return (
+    <div className={styles.reactions} aria-label={'Interaksi karya ' + artwork.title}>
+      {canLike && !artwork.isOwner ? (
+        <button type="button" className={styles.likeButton} aria-pressed={Boolean(liked)}
+          aria-label={(liked ? 'Batalkan apresiasi' : 'Apresiasi') + ' karya ' + artwork.title}
+          disabled={disabled} onClick={() => onReact(artwork, 'like', !liked)}>
+          <span aria-hidden="true">{liked ? '♥' : '♡'}</span> Apresiasi
+          <span className={styles.likeCount}>{Number(count).toLocaleString('id-ID')}</span>
+        </button>
+      ) : (
+        <span className={styles.likeStatic} aria-label={count + ' apresiasi'}>
+          <span aria-hidden="true">♡</span> {Number(count).toLocaleString('id-ID')}
+        </span>
+      )}
+      {canLike && !artwork.isOwner && (
+        <button type="button" className={styles.saveButton} aria-pressed={Boolean(favorited)}
+          aria-label={(favorited ? 'Hapus dari Favorit' : 'Simpan Favorit') + ' karya ' + artwork.title}
+          disabled={disabled} onClick={() => onReact(artwork, 'favorite', !favorited)}>
+          <span aria-hidden="true">{favorited ? '▮' : '▯'}</span>
+          {favorited ? 'Tersimpan' : 'Simpan Favorit'}
+        </button>
+      )}
+    </div>
+  )
+}
+
+function MuseumArtworkCard({ artwork, canLike, state, busy, onReact, onOpen, Heading }) {
+  return (
+    <article className={styles.artworkCard}>
+      <button type="button" className={styles.frameButton} onClick={() => onOpen(artwork.id)}
+        aria-label={'Lihat pratinjau karya ' + artwork.title}>
+        <span className={styles.matFrame}>
+          <span className={styles.frameImage}>
+            <Image src={artwork.imageSrc} alt="" fill unoptimized={artwork.isUploaded}
+              sizes="(max-width: 580px) 90vw, (max-width: 960px) 45vw, 28vw" />
+          </span>
+        </span>
+        <span className={styles.frameHint}>Lihat Detail ↗</span>
+      </button>
+      <div className={styles.artworkInfo}>
+        <div className={styles.metaLine}>
+          <span>{artwork.category}</span>
+          {artwork.challengeTitle && <span className={styles.challengeTag}>{artwork.challengeTitle}</span>}
+        </div>
+        <Heading className={styles.artworkTitle}>
+          <button type="button" onClick={() => onOpen(artwork.id)}>{artwork.title}</button>
+        </Heading>
+        <div className={styles.byline}>
+          <ArtworkByline artwork={artwork} />
+        </div>
+        <GalleryReactions artwork={artwork} canLike={canLike} state={state}
+          busy={busy} onReact={onReact} />
+        <div className={styles.cardFoot}>
+          <Link href={'/karya/' + artwork.id + '#komentar'}>
+            Komentar ({Number(artwork.commentCount || 0).toLocaleString('id-ID')})
+          </Link>
+          {canLike && artwork.creatorId !== null && !artwork.isOwner && (
+            <Link href={'/karya/' + artwork.id + '#laporkan-karya'}>Laporkan</Link>
+          )}
+        </div>
+      </div>
+    </article>
+  )
+}
+
+function GalleryLightbox({ artwork, artworks, canLike, state, busy, onReact, onClose, onNavigate }) {
+  const dialogRef = useRef(null)
+  const [detail, setDetail] = useState(null)
+  const [detailPending, setDetailPending] = useState(false)
+  const currentIndex = artworks.findIndex(item => item.id === artwork.id)
+  const title = 'Inspeksi karya ' + artwork.title
+  // Jangan tampilkan deskripsi lukisan sebelumnya saat tombol navigasi ditekan.
+  const selectedDetail = detail?.id === artwork.id ? detail : null
+  const onCloseRef = useRef(onClose)
+  const onNavigateRef = useRef(onNavigate)
+  useEffect(() => {
+    onCloseRef.current = onClose
+    onNavigateRef.current = onNavigate
+  }, [onClose, onNavigate])
+
+  useEffect(() => {
+    let active = true
+    setDetail(null)
+    setDetailPending(true)
+    readGalleryArtworkDetails(artwork.id).then(result => {
+      if (active) setDetail(result)
+    }).catch(() => {
+      if (active) setDetail(null)
+    }).finally(() => {
+      if (active) setDetailPending(false)
+    })
+    return () => { active = false }
+  }, [artwork.id])
+
+  useEffect(() => {
+    const previouslyFocused = document.activeElement
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    dialogRef.current?.focus()
+    function onKey(event) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onCloseRef.current()
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault()
+        onNavigateRef.current(-1)
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault()
+        onNavigateRef.current(1)
+      } else if (event.key === 'Tab') {
+        const items = Array.from(dialogRef.current?.querySelectorAll('button:not(:disabled),a[href]') || [])
+          .filter(element => element.getClientRects().length)
+        if (!items.length) return
+        if (event.shiftKey && document.activeElement === items[0]) {
+          event.preventDefault()
+          items[items.length - 1].focus()
+        } else if (!event.shiftKey && document.activeElement === items[items.length - 1]) {
+          event.preventDefault()
+          items[0].focus()
+        }
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = previousOverflow
+      if (previouslyFocused?.isConnected) previouslyFocused.focus()
+    }
+  }, [])
+
+  return (
+    <div className={styles.lightboxBackdrop} onMouseDown={event => {
+      if (event.target === event.currentTarget) onClose()
+    }}>
+      <section className={styles.lightbox} role="dialog" aria-modal="true"
+        aria-label={title} ref={dialogRef} tabIndex={-1}>
+        <button type="button" className={styles.closeButton} onClick={onClose}
+          aria-label="Tutup pratinjau karya">×</button>
+        <div className={styles.lightboxVisual}>
+          <div className={styles.lightboxMat}>
+            <div className={styles.lightboxImage}>
+              <Image src={artwork.imageSrc} alt={artwork.title} fill
+                unoptimized={artwork.isUploaded} sizes="(max-width: 800px) 90vw, 600px" />
+            </div>
+          </div>
+          <div className={styles.lightboxNavigation}>
+            <button type="button" onClick={() => onNavigate(-1)}
+              disabled={currentIndex <= 0} aria-label="Karya sebelumnya">← Sebelumnya</button>
+            <span>{String(currentIndex + 1).padStart(2, '0')} / {String(artworks.length).padStart(2, '0')}</span>
+            <button type="button" onClick={() => onNavigate(1)}
+              disabled={currentIndex >= artworks.length - 1} aria-label="Karya berikutnya">Berikutnya →</button>
+          </div>
+        </div>
+        <div className={styles.lightboxCopy}>
+          <p className={styles.mediumLabel}>{artwork.category}</p>
+          {artwork.challengeTitle && <span className={styles.challengeTag}>{artwork.challengeTitle}</span>}
+          <h2>{artwork.title}</h2>
+          <p className={styles.detailArtist}>oleh {artwork.artist}</p>
+          <div className={styles.curatorial}>
+            <span>CATATAN KURATORIAL</span>
+            {detailPending ? <p>Memuat keterangan karya…</p> : (
+              <p>{selectedDetail?.description || 'Tidak ada deskripsi tambahan untuk karya ini.'}</p>
+            )}
+          </div>
+          <dl className={styles.specs}>
+            <div><dt>Medium</dt><dd>{artwork.category}</dd></div>
+            {artwork.date && <div><dt>Tahun / periode</dt><dd>{artwork.date}</dd></div>}
+            {selectedDetail?.width && selectedDetail?.height && (
+              <div><dt>Resolusi gambar</dt><dd>{selectedDetail.width} × {selectedDetail.height} px</dd></div>
+            )}
+            {selectedDetail?.rights && <div><dt>Hak karya</dt><dd>{selectedDetail.rights}</dd></div>}
+          </dl>
+          <GalleryReactions artwork={artwork} canLike={canLike} state={state}
+            busy={busy} onReact={onReact} />
+          <Link href={'/karya/' + artwork.id} className={styles.detailLink}>
+            Buka Halaman Karya ↗
+          </Link>
+        </div>
+      </section>
+    </div>
+  )
+}
 
 export default function GalleryExplorer({ artworks, challenges, canLike, galleryPage = false }) {
+  const router = useRouter()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Semua')
   const [sort, setSort] = useState('popular')
-
+  const [density, setDensity] = useState('three')
+  const [selectedId, setSelectedId] = useState(null)
+  const [reactions, setReactions] = useState({})
+  const [busy, setBusy] = useState(null)
+  const [errors, setErrors] = useState({})
+  const openerRef = useRef(null)
+  const galleryArtworks = artworks ?? []
+  const allCategories = useMemo(() => [
+    ...categoriesList,
+    ...new Set(galleryArtworks.map(item => item.category).filter(name => !categoriesList.includes(name))),
+  ], [artworks])
+  const search = query.trim().toLocaleLowerCase('id')
+  const filteredArtworks = useMemo(() => galleryArtworks
+    .filter(artwork => category === 'Semua' || artwork.category === category)
+    .filter(artwork => [artwork.title, artwork.artist, ...(artwork.tags || []), artwork.challengeTitle || '']
+      .join(' ').toLocaleLowerCase('id').includes(search))
+    .sort((first, second) => sort === 'popular'
+      ? (reactions[second.id]?.likes ?? second.likes) - (reactions[first.id]?.likes ?? first.likes)
+      : second.uploadedAt.localeCompare(first.uploadedAt)),
+  [artworks, category, search, sort, reactions])
+  const selected = filteredArtworks.find(item => item.id === selectedId) || null
   const GalleryHeading = galleryPage ? 'h1' : 'h2'
   const ArtworkHeading = galleryPage ? 'h2' : 'h3'
-  const searchLabel = galleryPage ? 'Cari karya, kreator, atau tag' : 'Cari karya, kreator, atau challenge'
-  const galleryArtworks = artworks ?? []
-  const categories = ['Semua', ...new Set(galleryArtworks.map(artwork => artwork.category))]
-  const search = query.trim().toLocaleLowerCase('id')
-  const filteredArtworks = galleryArtworks
-    .filter(artwork => category === 'Semua' || artwork.category === category)
-    .filter(artwork => [artwork.title, artwork.artist, ...artwork.tags].join(' ')
-      .toLocaleLowerCase('id').includes(search))
-    .sort((first, second) => sort === 'popular'
-      ? second.likes - first.likes
-      : second.uploadedAt.localeCompare(first.uploadedAt))
 
-  let galleryMessage = 'Tidak ada karya yang cocok.'
-  if (!artworks) {
-    galleryMessage = 'Galeri belum bisa dimuat.'
-  } else if (artworks.length === 0) {
-    galleryMessage = 'Belum ada karya di galeri.'
+  useEffect(() => {
+    setReactions({})
+  }, [artworks])
+
+  function openArtwork(id) {
+    openerRef.current = document.activeElement
+    setSelectedId(id)
+  }
+  const closeArtwork = useCallback(() => {
+    setSelectedId(null)
+    requestAnimationFrame(() => {
+      if (openerRef.current?.isConnected) openerRef.current.focus()
+    })
+  }, [])
+  function navigateArtwork(step) {
+    const index = filteredArtworks.findIndex(item => item.id === selectedId)
+    const next = filteredArtworks[index + step]
+    if (next) setSelectedId(next.id)
+  }
+  async function react(artwork, kind, desired) {
+    if (busy) return
+    setBusy({ id: artwork.id, kind })
+    setErrors(current => ({ ...current, [artwork.id]: null }))
+    const previous = reactions[artwork.id] || {
+      likes: artwork.likes, liked: artwork.liked, favorited: artwork.favorited,
+    }
+    try {
+      const result = kind === 'like'
+        ? await setLike(artwork.id, desired)
+        : await setFavorite(artwork.id, desired)
+      if (result?.error) {
+        setErrors(current => ({ ...current, [artwork.id]: result.error }))
+      } else {
+        setReactions(current => ({
+          ...current,
+          [artwork.id]: {
+            ...previous,
+            ...(kind === 'like' ? {
+              liked: desired,
+              likes: Math.max(0, Number(previous.likes) + (desired ? 1 : -1)),
+            } : { favorited: desired }),
+          },
+        }))
+        router.refresh()
+      }
+    } catch {
+      setErrors(current => ({ ...current, [artwork.id]: 'Aksi belum berhasil. Coba lagi.' }))
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  function resetFilters() {
+    setCategory('Semua')
+    setQuery('')
   }
 
   const matchingChallenges = (challenges ?? []).filter(challenge =>
-    `${challenge.title} ${challenge.category}`.toLocaleLowerCase('id').includes(search),
-  )
+    (challenge.title + ' ' + challenge.category).toLocaleLowerCase('id').includes(search))
+  let galleryMessage = 'Tidak ada karya yang cocok.'
+  if (!artworks) galleryMessage = 'Galeri belum bisa dimuat.'
+  else if (artworks.length === 0) galleryMessage = 'Belum ada karya di galeri.'
   let challengeMessage = 'Tidak ada challenge yang cocok.'
-  if (challenges === undefined) {
-    challengeMessage = 'Challenge belum bisa dimuat.'
-  } else if (!challenges.length) {
-    challengeMessage = 'Belum ada challenge aktif.'
-  }
+  if (challenges === undefined) challengeMessage = 'Challenge belum bisa dimuat.'
+  else if (!challenges.length) challengeMessage = 'Belum ada challenge aktif.'
 
   return (
     <>
-      <section className={styles.gallery} id="galeri" aria-labelledby="judul-galeri">
-        <div className={styles.sectionHeader}>
-          <GalleryHeading id="judul-galeri" className={galleryPage ? styles.pageTitle : undefined}>Galeri Karya</GalleryHeading>
-          <label className={styles.search}>
-            <span className="sr-only">{searchLabel}</span>
-            <span className={styles.searchIcon} aria-hidden="true" />
-            <input
-              type="search"
-              placeholder={searchLabel}
-              value={query}
-              onChange={event => setQuery(event.target.value)}
-            />
-          </label>
+      <section className={`${homeStyles.gallery} ${styles.gallerySection}`} id="galeri" aria-labelledby="judul-galeri">
+        <div className={styles.galleryHeading}>
+          <div>
+            <span className={styles.eyebrow}>KOLEKSI TERKURASI</span>
+            <GalleryHeading id="judul-galeri">Galeri Karya</GalleryHeading>
+            <p>{galleryArtworks.length.toLocaleString('id-ID')} karya dalam koleksi ALTERIA</p>
+          </div>
+          <div className={styles.searchBox}>
+            <span className={styles.searchIcon} aria-hidden="true">⌕</span>
+            <input type="search" aria-label="Cari karya, kreator, atau challenge"
+              placeholder="Cari karya, kreator, atau challenge..."
+              value={query} onChange={event => setQuery(event.target.value)} />
+            {query && <button type="button" aria-label="Hapus pencarian" onClick={() => setQuery('')}>×</button>}
+          </div>
         </div>
-
-        <div className={styles.controls}>
-          <div className={styles.categories} role="group" aria-label="Kategori karya">
-            {categories.map(name => (
-              <button
-                key={name}
-                type="button"
-                aria-pressed={category === name}
-                onClick={() => setCategory(name)}
-              >
+        <div className={styles.filterControls}>
+          <div className={styles.categoryTabs} role="group" aria-label="Kategori medium">
+            {allCategories.map(name => (
+              <button type="button" key={name} aria-pressed={category === name}
+                onClick={() => setCategory(name)}>
                 {name}
+                <span>{(name === 'Semua' ? galleryArtworks : galleryArtworks.filter(item => item.category === name)).length}</span>
               </button>
             ))}
           </div>
-
-          <div className={styles.sort} role="group" aria-label="Urutan karya">
-            <button type="button" aria-pressed={sort === 'popular'} onClick={() => setSort('popular')}>
-              Populer
-            </button>
-            <button type="button" aria-pressed={sort === 'latest'} onClick={() => setSort('latest')}>
-              Terbaru
-            </button>
+          <div className={styles.rightControls}>
+            <div className={styles.sortTabs} role="group" aria-label="Urutan karya">
+              <button type="button" aria-pressed={sort === 'popular'} onClick={() => setSort('popular')}>Populer</button>
+              <button type="button" aria-pressed={sort === 'latest'} onClick={() => setSort('latest')}>Terbaru</button>
+            </div>
+            <div className={styles.layoutTabs} role="group" aria-label="Kepadatan tampilan galeri">
+              <button type="button" aria-pressed={density === 'three'} onClick={() => setDensity('three')}
+                aria-label="Grid tiga kolom" title="Grid tiga kolom">▦</button>
+              <button type="button" aria-pressed={density === 'two'} onClick={() => setDensity('two')}
+                aria-label="Galeri luas dua kolom" title="Galeri luas dua kolom">▤</button>
+            </div>
           </div>
         </div>
-
-        <p className="sr-only" aria-live="polite">{filteredArtworks.length} karya ditemukan</p>
-        {filteredArtworks.length > 0 ? (
-          <div className={styles.artworks}>
+        {(category !== 'Semua' || query.trim()) && (
+          <div className={styles.activeFilters} aria-label="Filter yang diterapkan">
+            <span>Filter aktif:</span>
+            {category !== 'Semua' && (
+              <button type="button" onClick={() => setCategory('Semua')}>{category} <span aria-hidden="true">×</span></button>
+            )}
+            {query.trim() && (
+              <button type="button" onClick={() => setQuery('')}>{query.trim()} <span aria-hidden="true">×</span></button>
+            )}
+            <button type="button" className={styles.resetButton} onClick={resetFilters}>Reset filter</button>
+          </div>
+        )}
+        <p className="sr-only" role="status">{filteredArtworks.length} karya ditemukan.</p>
+        {filteredArtworks.length ? (
+          <div className={styles.galleryGrid} data-density={density}>
             {filteredArtworks.map(artwork => (
-              <article className={styles.artwork} key={artwork.id}>
-                <Link className={styles.artworkLink} href={`/karya/${artwork.id}`}>
-                  <div className={styles.artworkImage}>
-                    <Image
-                      src={artwork.imageSrc}
-                      alt=""
-                      fill
-                      unoptimized={artwork.isUploaded}
-                      sizes="(max-width: 500px) 94vw, (max-width: 900px) 48vw, 32vw"
-                    />
-                  </div>
-                  <div className={styles.artworkCaption}>
-                    <div>
-                      <p className={styles.artworkCategory}>{artwork.category}</p>
-                      <ArtworkHeading className={styles.artworkTitle}>{artwork.title}</ArtworkHeading>
-                      {!artwork.creatorId && <ArtworkByline artwork={artwork} className={styles.artworkArtist} />}
-                    </div>
-                    <span className={`${styles.arrow} ${styles.arrowOut}`} aria-hidden="true" />
-                  </div>
-                </Link>
-                <div className={styles.artworkReaction}>
-                  <ArtworkLike artwork={artwork} canLike={canLike && !artwork.isOwner} variant="gallery" />
-                  {canLike && !artwork.isOwner && <ArtworkFavorite artwork={artwork} variant="gallery" />}
-                </div>
-                <div className={styles.artworkLinks}>
-                  {artwork.creatorId && <ArtworkByline artwork={artwork} className={styles.artworkUploader} />}
-                  <Link className={styles.artworkComments} href={`/karya/${artwork.id}#komentar`}>
-                    Komentar ({artwork.commentCount.toLocaleString('id-ID')})
-                    <span className="sr-only"> untuk {artwork.title}</span>
-                  </Link>
-                  {canLike && artwork.creatorId !== null && !artwork.isOwner && (
-                    <Link className={styles.artworkReport} href={`/karya/${artwork.id}#laporkan-karya`}>
-                      Laporkan
-                      <span className="sr-only"> karya {artwork.title}</span>
-                    </Link>
-                  )}
-                </div>
-              </article>
+              <div key={artwork.id}>
+                <MuseumArtworkCard artwork={artwork} canLike={canLike} Heading={ArtworkHeading}
+                  state={reactions[artwork.id]} busy={busy} onReact={react} onOpen={openArtwork} />
+                {errors[artwork.id] && <p role="alert" className={styles.actionError}>{errors[artwork.id]}</p>}
+              </div>
             ))}
           </div>
         ) : (
           <div className={styles.emptyGallery}>
-            <p>{galleryMessage}</p>
-            {search && matchingChallenges.length > 0 && (
-              <a className={styles.textLink} href="#challenge">
-                Lihat hasil challenge <span className={`${styles.arrow} ${styles.arrowDown}`} aria-hidden="true" />
-              </a>
+            <span aria-hidden="true">▧</span>
+            <h3>{galleryMessage}</h3>
+            <p>Coba kategori lain atau gunakan kata kunci pencarian yang berbeda.</p>
+            {(category !== 'Semua' || query) && (
+              <button type="button" onClick={resetFilters}>Reset filter</button>
             )}
           </div>
         )}
       </section>
 
       {!galleryPage && (
-        <section className={styles.challenge} id="challenge" aria-labelledby="judul-challenge">
+        <section className={homeStyles.challenge} id="challenge" aria-labelledby="judul-challenge">
           <h2 id="judul-challenge">Challenge Aktif</h2>
           {matchingChallenges.length > 0 ? matchingChallenges.map(challenge => (
             <ChallengeCard key={challenge.id} challenge={challenge} statusLabel="Sedang berlangsung" />
-          )) : <p className={styles.emptyGallery}>{challengeMessage}</p>}
+          )) : <p className={homeStyles.emptyGallery}>{challengeMessage}</p>}
         </section>
+      )}
+
+      {selected && (
+        <GalleryLightbox artwork={selected} artworks={filteredArtworks} canLike={canLike}
+          state={reactions[selected.id]} busy={busy} onReact={react}
+          onClose={closeArtwork} onNavigate={navigateArtwork} />
       )}
     </>
   )
