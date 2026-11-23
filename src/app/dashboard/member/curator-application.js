@@ -8,7 +8,7 @@ export async function applyForCurator(expectedStatus) {
   const user = await requireUser('member')
 
   try {
-    await pool.query(
+    const { rowCount } = await pool.query(
       `UPDATE users
        SET curator_status = 'pending', curator_applied_at = clock_timestamp()
        WHERE id = $1 AND role = 'member'
@@ -16,6 +16,7 @@ export async function applyForCurator(expectedStatus) {
          AND curator_status IS NOT DISTINCT FROM $2`,
       [user.id, expectedStatus],
     )
+    if (!rowCount) return { error: 'Status pengajuan berubah. Muat ulang halaman dan coba lagi.' }
   } catch (error) {
     console.error('Pengajuan akses Curator gagal', error.code ?? error.name)
     return { error: 'Pengajuan belum terkirim. Coba lagi sebentar.' }
@@ -23,5 +24,5 @@ export async function applyForCurator(expectedStatus) {
 
   revalidatePath('/dashboard/member')
   revalidatePath('/dashboard/admin')
-  return null
+  return { success: 'Pengajuan Curator berhasil dikirim.' }
 }
