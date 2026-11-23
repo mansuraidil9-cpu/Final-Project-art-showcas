@@ -36,6 +36,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
   const [toast, setToast] = useState('')
 
   const works = artworks.slice(0, 3)
+  const workCount = works.length
   const featured = works[galleryIndex] || null
   const favorites = artworks.filter(artwork => artwork.favorited)
   const activeChallenge = challenges[0] || null
@@ -81,8 +82,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
       const galleryProgress = galleryRect
         ? clamp((focusLine - galleryRect.top) / Math.max(galleryRect.height,1),0,.99999)
         : 0
-      const index = clamp(Math.floor(galleryProgress * Math.max(works.length,1)),
-        0, Math.max(works.length-1,0))
+      const index = clamp(Math.floor(galleryProgress * workCount), 0, Math.max(workCount - 1, 0))
       if (next !== 2) selectedRef.current.locked = false
       if (!selectedRef.current.locked) {
         motionRef.current.galleryIndex = index
@@ -107,7 +107,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
       window.removeEventListener('resize', schedule)
       window.removeEventListener('pointermove', pointerMove)
     }
-  }, [works.length])
+  }, [workCount])
 
   useEffect(() => {
     motionRef.current.manual = manual
@@ -138,12 +138,12 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
   }, [detail, favoritesOpen])
 
   const selectArtwork = useCallback(index => {
-    if (!works.length) return
-    const next = clamp(index, 0, works.length - 1)
+    if (!workCount) return
+    const next = clamp(index, 0, workCount - 1)
     selectedRef.current.locked = true
     motionRef.current.galleryIndex = next
     setGalleryIndex(next)
-  }, [works.length])
+  }, [workCount])
 
   function jumpTo(index) {
     const element = chaptersRef.current[index]
@@ -152,9 +152,6 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
       behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
       block: 'start',
     })
-  }
-  function jumpToWork(index) {
-    selectArtwork(index)
   }
   function toggleManual() {
     setManual(previous => !previous)
@@ -190,7 +187,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
                 className={styles.fallbackGalleryFrame}
                 style={{
                   transform: `translate3d(calc(-50% + ${(index - galleryIndex) * 26}vw), -50%, 0) rotate(${(index - galleryIndex) * -4}deg) scale(${index === galleryIndex ? 1 : .78})`,
-                  zIndex: works.length - Math.abs(index - galleryIndex),
+                  zIndex: workCount - Math.abs(index - galleryIndex),
                 }}
               >
                 <Image src={artwork.imageSrc} alt="" fill unoptimized={Boolean(artwork.isUploaded)} sizes="(max-width: 760px) 55vw, 27vw" />
@@ -240,20 +237,13 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
         <div className={styles.galleryCard}>
           <div className={styles.cardTop}>
             <span className={styles.eyebrow}>03 — KURASI GALERI</span>
-            <span className={styles.counter}>{works.length ? String(galleryIndex + 1).padStart(2,'0') : '00'} / {String(works.length).padStart(2,'0')}</span>
+            <span className={styles.counter}>{String(workCount ? galleryIndex + 1 : 0).padStart(2, '0')} / {String(workCount).padStart(2, '0')}</span>
           </div>
           <div className={styles.switcher} role="group" aria-label="Pilih karya pameran">
             {works.map((work, index) => (
-              <button type="button" key={work.id} aria-label={`Lihat ${work.title}`} aria-current={index === galleryIndex ? 'true' : undefined} onClick={() => jumpToWork(index)} />
+              <button type="button" key={work.id} aria-label={`Lihat ${work.title}`} aria-current={index === galleryIndex ? 'true' : undefined} onClick={() => selectArtwork(index)} />
             ))}
           </div>
-          {works.length > 1 && (
-            <div className={styles.galleryNav} role="group" aria-label="Kontrol geser karya">
-              <button type="button" aria-label="Karya sebelumnya" disabled={galleryIndex === 0} onClick={() => selectArtwork(galleryIndex - 1)}>←</button>
-              <span>Klik lukisan di samping atau geser untuk memilih</span>
-              <button type="button" aria-label="Karya berikutnya" disabled={galleryIndex === works.length - 1} onClick={() => selectArtwork(galleryIndex + 1)}>→</button>
-            </div>
-          )}
           {featured ? (
             <>
               <span className={styles.medium}>{featured.category}</span>

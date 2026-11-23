@@ -54,9 +54,10 @@
 }
 
 .actions button {
-  min-height: 2.6rem;
+  min-height: 2.75rem;
   padding: .45rem .9rem;
   border: 1px solid var(--accent);
+  border-radius: var(--button-radius);
   color: var(--accent);
   cursor: pointer;
   font-size: .82rem;

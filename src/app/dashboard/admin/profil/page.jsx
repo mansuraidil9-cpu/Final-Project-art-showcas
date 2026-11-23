@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import AccountPanel from '@/app/account-panel'
 import ActionForm from '@/app/dashboard/action-form'
+import ProfileLogout from '@/app/dashboard/profile-logout'
 import styles from '@/app/dashboard/member/member-artworks.module.css'
 import { requireUser } from '@/lib/session'
 import { saveAdminAvatar } from './profile-actions'
@@ -27,6 +28,7 @@ export default async function AdminProfilePage() {
           <p className={styles.hint} id="admin-avatar-hint">JPEG, PNG, atau WebP hingga 5 MB.</p>
         </div>
       </ActionForm>
+      <ProfileLogout />
     </AccountPanel>
   )
 }

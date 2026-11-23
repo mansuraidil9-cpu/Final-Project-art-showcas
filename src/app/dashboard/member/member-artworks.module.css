@@ -9,6 +9,7 @@
 .section {
   gap: 1rem;
   margin-block: .5rem 1rem;
+  overflow-wrap: anywhere;
 }
 
 .sectionHeader,
@@ -39,6 +40,7 @@
   width: fit-content;
   min-height: 2.75rem;
   padding: .55rem .95rem;
+  border-radius: var(--button-radius);
   color: var(--paper);
   cursor: pointer;
   font-size: .84rem;
@@ -251,6 +253,7 @@
   margin-right: .65rem;
   padding: .32rem .5rem;
   border: 1px solid var(--rule);
+  border-radius: var(--button-radius);
   background: var(--paper);
   color: var(--ink);
   cursor: pointer;
@@ -276,4 +279,18 @@
 
 .formActions {
   margin-bottom: .5rem;
+  overflow-wrap: anywhere;
+}
+
+@media (pointer: coarse) {
+  .formActions a {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .formActions a,
+  .cardActions a,
+  .deleteLink {
+    min-height: 2.75rem;
+  }
 }

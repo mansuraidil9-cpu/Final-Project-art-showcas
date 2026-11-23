@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useActionState, useState } from 'react'
 import { newPasswordPattern } from '../lib/account-validation.mjs'
 import { signIn, signUp } from './auth-actions'
+import HomeLink from './home-link'
 import styles from './auth.module.css'
 
 const screens = {
@@ -63,7 +64,7 @@ export default function AuthPage({ variant }) {
       <div className={styles.shell}>
         <header className={styles.header}>
           <Link className={styles.wordmark} href="/">ALTERIA</Link>
-          <Link className={styles.back} href="/">Kembali ke beranda</Link>
+          <HomeLink />
         </header>
 
         <main className={styles.content}>

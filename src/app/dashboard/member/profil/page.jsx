@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import AccountPanel from '@/app/account-panel'
 import ActionForm from '@/app/dashboard/action-form'
+import ProfileLogout from '@/app/dashboard/profile-logout'
 import { getPublicCreator } from '@/lib/artworks'
 import { requireUser } from '@/lib/session'
 import styles from '../member-artworks.module.css'
@@ -46,6 +47,7 @@ export default async function MemberProfilePage() {
           </div>
         </ActionForm>
       </section>
+      <ProfileLogout />
     </AccountPanel>
   )
 }

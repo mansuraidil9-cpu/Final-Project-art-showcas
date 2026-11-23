@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { signOut } from './auth-actions'
 import DashboardMotion from './dashboard/dashboard-motion'
+import HomeLink from './home-link'
 import styles from './auth.module.css'
 
 export default function AccountPanel({ title, description, children, wide = false }) {
@@ -9,17 +9,12 @@ export default function AccountPanel({ title, description, children, wide = fals
       <div className={styles.shell}>
         <header className={styles.header}>
           <Link className={styles.wordmark} href="/">ALTERIA</Link>
-          <Link className={styles.back} href="/">Kembali ke beranda</Link>
+          <HomeLink />
         </header>
-        <main className={`${styles.panel} ${wide ? styles.widePanel : ''} py-12`}>
+        <main className={`${styles.panel} ${styles.accountPanel} ${wide ? styles.widePanel : ''}`}>
           <h1>{title}</h1>
           {description && <p className={styles.intro}>{description}</p>}
-          <DashboardMotion>
-            {children}
-            <form action={signOut}>
-              <button className={styles.submit} type="submit">Keluar</button>
-            </form>
-          </DashboardMotion>
+          <DashboardMotion>{children}</DashboardMotion>
         </main>
       </div>
     </div>

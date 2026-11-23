@@ -11,6 +11,7 @@ function getInitials(name) {
 
 export default function ShowcaseHeader({ user, currentPage, favoritesCount }) {
   const accountPath = user ? dashboardPath(user) : null
+  const displayName = user?.display_name.trim()
   const roleLabel = user ? roleLabels[user.role] : null
   const showRole = user?.role === 'admin' || user?.role === 'curator'
   const accountLabel = accountPath === '/curator/pending' ? 'Buka status akun Curator' : `Buka dashboard ${roleLabel}`
@@ -31,12 +32,15 @@ export default function ShowcaseHeader({ user, currentPage, favoritesCount }) {
             <Link className={styles.accountRole} href="/dashboard/curator" aria-label="Buka dashboard Curator">Curator</Link>
           )}
           {accountPath ? (
-            <Link className={styles.accountProfile} href={accountPath} aria-label={accountLabel} title={accountLabel}>
-              {showRole && <span className={styles.accountRole}>{roleLabel}</span>}
+            <Link className={styles.accountProfile} href={accountPath} aria-label={`${accountLabel} untuk ${displayName}`} title={displayName}>
+              <span className={styles.accountIdentity}>
+                <span className={styles.accountName}>{displayName}</span>
+                {showRole && <span className={styles.accountRole}>{roleLabel}</span>}
+              </span>
               {user.avatarSrc ? (
                 <Image className={styles.accountAvatar} src={user.avatarSrc} alt="" width={44} height={44} unoptimized />
               ) : (
-                <span className={styles.accountAvatar} aria-hidden="true">{getInitials(user.display_name) || roleLabel[0]}</span>
+                <span className={styles.accountAvatar} aria-hidden="true">{getInitials(displayName) || roleLabel[0]}</span>
               )}
             </Link>
           ) : (

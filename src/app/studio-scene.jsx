@@ -11,8 +11,9 @@ const smoothstep = (a, b, value) => {
 }
 
 function getLayout() {
-  const width = window.innerWidth
-  if (width < 768) {
+  const { innerWidth: width, innerHeight: height } = window
+  const compactLandscape = width > height && height <= 560
+  if (width < 768 && !compactLandscape) {
     return { heroX:.16, heroY:-1, heroScale:.65, dimX:0, dimY:1.03, dimScale:.57, galleryX:.15, galleryY:.72, galleryScale:.64, finaleScale:.73, baseZ:9.8 }
   }
   if (width < 1024) {
@@ -313,11 +314,11 @@ export default function StudioScene({ images = [], heroImage, motionRef, onSelec
     }
     function resize() {
       if (!renderer || !camera) return
-      const width = innerWidth
-      const height = innerHeight
+      const width = mount.clientWidth || innerWidth
+      const height = mount.clientHeight || innerHeight
       camera.aspect = width / Math.max(height,1)
       camera.updateProjectionMatrix()
-      renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2))
+      renderer.setPixelRatio(Math.min(devicePixelRatio || 1, width < 1024 ? 1.5 : 2))
       renderer.setSize(width,height,false)
     }
     function visibilityChange() {
@@ -440,7 +441,7 @@ export default function StudioScene({ images = [], heroImage, motionRef, onSelec
       return
     }
 
-    let current = 0
+    let current = motionRef.current.progress
     let mouseX = 0
     let mouseY = 0
     let lastFrame = 0
@@ -448,15 +449,17 @@ export default function StudioScene({ images = [], heroImage, motionRef, onSelec
     function draw(now) {
       raf = 0
       if (disposed || reduce.matches || document.hidden || !inView) return
-      if (lastFrame && now - lastFrame < 12) {
+      const elapsed = lastFrame ? now - lastFrame : 1000 / 60
+      if (elapsed < 12) {
         raf = requestAnimationFrame(draw)
         return
       }
       lastFrame = now
       const layout = getLayout()
-      current += (motionRef.current.progress - current)*.068
-      mouseX += (motionRef.current.pointerX - mouseX)*.07
-      mouseY += (motionRef.current.pointerY - mouseY)*.07
+      const sceneEase = 1 - Math.exp(-elapsed / 235)
+      current += (motionRef.current.progress - current) * sceneEase
+      mouseX += (motionRef.current.pointerX - mouseX) * sceneEase
+      mouseY += (motionRef.current.pointerY - mouseY) * sceneEase
       const t12=smoothstep(.12,.34,current)
       const t23=smoothstep(.47,.62,current)
       const t34=smoothstep(.86,.97,current)
@@ -492,7 +495,7 @@ export default function StudioScene({ images = [], heroImage, motionRef, onSelec
       light.position.set(2+mouseX*2,1-mouseY*1.6,5)
 
       const targetFocus = clamp(motionRef.current.galleryIndex || 0, 0, Math.max(gallery.length - 1, 0))
-      galleryFocus += (targetFocus - galleryFocus) * .095
+      galleryFocus += (targetFocus - galleryFocus) * (1 - Math.exp(-elapsed / 170))
       const artProgress = galleryFocus - (motionRef.current.dragOffset || 0)
       gallery.forEach((item,i)=>{
         const distance=i-artProgress

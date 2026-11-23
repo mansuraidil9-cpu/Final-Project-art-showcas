@@ -39,15 +39,27 @@
 }
 
 .wordmark {
-  font: 1.7rem/1 var(--serif);
+  font: clamp(1.4rem, 5.5vw, 1.7rem)/1 var(--serif);
   letter-spacing: .23em;
 }
 
 .back {
-  font-size: .83rem;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  background: #faf8f1;
+  color: var(--accent);
 }
 
-.back:hover,
+.back:is(:hover, :focus-visible) {
+  border-color: var(--accent);
+  background: #e9ecdf;
+}
+
 .switch a {
   text-decoration: underline;
   text-underline-offset: .22em;
@@ -64,6 +76,7 @@
 }
 
 .panel {
+  min-width: 0;
   width: min(100%, 28rem);
   justify-self: center;
 }
@@ -75,6 +88,15 @@
 .panel h1 {
   font: 400 clamp(3.55rem, 6vw, 5.3rem)/.95 var(--serif);
   letter-spacing: -.025em;
+  overflow-wrap: anywhere;
+}
+
+.accountPanel {
+  padding-block: clamp(1.75rem, 5vw, 3rem);
+}
+
+.accountPanel h1 + div {
+  margin-top: 1.15rem;
 }
 
 .panel.formPanel {
@@ -114,6 +136,7 @@
   color: var(--muted);
   font-size: .91rem;
   line-height: 1.55;
+  overflow-wrap: anywhere;
 }
 
 .form,
@@ -127,6 +150,7 @@
 
 .field {
   gap: .35rem;
+  min-width: 0;
 }
 
 .field label {
@@ -180,8 +204,9 @@
 .submit {
   min-height: 2.9rem;
   padding: .65rem 1rem;
+  border-radius: var(--button-radius, .65rem);
   background: var(--accent);
-  color: var(--paper);
+  color: #fbf8f3;
   cursor: pointer;
   font-size: .88rem;
   font-weight: 600;
@@ -194,6 +219,12 @@
 .submit:disabled {
   cursor: wait;
   opacity: .7;
+}
+
+.profileLogout {
+  margin-top: .5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -243,12 +274,44 @@
 
   .content {
     grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .panel h1 {
+    font-size: clamp(2.65rem, 8vw, 3.5rem);
+    line-height: 1.02;
   }
 
   .accountInfo {
     width: min(100%, 33rem);
     margin-top: 0;
     justify-self: center;
+  }
+}
+
+@media (max-width: 375px) {
+  .panel.formPanel {
+    padding: 1rem;
+  }
+
+  .password button {
+    min-width: 4.5rem;
+    padding-inline: .45rem;
+  }
+}
+
+@media (max-height: 460px) and (orientation: landscape) {
+  .header {
+    min-height: 3.6rem;
+  }
+
+  .content,
+  .accountPanel {
+    padding-block: 1.35rem 2rem;
+  }
+
+  .accountInfo {
+    margin-top: .7rem;
   }
 }
 
@@ -261,4 +324,3 @@
   box-shadow:0 20px 50px -25px rgb(38 48 36 / 17%);
 }
 .field > input,.password { background:#FBF8F3; border-color:rgb(125 84 39 / 23%); }
-.submit { background:#313D2F; color:#FBF8F3; border-radius:2px; }

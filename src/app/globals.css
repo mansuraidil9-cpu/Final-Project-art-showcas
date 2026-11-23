@@ -23,6 +23,7 @@
   --muted: #5B5549;
   --rule: rgb(125 84 39 / 19%);
   --accent: #313D2F;
+  --button-radius: .65rem;
   --serif: var(--font-studio-serif), Georgia, serif;
   --ease-studio: cubic-bezier(.22, 1, .36, 1);
 }
@@ -52,6 +53,7 @@ body > * { position:relative; z-index:1; }
 ::-webkit-scrollbar-thumb:hover { background:rgb(49 61 47 / 60%); }
 a:where(:link,:visited),a:where(:hover,:focus,:active) { color:inherit; }
 button,input,textarea,select { font:inherit; }
+:where(button,input:is([type="button"],[type="reset"],[type="submit"])) { border-radius:var(--button-radius); }
 button:not(:disabled) { cursor:pointer; }
 input,textarea,select { accent-color:#313D2F; }
 :where(a,button,input,textarea,select,summary):focus-visible { outline:2px solid #7D5427; outline-offset:3px; }

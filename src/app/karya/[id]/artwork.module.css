@@ -162,6 +162,7 @@
 .commentSubmit {
   min-height: 44px;
   padding: .55rem .95rem;
+  border-radius: var(--button-radius);
   background: var(--accent);
   color: var(--paper);
   font-size: .83rem;
