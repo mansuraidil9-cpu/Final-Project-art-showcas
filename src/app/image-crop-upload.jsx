@@ -57,6 +57,7 @@ export default function ImageCropUpload({
   const canvasRef = useRef(null)
   const [pending, setPending] = useState(null)
   const [loaded, setLoaded] = useState(false)
+  const [naturalSize, setNaturalSize] = useState(null)
   const [appliedName, setAppliedName] = useState('')
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
@@ -69,8 +70,9 @@ export default function ImageCropUpload({
   const isAvatar = shape === 'circle'
   const ratio = isAvatar ? 1 : CROP_RATIOS[cropRatio] ?? naturalRatio
   const { width, height } = getCanvasSize(ratio)
-  const outputSize = loaded
-    ? getExportSize({ width, height }, imageRef.current, zoom, resizeRatio, isAvatar)
+  // Data ukuran disimpan di state agar tidak membaca ref selama render.
+  const outputSize = loaded && naturalSize
+    ? getExportSize({ width, height }, naturalSize, zoom, resizeRatio, isAvatar)
     : null
 
   const setInput = useCallback(file => {
@@ -93,6 +95,7 @@ export default function ImageCropUpload({
     picture.onload = () => {
       if (!live) return
       imageRef.current = picture
+      setNaturalSize({ naturalWidth: picture.naturalWidth, naturalHeight: picture.naturalHeight })
       setNaturalRatio(picture.naturalWidth / picture.naturalHeight)
       setLoaded(true)
     }
@@ -129,6 +132,7 @@ export default function ImageCropUpload({
     internalInput.current?.setCustomValidity('Tekan Terapkan ukuran foto sebelum menyimpan.')
     sourceRef.current = file
     setLoaded(false)
+    setNaturalSize(null)
     setZoom(1)
     setPan({ x: 0, y: 0 })
     setCropRatio(isAvatar ? 'square' : 'original')
@@ -223,6 +227,7 @@ export default function ImageCropUpload({
     setInput(null)
     internalInput.current?.setCustomValidity('Tekan Terapkan crop & ukuran sebelum menyimpan.')
     setLoaded(false)
+    setNaturalSize(null)
     setZoom(1)
     setPan({ x: 0, y: 0 })
     setPending(sourceRef.current)

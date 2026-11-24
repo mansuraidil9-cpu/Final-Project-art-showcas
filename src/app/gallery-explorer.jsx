@@ -238,11 +238,11 @@ export default function GalleryExplorer({ artworks, challenges, canLike, gallery
   const [busy, setBusy] = useState(null)
   const [errors, setErrors] = useState({})
   const openerRef = useRef(null)
-  const galleryArtworks = artworks ?? []
+  const galleryArtworks = useMemo(() => artworks ?? [], [artworks])
   const allCategories = useMemo(() => [
     ...categoriesList,
     ...new Set(galleryArtworks.map(item => item.category).filter(name => !categoriesList.includes(name))),
-  ], [artworks])
+  ], [galleryArtworks])
   const search = query.trim().toLocaleLowerCase('id')
   const filteredArtworks = useMemo(() => galleryArtworks
     .filter(artwork => category === 'Semua' || artwork.category === category)
@@ -251,7 +251,7 @@ export default function GalleryExplorer({ artworks, challenges, canLike, gallery
     .sort((first, second) => sort === 'popular'
       ? (reactions[second.id]?.likes ?? second.likes) - (reactions[first.id]?.likes ?? first.likes)
       : second.uploadedAt.localeCompare(first.uploadedAt)),
-  [artworks, category, search, sort, reactions])
+  [galleryArtworks, category, search, sort, reactions])
   const selected = filteredArtworks.find(item => item.id === selectedId) || null
   const GalleryHeading = galleryPage ? 'h1' : 'h2'
   const ArtworkHeading = galleryPage ? 'h2' : 'h3'

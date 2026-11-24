@@ -45,6 +45,7 @@ export default function ArtworkMoreMenu({ artwork, canReport = false }) {
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     const dialog = reportDialogRef.current
+    const trigger = triggerRef.current
     ;(dialog?.querySelector('input[type="radio"]') || dialog?.querySelector('button') || dialog)?.focus()
     function keys(event) {
       if (event.key === 'Escape') {
@@ -70,7 +71,7 @@ export default function ArtworkMoreMenu({ artwork, canReport = false }) {
     return () => {
       document.removeEventListener('keydown', keys)
       document.body.style.overflow = previousOverflow
-      triggerRef.current?.focus()
+      trigger?.focus()
     }
   }, [reportVisible])
 
