@@ -139,12 +139,12 @@ function ProfileEditor({ profile, initialName, avatarSrc, onCancel, onPreview, o
           <strong>Foto Profil</strong>
           <p>Pilih foto, atur besar-kecil dan posisinya, lalu terapkan sebelum menyimpan profil.</p>
           <ImageCropUpload
+            key={avatarResetSignal}
             id="member-avatar-upload"
             name="avatar"
             label="Unggah Foto"
             shape="circle"
             inputRef={inputRef}
-            resetSignal={avatarResetSignal}
             onApplied={file => {
               setInitialMode(false)
               onPreview({ file, initials: false })

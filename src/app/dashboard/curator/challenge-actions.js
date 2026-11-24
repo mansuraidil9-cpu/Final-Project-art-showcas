@@ -43,7 +43,7 @@ export async function saveChallenge(id, _previous, formData) {
     console.error('Challenge gagal disimpan.', error.code ?? error.name)
     return { error: 'Challenge belum bisa disimpan. Coba lagi.' }
   }
-  if (!savedId) return { error: 'Challenge tidak bisa disimpan. Jadwal terkunci setelah hasil diumumkan.' }
+  if (!savedId) return { error: 'Challenge tidak bisa disimpan. Perubahan terkunci setelah hasil juara diumumkan.' }
 
   refreshChallengePages(savedId)
   redirect(`/dashboard/curator?hasil=${creating ? 'dibuat' : 'diedit'}`)
@@ -54,7 +54,9 @@ export async function removeChallenge(id, _previous, formData) {
   if (!isDatabaseId(id) || formData.get('confirmed') !== 'yes') return { error: 'Konfirmasi penghapusan terlebih dahulu.' }
 
   try {
-    if (!await deleteCuratorChallenge(id, user.id)) return { error: 'Challenge tidak ditemukan.' }
+    if (!await deleteCuratorChallenge(id, user.id)) {
+      return { error: 'Challenge tidak ditemukan atau hasil juaranya sudah diumumkan dan terkunci.' }
+    }
   } catch (error) {
     console.error('Challenge gagal dihapus.', error.code ?? error.name)
     return { error: 'Challenge belum bisa dihapus. Coba lagi.' }
@@ -73,7 +75,7 @@ export async function announceWinners(id, _previous, formData) {
 
   try {
     if (!await publishChallengeWinners(id, user.id, winners)) {
-      return { error: 'Pilih minimal satu karya dari challenge ini. Setiap karya hanya boleh mendapat satu juara setelah tenggat.' }
+      return { error: 'Pilih minimal satu karya berbeda setelah tenggat. Pengumuman juara hanya dapat dilakukan sekali.' }
     }
   } catch (error) {
     console.error('Pemenang gagal diumumkan.', error.code ?? error.name)

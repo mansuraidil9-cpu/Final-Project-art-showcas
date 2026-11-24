@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { setLike, setFavorite } from './artwork-interaction-actions'
 import { readGalleryArtworkDetails } from './gallery-artwork-details'
 import ArtworkByline from './artwork-byline'
+import ArtworkMoreMenu from './artwork-more-menu'
 import ChallengeCard from './challenge-card'
 import styles from './gallery-museum.module.css'
 import homeStyles from './home.module.css'
@@ -100,9 +101,7 @@ function MuseumArtworkCard({ artwork, canLike, state, busy, onReact, onOpen, Hea
           <Link href={'/karya/' + artwork.id + '#komentar'}>
             Komentar ({Number(artwork.commentCount || 0).toLocaleString('id-ID')})
           </Link>
-          {canLike && artwork.creatorId !== null && !artwork.isOwner && (
-            <Link href={'/karya/' + artwork.id + '#laporkan-karya'}>Laporkan</Link>
-          )}
+
         </div>
       </div>
     </article>
@@ -112,7 +111,7 @@ function MuseumArtworkCard({ artwork, canLike, state, busy, onReact, onOpen, Hea
 function GalleryLightbox({ artwork, artworks, canLike, state, busy, onReact, onClose, onNavigate }) {
   const dialogRef = useRef(null)
   const [detail, setDetail] = useState(null)
-  const [detailPending, setDetailPending] = useState(false)
+  const [detailPending, setDetailPending] = useState(true)
   const currentIndex = artworks.findIndex(item => item.id === artwork.id)
   const title = 'Inspeksi karya ' + artwork.title
   // Jangan tampilkan deskripsi lukisan sebelumnya saat tombol navigasi ditekan.
@@ -126,8 +125,6 @@ function GalleryLightbox({ artwork, artworks, canLike, state, busy, onReact, onC
 
   useEffect(() => {
     let active = true
-    setDetail(null)
-    setDetailPending(true)
     readGalleryArtworkDetails(artwork.id).then(result => {
       if (active) setDetail(result)
     }).catch(() => {
@@ -144,6 +141,8 @@ function GalleryLightbox({ artwork, artworks, canLike, state, busy, onReact, onC
     document.body.style.overflow = 'hidden'
     dialogRef.current?.focus()
     function onKey(event) {
+      // Dialog laporan memiliki penanganan keyboard sendiri.
+      if (document.querySelector('[data-artwork-report-dialog]')) return
       if (event.key === 'Escape') {
         event.preventDefault()
         onCloseRef.current()
@@ -157,7 +156,7 @@ function GalleryLightbox({ artwork, artworks, canLike, state, busy, onReact, onC
         const items = Array.from(dialogRef.current?.querySelectorAll('button:not(:disabled),a[href]') || [])
           .filter(element => element.getClientRects().length)
         if (!items.length) return
-        if (event.shiftKey && document.activeElement === items[0]) {
+        if (event.shiftKey && (document.activeElement === items[0] || document.activeElement === dialogRef.current)) {
           event.preventDefault()
           items[items.length - 1].focus()
         } else if (!event.shiftKey && document.activeElement === items[items.length - 1]) {
@@ -180,6 +179,7 @@ function GalleryLightbox({ artwork, artworks, canLike, state, busy, onReact, onC
     }}>
       <section className={styles.lightbox} role="dialog" aria-modal="true"
         aria-label={title} ref={dialogRef} tabIndex={-1}>
+        <ArtworkMoreMenu key={artwork.id} artwork={artwork} canReport={canLike} />
         <button type="button" className={styles.closeButton} onClick={onClose}
           aria-label="Tutup pratinjau karya">×</button>
         <div className={styles.lightboxVisual}>
@@ -227,9 +227,9 @@ function GalleryLightbox({ artwork, artworks, canLike, state, busy, onReact, onC
   )
 }
 
-export default function GalleryExplorer({ artworks, challenges, canLike, galleryPage = false }) {
+export default function GalleryExplorer({ artworks, challenges, canLike, galleryPage = false, initialQuery = '' }) {
   const router = useRouter()
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(initialQuery)
   const [category, setCategory] = useState('Semua')
   const [sort, setSort] = useState('popular')
   const [density, setDensity] = useState('three')
@@ -255,10 +255,6 @@ export default function GalleryExplorer({ artworks, challenges, canLike, gallery
   const selected = filteredArtworks.find(item => item.id === selectedId) || null
   const GalleryHeading = galleryPage ? 'h1' : 'h2'
   const ArtworkHeading = galleryPage ? 'h2' : 'h3'
-
-  useEffect(() => {
-    setReactions({})
-  }, [artworks])
 
   function openArtwork(id) {
     openerRef.current = document.activeElement
@@ -308,9 +304,18 @@ export default function GalleryExplorer({ artworks, challenges, canLike, gallery
     }
   }
 
+  function changeQuery(value) {
+    setQuery(value)
+    // Gunakan replaceState, bukan pushState: tombol Back kembali dengan kata kunci sebelumnya.
+    const url = new URL(window.location.href)
+    if (value.trim()) url.searchParams.set('cari', value.trim())
+    else url.searchParams.delete('cari')
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash)
+  }
+
   function resetFilters() {
     setCategory('Semua')
-    setQuery('')
+    changeQuery('')
   }
 
   const matchingChallenges = (challenges ?? []).filter(challenge =>
@@ -335,8 +340,8 @@ export default function GalleryExplorer({ artworks, challenges, canLike, gallery
             <span className={styles.searchIcon} aria-hidden="true">⌕</span>
             <input type="search" aria-label="Cari karya, kreator, atau challenge"
               placeholder="Cari karya, kreator, atau challenge..."
-              value={query} onChange={event => setQuery(event.target.value)} />
-            {query && <button type="button" aria-label="Hapus pencarian" onClick={() => setQuery('')}>×</button>}
+              value={query} onChange={event => changeQuery(event.target.value)} />
+            {query && <button type="button" aria-label="Hapus pencarian" onClick={() => changeQuery('')}>×</button>}
           </div>
         </div>
         <div className={styles.filterControls}>
@@ -369,7 +374,7 @@ export default function GalleryExplorer({ artworks, challenges, canLike, gallery
               <button type="button" onClick={() => setCategory('Semua')}>{category} <span aria-hidden="true">×</span></button>
             )}
             {query.trim() && (
-              <button type="button" onClick={() => setQuery('')}>{query.trim()} <span aria-hidden="true">×</span></button>
+              <button type="button" onClick={() => changeQuery('')}>{query.trim()} <span aria-hidden="true">×</span></button>
             )}
             <button type="button" className={styles.resetButton} onClick={resetFilters}>Reset filter</button>
           </div>
@@ -407,7 +412,7 @@ export default function GalleryExplorer({ artworks, challenges, canLike, gallery
       )}
 
       {selected && (
-        <GalleryLightbox artwork={selected} artworks={filteredArtworks} canLike={canLike}
+        <GalleryLightbox key={selected.id} artwork={selected} artworks={filteredArtworks} canLike={canLike}
           state={reactions[selected.id]} busy={busy} onReact={react}
           onClose={closeArtwork} onNavigate={navigateArtwork} />
       )}

@@ -6,7 +6,7 @@ import ActionForm from '@/app/dashboard/action-form'
 import sectionStyles from '@/app/dashboard/member/member-artworks.module.css'
 import { getMemberArtworks } from '@/lib/artworks'
 import { challengeStatusLabels } from '@/lib/challenge-dates'
-import { challengeTimeZone, getChallengeById, getChallengeSubmissions, getMemberChallengeSubmissions } from '@/lib/challenges'
+import { challengeTimeZone, getChallengeById, getChallengeSubmissions, getChallengeWinners, getMemberChallengeSubmissions } from '@/lib/challenges'
 import { getCurrentUser } from '@/lib/session'
 import SubmissionCards from '../submission-cards'
 import { submitArtwork, withdrawArtwork } from '../submission-actions'
@@ -31,14 +31,16 @@ export default async function DetailChallenge({ params }) {
 
   const memberId = user?.role === 'member' ? user.id : null
   const canParticipate = memberId && challenge.status !== 'ended'
-  const [submissions, ownSubmissions] = await Promise.all([
+  const [submissions, ownSubmissions, winnerArchive] = await Promise.all([
     getChallengeSubmissions(id),
     canParticipate ? getMemberChallengeSubmissions(memberId, id) : [],
+    getChallengeWinners(id),
   ])
   const ownSubmission = ownSubmissions[0]
   const canSubmit = canParticipate && challenge.status === 'active' && challenge.curatorId !== memberId && !ownSubmission
   const availableArtworks = canSubmit ? await getMemberArtworks(memberId) : []
-  const winners = submissions.filter(item => item.rank !== null).sort((a, b) => a.rank - b.rank)
+  const winners = winnerArchive.length ? winnerArchive
+    : submissions.filter(item => item.rank !== null).sort((a, b) => a.rank - b.rank)
   const coverCredit = credits.find(artwork => `/alteria/${artwork.filename}` === challenge.coverImage)
 
   return (
@@ -120,7 +122,11 @@ export default async function DetailChallenge({ params }) {
       </section>
       <section className={sectionStyles.section} aria-labelledby="pemenang-challenge">
         <header className={sectionStyles.sectionHeader}><h2 id="pemenang-challenge">Pemenang</h2></header>
-        {winners.length ? <SubmissionCards submissions={winners} /> : <p className={sectionStyles.empty}>Pemenang belum diumumkan.</p>}
+        {winners.length ? <SubmissionCards submissions={winners} /> : (
+          <p className={sectionStyles.empty}>
+            {challenge.winnersPublishedAt ? 'Hasil diumumkan, tetapi arsip belum tersedia.' : 'Pemenang belum diumumkan.'}
+          </p>
+        )}
       </section>
     </ShowcaseDetail>
   )

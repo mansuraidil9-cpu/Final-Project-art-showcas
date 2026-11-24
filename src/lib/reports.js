@@ -13,14 +13,14 @@ export async function createArtworkReport(artworkId, memberId, reason) {
     INSERT INTO artwork_reports (artwork_id, member_id, reason)
     SELECT a.id, u.id, $3 FROM artworks a
     JOIN users u ON u.id = $2 AND u.role = 'member'
-    WHERE a.id = $1 AND a.owner_id IS NOT NULL AND a.owner_id <> u.id
+    WHERE a.id = $1 AND a.owner_id IS DISTINCT FROM u.id
     ON CONFLICT (artwork_id, member_id) DO NOTHING`, [artworkId, memberId, reason])
   return rowCount === 1
 }
 
 export async function getPendingArtworkReports() {
   const { rows } = await pool.query(`
-    SELECT a.id::text, a.title, creator.display_name AS artist,
+    SELECT a.id::text, a.title, COALESCE(creator.display_name, a.artist) AS artist,
            count(*)::integer AS total,
            jsonb_agg(jsonb_build_object('reason', r.reason, 'id', r.member_id::text)
                      ORDER BY r.created_at, r.member_id) AS reports

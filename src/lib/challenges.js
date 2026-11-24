@@ -13,6 +13,7 @@ const dayFormat = new Intl.DateTimeFormat('id-ID', {
 const selectChallenges = `
   SELECT c.id::text, c.owner_id::text, c.title, c.category, c.description, c.rules, c.prize,
          c.cover_image, c.cover_alt, c.starts_at, c.ends_at,
+         (to_jsonb(c)->>'winners_published_at') AS winners_published_at,
          CASE
            WHEN c.starts_at > CURRENT_TIMESTAMP THEN 'upcoming'
            WHEN c.ends_at <= CURRENT_TIMESTAMP THEN 'ended'
@@ -37,6 +38,7 @@ function toChallenge(row) {
     deadline: row.ends_at.toISOString(),
     deadlineLabel: dayFormat.format(row.ends_at),
     status: row.status,
+    winnersPublishedAt: row.winners_published_at ?? null,
   }
 }
 
@@ -114,9 +116,7 @@ export function updateCuratorChallenge(id, curatorId, fields, banner) {
         starts_at = $7, ends_at = $8, cover_image = COALESCE($9, c.cover_image),
         cover_alt = $3, cover_data = COALESCE($10, c.cover_data)
       WHERE c.id = $1 AND ${challengeOwner}
-        AND ((c.starts_at = $7 AND c.ends_at = $8) OR NOT EXISTS (
-          SELECT 1 FROM challenge_submissions s WHERE s.challenge_id = c.id AND s.placement IS NOT NULL
-        ))`,
+        AND c.winners_published_at IS NULL`,
       [id, curatorId, fields.title, fields.description, fields.rules, fields.prize,
         fields.startsAt, fields.endsAt, banner?.src ?? null, banner?.data ?? null],
     )
@@ -125,7 +125,11 @@ export function updateCuratorChallenge(id, curatorId, fields, banner) {
 }
 
 export async function deleteCuratorChallenge(id, curatorId) {
-  const { rowCount } = await pool.query(`DELETE FROM challenges c WHERE c.id = $1 AND ${challengeOwner}`, [id, curatorId])
+  // Pengumuman juara bersifat final; arsipnya tidak boleh dihapus tak sengaja.
+  const { rowCount } = await pool.query(
+    `DELETE FROM challenges c WHERE c.id = $1 AND ${challengeOwner}
+       AND c.winners_published_at IS NULL`, [id, curatorId],
+  )
   return rowCount === 1
 }
 
@@ -153,6 +157,47 @@ function toSubmission(row) {
     withdrawn: row.withdrawn_at !== null,
     submittedAt: row.submitted_at.toISOString(),
   }
+}
+
+export async function getChallengeWinners(id) {
+  if (!isDatabaseId(id)) return []
+  let rows
+  try {
+    ;({ rows } = await pool.query(`
+    SELECT w.challenge_id::text, w.rank, w.artwork_id::text, w.title,
+           w.artist, w.image_src, w.image_alt, (w.image_data IS NOT NULL) AS has_data,
+           (a.id IS NOT NULL) AS artwork_exists
+    FROM challenge_winner_snapshots w
+    LEFT JOIN artworks a ON a.id = w.artwork_id
+    WHERE w.challenge_id = $1
+    ORDER BY w.rank`, [id]))
+  } catch (error) {
+    // Halaman publik tetap dapat dibuka saat migrasi database belum dijalankan.
+    if (error.code === '42P01') return []
+    throw error
+  }
+  return rows.map(row => ({
+    id: 'arsip-' + row.challenge_id + '-' + row.rank,
+    challengeId: row.challenge_id,
+    artworkId: row.artwork_id,
+    title: row.title,
+    artist: row.artist,
+    imageSrc: row.has_data
+      ? `/media/juara/${row.challenge_id}/${row.rank}`
+      : row.image_src,
+    imageAlt: row.image_alt,
+    rank: row.rank,
+    hasArtwork: row.artwork_exists,
+  }))
+}
+
+export async function getWinnerSnapshotImage(challengeId, rank) {
+  if (!isDatabaseId(challengeId) || ![1, 2, 3].includes(Number(rank))) return null
+  const { rows } = await pool.query(
+    'SELECT image_data FROM challenge_winner_snapshots WHERE challenge_id = $1 AND rank = $2',
+    [challengeId, rank],
+  )
+  return rows[0]?.image_data ?? null
 }
 
 export async function getChallengeSubmissions(id) {
@@ -207,7 +252,7 @@ export function publishChallengeWinners(id, curatorId, winners) {
     const { rows } = await client.query(`
       SELECT EXISTS (
         SELECT 1 FROM challenges c WHERE c.id = $1 AND ${challengeOwner}
-          AND c.ends_at <= clock_timestamp()
+          AND c.ends_at <= clock_timestamp() AND c.winners_published_at IS NULL
       ) AS eligible`, [id, curatorId])
     if (!rows[0].eligible) return false
 
@@ -217,11 +262,26 @@ export function publishChallengeWinners(id, curatorId, winners) {
       ORDER BY id FOR UPDATE`, [id, submissionIds, curatorId])
     if (rowCount !== submissionIds.length) return false
 
-    await client.query('UPDATE challenge_submissions SET placement = NULL WHERE challenge_id = $1 AND placement IS NOT NULL', [id])
+    // Buat snapshot dalam transaksi yang sama; hasil tidak bergantung pada FK karya.
+    const snapshots = await client.query(`
+      INSERT INTO challenge_winner_snapshots
+        (challenge_id, rank, artwork_id, title, artist, image_src, image_alt, image_data)
+      SELECT $1, selected.rank, a.id, a.title, u.display_name, a.image_src, a.image_alt, a.image_data
+      FROM unnest($2::bigint[], $3::smallint[]) AS selected(id, rank)
+      JOIN challenge_submissions s ON s.id = selected.id AND s.challenge_id = $1
+      JOIN artworks a ON a.id = s.artwork_id
+      JOIN users u ON u.id = s.member_id`, [id, submissionIds, ranks])
+    if (snapshots.rowCount !== submissionIds.length) throw new Error('Arsip pemenang tidak lengkap.')
+
     await client.query(`
       UPDATE challenge_submissions s SET placement = selected.rank
       FROM unnest($2::bigint[], $3::smallint[]) AS selected(id, rank)
       WHERE s.challenge_id = $1 AND s.id = selected.id`, [id, submissionIds, ranks])
+    const updated = await client.query(
+      'UPDATE challenges SET winners_published_at = clock_timestamp() WHERE id = $1 AND winners_published_at IS NULL',
+      [id],
+    )
+    if (updated.rowCount !== 1) throw new Error('Status hasil final gagal disimpan.')
     return true
   })
 }

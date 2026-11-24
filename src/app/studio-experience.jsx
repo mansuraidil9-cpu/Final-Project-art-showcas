@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ArtworkFavorite from './artwork-favorite'
+import ArtworkMoreMenu from './artwork-more-menu'
 import StudioSceneLoader from './studio-scene-loader'
 import styles from './studio-experience.module.css'
 
@@ -23,6 +24,8 @@ const mainArtwork = {
 
 export default function StudioExperience({ artworks = [], challenges = [], canLike = false }) {
   const rootRef = useRef(null)
+  const detailDialogRef = useRef(null)
+  const favoritesDialogRef = useRef(null)
   const chaptersRef = useRef([])
   const selectedRef = useRef({ locked: false })
   const motionRef = useRef({ progress: 0, pointerX: 0, pointerY: 0, manual: false, orbitX: 0, orbitY: 0, galleryIndex: 0, dragOffset: 0 })
@@ -33,12 +36,13 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
   const [layer, setLayer] = useState('all')
   const [detail, setDetail] = useState(null)
   const [favoritesOpen, setFavoritesOpen] = useState(false)
+  const [favoriteOverrides, setFavoriteOverrides] = useState({})
   const [toast, setToast] = useState('')
 
   const works = artworks.slice(0, 3)
   const workCount = works.length
   const featured = works[galleryIndex] || null
-  const favorites = artworks.filter(artwork => artwork.favorited)
+  const favorites = artworks.filter(artwork => favoriteOverrides[artwork.id] ?? artwork.favorited)
   const activeChallenge = challenges[0] || null
   const sceneImages = works.map(artwork => artwork.imageSrc)
   const onSceneReady = useCallback(() => setReady(true), [])
@@ -125,15 +129,36 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
 
   useEffect(() => {
     if (!detail && !favoritesOpen) return
+    const previousFocus = document.activeElement
     const oldOverflow = document.body.style.overflow
-    function closeOnEscape(event) {
-      if (event.key === 'Escape') { setDetail(null); setFavoritesOpen(false) }
-    }
+    const box = detail ? detailDialogRef.current : favoritesDialogRef.current
     document.body.style.overflow = 'hidden'
-    document.addEventListener('keydown', closeOnEscape)
+    box?.querySelector('button')?.focus()
+    function dialogKeys(event) {
+      if (document.querySelector('[data-artwork-report-dialog]')) return
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setDetail(null)
+        setFavoritesOpen(false)
+        return
+      }
+      if (event.key !== 'Tab' || !box) return
+      const items = [...box.querySelectorAll('button:not(:disabled),a[href],input:not(:disabled)')]
+        .filter(item => item.getClientRects().length)
+      if (!items.length) return
+      if (event.shiftKey && (document.activeElement === items[0] || document.activeElement === box)) {
+        event.preventDefault()
+        items[items.length - 1].focus()
+      } else if (!event.shiftKey && document.activeElement === items[items.length - 1]) {
+        event.preventDefault()
+        items[0].focus()
+      }
+    }
+    document.addEventListener('keydown', dialogKeys)
     return () => {
       document.body.style.overflow = oldOverflow
-      document.removeEventListener('keydown', closeOnEscape)
+      document.removeEventListener('keydown', dialogKeys)
+      if (previousFocus?.isConnected) previousFocus.focus()
     }
   }, [detail, favoritesOpen])
 
@@ -302,7 +327,8 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
 
       {detail && (
         <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setDetail(null) }}>
-          <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="studio-detail-title">
+          <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="studio-detail-title" ref={detailDialogRef} tabIndex={-1}>
+            {detail.id && <ArtworkMoreMenu key={detail.id} artwork={detail} canReport={canLike} />}
             <button type="button" className={styles.close} aria-label="Tutup detail karya" onClick={() => setDetail(null)}>×</button>
             <div className={styles.modalArt}><Image src={detail.imageSrc} alt={detail.title} fill unoptimized={Boolean(detail.isUploaded || !detail.id)} sizes="(max-width: 720px) 90vw, 38vw" /></div>
             <div className={styles.modalCopy}>
@@ -311,9 +337,10 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
               <p>oleh {detail.artist}</p>
               <dl><dt>Medium / kategori</dt><dd>{detail.category}</dd><dt>Informasi lainnya</dt><dd>{detail.id ? 'Lihat informasi pada halaman detail karya' : 'Ilustrasi pada beranda'}</dd></dl>
               {detail.id && <Link href={`/karya/${detail.id}`} className={styles.primary}>Buka detail lengkap ↗</Link>}
-              {detail.id && canLike && !detail.isOwner && <ArtworkFavorite artwork={detail} />}
-              {detail.id && canLike && detail.creatorId !== null && !detail.isOwner && (
-                <Link href={`/karya/${detail.id}#laporkan-karya`} className={styles.secondary}>Laporkan karya</Link>
+              {detail.id && canLike && !detail.isOwner && (
+                <ArtworkFavorite key={detail.id} artwork={{
+                  ...detail, favorited: favoriteOverrides[detail.id] ?? detail.favorited,
+                }} onChange={(id, saved) => setFavoriteOverrides(previous => ({ ...previous, [id]: saved }))} />
               )}
             </div>
           </div>
@@ -321,7 +348,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
       )}
       {favoritesOpen && (
         <div className={styles.modalBackdrop} role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setFavoritesOpen(false) }}>
-          <div className={styles.favoritesPanel} role="dialog" aria-modal="true" aria-labelledby="judul-favorit">
+          <div className={styles.favoritesPanel} role="dialog" aria-modal="true" aria-labelledby="judul-favorit" ref={favoritesDialogRef} tabIndex={-1}>
             <button className={styles.close} type="button" aria-label="Tutup favorit" onClick={() => setFavoritesOpen(false)}>×</button>
             <span className={styles.eyebrow}>KOLEKSI TERSIMPAN</span>
             <h2 id="judul-favorit">Karya Favorit</h2>

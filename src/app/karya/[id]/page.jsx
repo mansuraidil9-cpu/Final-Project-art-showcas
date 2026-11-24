@@ -31,7 +31,7 @@ export default async function DetailKarya({ params }) {
   if (!artwork) notFound()
 
   const canInteract = memberId !== null && !artwork.isOwner
-  const canReport = canInteract && artwork.creatorId !== null
+  const canReport = canInteract
   const [comments, reported] = await Promise.all([
     getArtworkComments(artwork.id, memberId),
     canReport ? hasArtworkReport(artwork.id, memberId) : false,

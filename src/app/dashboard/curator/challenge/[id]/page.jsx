@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import AccountPanel from '@/app/account-panel'
 import ActionForm from '@/app/dashboard/action-form'
 import SubmissionCards from '@/app/challenge/submission-cards'
-import { getChallengeById, getChallengeSubmissions } from '@/lib/challenges'
+import { getChallengeById, getChallengeSubmissions, getChallengeWinners } from '@/lib/challenges'
 import { challengeStatusLabels } from '@/lib/challenge-dates'
 import { requireUser } from '@/lib/session'
 import { announceWinners, removeChallenge, saveChallenge } from '../../challenge-actions'
@@ -16,7 +16,10 @@ export default async function ManageChallenge({ params }) {
   const challenge = await getChallengeById(id)
   if (!challenge || challenge.curatorId !== user.id) notFound()
 
-  const submissions = await getChallengeSubmissions(id)
+  const [submissions, winners] = await Promise.all([
+    getChallengeSubmissions(id),
+    getChallengeWinners(id),
+  ])
 
   return (
     <AccountPanel title={challenge.title} description={challengeStatusLabels[challenge.status]} wide>
@@ -25,18 +28,18 @@ export default async function ManageChallenge({ params }) {
         <Link href={`/challenge/${id}`}>Lihat halaman publik</Link>
       </div>
 
-      <section className={styles.section} aria-labelledby="edit-challenge">
+      {!challenge.winnersPublishedAt && <section className={styles.section} aria-labelledby="edit-challenge">
         <header className={styles.sectionHeader}><h2 id="edit-challenge">Edit Challenge</h2></header>
         <ActionForm action={saveChallenge.bind(null, id)} submitLabel="Simpan perubahan">
           <ChallengeFields challenge={challenge} />
         </ActionForm>
-      </section>
+      </section>}
 
       <section className={styles.section} aria-labelledby="peserta-challenge">
         <header className={styles.sectionHeader}><h2 id="peserta-challenge">Karya Peserta</h2></header>
         {submissions.length ? <SubmissionCards submissions={submissions} /> : <p className={styles.empty}>Belum ada peserta.</p>}
         {challenge.status !== 'ended' && <p className={styles.hint}>Pemenang dapat dipilih setelah tenggat.</p>}
-        {challenge.status === 'ended' && submissions.length > 0 && (
+        {challenge.status === 'ended' && submissions.length > 0 && !challenge.winnersPublishedAt && (
           <ActionForm action={announceWinners.bind(null, id)} submitLabel="Umumkan pemenang">
             {[1, 2, 3].map(rank => (
               <div className={styles.field} key={rank}>
@@ -51,7 +54,18 @@ export default async function ManageChallenge({ params }) {
         )}
       </section>
 
-      <section className={styles.section} aria-labelledby="hapus-challenge">
+      {challenge.winnersPublishedAt && (
+        <section className={styles.section} aria-labelledby="hasil-juara">
+          <header className={styles.sectionHeader}><h2 id="hasil-juara">Hasil Final</h2></header>
+          <p className={styles.notice} role="status">
+            Juara sudah diumumkan dan diarsipkan. Challenge terkunci untuk menjaga hasil tetap konsisten.
+          </p>
+          {winners.length > 0 ? <SubmissionCards submissions={winners} /> : (
+            <p className={styles.error}>Arsip pemenang belum tersedia. Periksa migrasi database.</p>
+          )}
+        </section>
+      )}
+      {!challenge.winnersPublishedAt && <section className={styles.section} aria-labelledby="hapus-challenge">
         <header className={styles.sectionHeader}><h2 id="hapus-challenge">Hapus Challenge</h2></header>
         <ActionForm action={removeChallenge.bind(null, id)} submitLabel="Hapus challenge" danger>
           <label className="flex items-start gap-2 text-sm">
@@ -59,7 +73,7 @@ export default async function ManageChallenge({ params }) {
             Hapus challenge ini beserta submisi dan hasilnya.
           </label>
         </ActionForm>
-      </section>
+      </section>}
     </AccountPanel>
   )
 }

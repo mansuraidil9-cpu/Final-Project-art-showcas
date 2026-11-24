@@ -11,7 +11,9 @@ export const metadata = {
   description: 'Jelajahi galeri karya seni ALTERIA dan temukan karya berdasarkan judul, kreator, atau kategori.',
 }
 
-export default async function GalleryPage() {
+export default async function GalleryPage({ searchParams }) {
+  const urlParams = await searchParams
+  const initialQuery = typeof urlParams?.cari === 'string' ? urlParams.cari.slice(0, 120) : ''
   await connection()
 
   const user = await getCurrentUser()
@@ -26,7 +28,7 @@ export default async function GalleryPage() {
       <ShowcaseHeader user={user} currentPage="galeri" favoritesCount={canLike ? (artworks ?? []).filter(artwork => artwork.favorited).length : undefined} />
       <div className={styles.shell}>
         <main>
-          <GalleryExplorer artworks={artworks} canLike={canLike} galleryPage />
+          <GalleryExplorer artworks={artworks} canLike={canLike} galleryPage initialQuery={initialQuery} />
         </main>
         <ShowcaseFooter />
       </div>

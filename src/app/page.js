@@ -8,7 +8,9 @@ import ShowcaseFooter from './showcase-footer'
 import ShowcaseHeader from './showcase-header'
 import styles from './home.module.css'
 
-export default async function Home() {
+export default async function Home({ searchParams }) {
+  const urlParams = await searchParams
+  const initialQuery = typeof urlParams?.cari === 'string' ? urlParams.cari.slice(0, 120) : ''
   await connection()
   const challengeQuery = getActiveChallenges().catch(error => {
     console.error('Challenge gagal dimuat.', error.code ?? error.name)
@@ -31,7 +33,7 @@ export default async function Home() {
       <div className={styles.shell}>
         <main>
           <StudioExperience artworks={artworks ?? []} challenges={challenges ?? []} canLike={canLike} />
-          <GalleryExplorer artworks={artworks} challenges={challenges} canLike={canLike} />
+          <GalleryExplorer artworks={artworks} challenges={challenges} canLike={canLike} initialQuery={initialQuery} />
         </main>
         <ShowcaseFooter />
       </div>

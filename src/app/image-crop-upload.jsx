@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { maxArtworkImageBytes } from '@/lib/artwork-fields'
+import { CROP_RATIOS, getCanvasSize, getExportSize, layout } from '@/lib/image-crop-geometry.mjs'
 import styles from './image-crop-upload.module.css'
 
 const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp'])
@@ -18,61 +19,15 @@ function placeFile(input, file) {
   input.files = transfer.files
 }
 
-function layout(img, width, height, zoom, pan) {
-  const scale = Math.max(width / img.naturalWidth, height / img.naturalHeight) * zoom
-  const drawWidth = img.naturalWidth * scale
-  const drawHeight = img.naturalHeight * scale
-  const limitX = Math.max(0, (drawWidth - width) / 2)
-  const limitY = Math.max(0, (drawHeight - height) / 2)
-  const centerX = Math.max(-limitX, Math.min(limitX, pan.x * width))
-  const centerY = Math.max(-limitY, Math.min(limitY, pan.y * height))
-  return { drawWidth, drawHeight, left: (width - drawWidth) / 2 + centerX, top: (height - drawHeight) / 2 + centerY }
-}
-
 function draw(canvas, img, zoom, pan) {
   if (!canvas || !img) return
   const context = canvas.getContext('2d')
   if (!context) return
   const { width, height } = canvas
   const box = layout(img, width, height, zoom, pan)
+  // Biarkan alpha tetap transparan: jangan tambahkan latar krem sebelum menggambar.
   context.clearRect(0, 0, width, height)
-  context.fillStyle = '#FBF8F3'
-  context.fillRect(0, 0, width, height)
   context.drawImage(img, box.left, box.top, box.drawWidth, box.drawHeight)
-}
-
-// Satu langkah memilih area crop; langkah berikutnya mengecilkan resolusi.
-const CROP_RATIOS = {
-  original: null,
-  square: 1,
-  landscape: 4 / 3,
-  wide: 16 / 9,
-  portrait: 4 / 5,
-}
-
-function getCanvasSize(ratio) {
-  const safeRatio = Number.isFinite(ratio) && ratio > 0 ? ratio : 4 / 3
-  const longSide = 800
-  return safeRatio >= 1
-    ? { width: longSide, height: Math.max(1, Math.round(longSide / safeRatio)) }
-    : { width: Math.max(1, Math.round(longSide * safeRatio)), height: longSide }
-}
-
-function getExportSize(canvas, img, zoom, resizeRatio, avatar) {
-  if (!canvas || !img) return null
-  const fillScale = Math.max(
-    canvas.width / img.naturalWidth,
-    canvas.height / img.naturalHeight,
-  ) * zoom
-  // Luas sumber yang masih ada setelah crop, dalam piksel asli.
-  const cropWidth = Math.min(img.naturalWidth, canvas.width / fillScale)
-  const cropHeight = Math.min(img.naturalHeight, canvas.height / fillScale)
-  const limit = avatar ? 512 : 1800
-  const longest = Math.min(limit, Math.max(cropWidth, cropHeight)) * resizeRatio
-  const ratio = canvas.width / canvas.height
-  const width = Math.max(1, Math.round(longest * Math.min(1, ratio)))
-  const height = Math.max(1, Math.round(longest / Math.max(1, ratio)))
-  return { width, height }
 }
 
 async function exportEdited(canvas, img, zoom, pan, fileName, resizeRatio, avatar) {
@@ -91,14 +46,14 @@ async function exportEdited(canvas, img, zoom, pan, fileName, resizeRatio, avata
 
 export default function ImageCropUpload({
   id, name, label, shape = 'landscape', required = false, inputRef,
-  onApplied, onError, resetSignal = 0,
+  onApplied, onError,
 }) {
   const internalInput = useRef(null)
   const imageRef = useRef(null)
   const dragRef = useRef(null)
   const sourceRef = useRef(null)
+  const appliedSourceRef = useRef(null)
   const appliedRef = useRef(null)
-  const previewUrlRef = useRef(null)
   const canvasRef = useRef(null)
   const [pending, setPending] = useState(null)
   const [loaded, setLoaded] = useState(false)
@@ -130,27 +85,9 @@ export default function ImageCropUpload({
   }, [inputRef])
 
   useEffect(() => {
-    sourceRef.current = null
-    appliedRef.current = null
-    setInput(null)
-    internalInput.current?.setCustomValidity('')
-    setPending(null)
-    setAppliedName('')
-    setCropRatio(shape === 'circle' ? 'square' : 'original')
-    setResizeRatio(1)
-    setError('')
-  }, [resetSignal, setInput, shape])
-
-  useEffect(() => {
     imageRef.current = null
-    setLoaded(false)
-    if (previewUrlRef.current) {
-      URL.revokeObjectURL(previewUrlRef.current)
-      previewUrlRef.current = null
-    }
     if (!pending) return undefined
     const url = URL.createObjectURL(pending)
-    previewUrlRef.current = url
     const picture = new window.Image()
     let live = true
     picture.onload = () => {
@@ -168,7 +105,6 @@ export default function ImageCropUpload({
       live = false
       imageRef.current = null
       URL.revokeObjectURL(url)
-      if (previewUrlRef.current === url) previewUrlRef.current = null
     }
   }, [pending])
 
@@ -192,6 +128,7 @@ export default function ImageCropUpload({
     // Blokir pengiriman sebelum hasil pengaturan foto diterapkan.
     internalInput.current?.setCustomValidity('Tekan Terapkan ukuran foto sebelum menyimpan.')
     sourceRef.current = file
+    setLoaded(false)
     setZoom(1)
     setPan({ x: 0, y: 0 })
     setCropRatio(isAvatar ? 'square' : 'original')
@@ -240,6 +177,7 @@ export default function ImageCropUpload({
         sourceRef.current.name, resizeRatio, isAvatar,
       )
       appliedRef.current = editedFile
+      appliedSourceRef.current = sourceRef.current
       setInput(editedFile)
       internalInput.current?.setCustomValidity('')
       setAppliedName(editedFile.name)
@@ -260,6 +198,7 @@ export default function ImageCropUpload({
   function useOriginal() {
     if (!sourceRef.current || saving) return
     appliedRef.current = sourceRef.current
+    appliedSourceRef.current = sourceRef.current
     setInput(sourceRef.current)
     internalInput.current?.setCustomValidity('')
     setAppliedName(sourceRef.current.name)
@@ -271,6 +210,7 @@ export default function ImageCropUpload({
 
   function cancelEditing() {
     setInput(appliedRef.current)
+    sourceRef.current = appliedSourceRef.current
     internalInput.current?.setCustomValidity('')
     setPending(null)
     setError('')
@@ -279,6 +219,10 @@ export default function ImageCropUpload({
 
   function reopen() {
     if (!sourceRef.current) return
+    // Jangan sampai submit memakai hasil lama ketika pengguna sedang mengedit.
+    setInput(null)
+    internalInput.current?.setCustomValidity('Tekan Terapkan crop & ukuran sebelum menyimpan.')
+    setLoaded(false)
     setZoom(1)
     setPan({ x: 0, y: 0 })
     setPending(sourceRef.current)

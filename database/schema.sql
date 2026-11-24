@@ -179,6 +179,9 @@ ALTER TABLE challenges
     ADD COLUMN IF NOT EXISTS cover_data BYTEA CONSTRAINT challenges_cover_pair_check
         CHECK ((owner_id IS NULL) = (cover_data IS NULL));
 
+-- Status final hasil challenge tidak bergantung pada keberadaan submisi saat ini.
+ALTER TABLE challenges ADD COLUMN IF NOT EXISTS winners_published_at TIMESTAMPTZ;
+
 CREATE INDEX IF NOT EXISTS challenges_owner_id_index ON challenges (owner_id, starts_at DESC, id DESC);
 CREATE UNIQUE INDEX IF NOT EXISTS challenges_uploaded_cover_unique ON challenges (cover_image)
     WHERE owner_id IS NOT NULL;
@@ -202,6 +205,37 @@ CREATE UNIQUE INDEX IF NOT EXISTS challenge_submissions_active_member_unique
     ON challenge_submissions (challenge_id, member_id) WHERE withdrawn_at IS NULL;
 CREATE INDEX IF NOT EXISTS challenge_submissions_member_index ON challenge_submissions (member_id, submitted_at DESC, id DESC);
 CREATE INDEX IF NOT EXISTS challenge_submissions_artwork_index ON challenge_submissions (artwork_id, member_id);
+
+-- Arsip permanen selama challenge ada. Tidak memiliki FK ke artwork/member,
+-- agar penghapusan karya atau akun tidak menghapus hasil yang sudah diumumkan.
+CREATE TABLE IF NOT EXISTS challenge_winner_snapshots (
+    challenge_id BIGINT NOT NULL REFERENCES challenges (id) ON DELETE CASCADE,
+    rank SMALLINT NOT NULL CHECK (rank BETWEEN 1 AND 3),
+    artwork_id BIGINT NOT NULL,
+    title TEXT NOT NULL,
+    artist TEXT NOT NULL,
+    image_src TEXT NOT NULL,
+    image_alt TEXT NOT NULL DEFAULT '',
+    image_data BYTEA,
+    PRIMARY KEY (challenge_id, rank)
+);
+
+-- Selamatkan hasil lama yang masih punya submisi pemenang sebelum ada penghapusan.
+INSERT INTO challenge_winner_snapshots
+    (challenge_id, rank, artwork_id, title, artist, image_src, image_alt, image_data)
+SELECT s.challenge_id, s.placement, a.id, a.title, u.display_name,
+       a.image_src, a.image_alt, a.image_data
+FROM challenge_submissions s
+JOIN artworks a ON a.id = s.artwork_id
+JOIN users u ON u.id = s.member_id
+WHERE s.placement IS NOT NULL AND s.withdrawn_at IS NULL
+ON CONFLICT (challenge_id, rank) DO NOTHING;
+
+UPDATE challenges c SET winners_published_at = now()
+WHERE c.winners_published_at IS NULL
+  AND EXISTS (
+    SELECT 1 FROM challenge_winner_snapshots w WHERE w.challenge_id = c.id
+  );
 
 CREATE TABLE IF NOT EXISTS artwork_categories (
     name TEXT PRIMARY KEY CHECK (name = btrim(name) AND char_length(name) BETWEEN 1 AND 80)

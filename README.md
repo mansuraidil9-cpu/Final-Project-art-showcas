@@ -48,6 +48,8 @@ npm ci
 
 Buat database `alteria` di PostgreSQL. Buka **Query Tool** untuk database tersebut di pgAdmin, lalu jalankan seluruh isi [database/schema.sql](database/schema.sql). Jika sudah memiliki database ALTERIA dari versi sebelumnya, jalankan file skema yang sama untuk memperbarui struktur tabel.
 
+**Penting setelah pembaruan audit QA:** buat cadangan database, lalu jalankan ulang `database/schema.sql` **sebelum mencoba fitur Challenge**. Skema menambah status hasil final serta tabel `challenge_winner_snapshots`, dan menyalin pemenang lama yang submisinya masih tersedia. Data juara yang sudah terhapus sebelum migrasi tidak bisa dipulihkan otomatis. Jangan jalankan ulang file seed pada database yang sudah berisi karya pengguna.
+
 Untuk mengisi galeri dan challenge dengan data contoh, jalankan [seed-artworks.sql](database/seed-artworks.sql) dan [seed-challenge.sql](database/seed-challenge.sql) setelah skema berhasil dijalankan.
 
 ### 3. Atur koneksi
