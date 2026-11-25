@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import AccountPanel from '../../account-panel'
-import { deleteRejectedCurator } from '../../auth-actions'
+import { deleteRejectedCurator, signOut } from '../../auth-actions'
 import { dashboardPath, requireUser } from '../../../lib/session'
 import styles from '../../auth.module.css'
 
@@ -28,6 +28,11 @@ export default async function CuratorPending() {
     <AccountPanel
       title="Akun Anda sedang ditinjau."
       description="Anda bisa membuka dashboard Curator setelah Admin menyetujui akun ini."
+      headerAction={(
+        <form action={signOut}>
+          <button className={styles.headerLogout} type="submit">Logout</button>
+        </form>
+      )}
     />
   )
 }

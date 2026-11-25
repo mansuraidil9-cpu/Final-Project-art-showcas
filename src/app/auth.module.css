@@ -55,6 +55,22 @@
   color: var(--accent);
 }
 
+.headerActions {display:inline-flex;flex:none;flex-direction:row;flex-wrap:nowrap;align-items:center;gap:.65rem;white-space:nowrap;}
+.headerActions form {display:flex;flex:none;}
+.headerLogout {
+  min-height:2.75rem;
+  padding:.55rem 1rem;
+  border:1px solid var(--accent);
+  border-radius:9999px;
+  background:var(--accent);
+  color:#fbf8f3;
+  font-size:.84rem;
+  font-weight:600;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.headerLogout:hover {background:var(--ink);border-color:var(--ink);}
+
 .back:is(:hover, :focus-visible) {
   border-color: var(--accent);
   background: #e9ecdf;
