@@ -3,8 +3,15 @@
 import { useEffect, useRef, useState } from 'react'
 import styles from './login-atmosphere.module.css'
 
-const modes = ['Galeri Melayang', 'Aliran Pigmen', 'Cahaya & Daun']
+const modes = [
+  { key: 'pigment', label: 'Aliran Pigmen' },
+  { key: 'gallery', label: 'Galeri Melayang' },
+  { key: 'light', label: 'Cahaya & Daun' },
+]
+const modeKeys = modes.map(({ key }) => key)
 const modeStorageKey = 'alteria-auth-background-mode'
+const legacyModeKeys = ['gallery', 'pigment', 'light']
+const createWeights = activeMode => Object.fromEntries(modeKeys.map(key => [key, key === activeMode ? 1 : 0]))
 const dust = Array.from({ length: 58 }, (_, i) => ({
   x: ((i * 79.7) % 997) / 997,
   y: ((i * 43.3) % 991) / 991,
@@ -156,17 +163,18 @@ function drawSunlight(ctx, w, h, t) {
 
 export default function LoginAtmosphere() {
   const canvasRef = useRef(null)
-  const modeRef = useRef(0)
-  const previousModeRef = useRef(0)
-  const [mode, setMode] = useState(0)
+  const modeRef = useRef('pigment')
+  const previousModeRef = useRef('pigment')
+  const weightsRef = useRef(createWeights('pigment'))
+  const [mode, setMode] = useState('pigment')
 
   useEffect(() => {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d', { alpha: true })
     if (!canvas || !ctx) return
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
-    let width = 0, height = 0, frame = 0, savedModeFrame = 0, lastTime = 0
-    let previousMode = modeRef.current, transitionAt = 0
+    let width = 0, height = 0, frame = 0, lastTime = 0
+    let transitionFrom = modeRef.current, transitionAt = 0
     const pointer = { x: .5, y: .5 }
     const ripples = []
     const resize = () => {
@@ -178,22 +186,27 @@ export default function LoginAtmosphere() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       paint(performance.now())
     }
-    const drawMode = (index, time) => {
-      if (index === 0) drawGallery(ctx, width, height, time, pointer)
-      else if (index === 1) drawPigment(ctx, width, height, time, pointer)
-      else drawSunlight(ctx, width, height, time)
+    const drawMode = (key, time) => {
+      if (key === 'pigment') drawPigment(ctx, width, height, time, pointer)
+      else if (key === 'gallery') drawGallery(ctx, width, height, time, pointer)
+      else if (key === 'light') drawSunlight(ctx, width, height, time)
     }
     const paint = time => {
       if (!width || !height) return
       ctx.clearRect(0, 0, width, height)
       if (transitionAt && time - transitionAt < 900) {
-        const progress = (time - transitionAt) / 900
-        ctx.save(); ctx.globalAlpha = 1 - progress; drawMode(previousMode, time); ctx.restore()
-        ctx.save(); ctx.globalAlpha = progress; drawMode(modeRef.current, time); ctx.restore()
+        const progress = Math.min((time - transitionAt) / 900, 1)
+        weightsRef.current = createWeights(null)
+        weightsRef.current[transitionFrom] = 1 - progress
+        weightsRef.current[modeRef.current] = progress
       } else {
         transitionAt = 0
-        drawMode(modeRef.current, time)
+        weightsRef.current = createWeights(modeRef.current)
       }
+      Object.entries(weightsRef.current).forEach(([key, weight]) => {
+        if (weight <= 0) return
+        ctx.save(); ctx.globalAlpha = weight; drawMode(key, time); ctx.restore()
+      })
       dust.forEach(p => {
         const flicker = .35 + .65 * ((Math.sin(time * .001 + p.phase) + 1) / 2)
         ctx.fillStyle = `rgba(166,134,88,${flicker * .34})`
@@ -227,7 +240,17 @@ export default function LoginAtmosphere() {
         ripples.push({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, at: performance.now() })
       }
     }
-    const onMode = () => { previousMode = previousModeRef.current; transitionAt = performance.now(); if (reduceMotion.matches) paint(performance.now()); else start() }
+    const onMode = () => {
+      transitionFrom = previousModeRef.current
+      if (reduceMotion.matches || transitionFrom === modeRef.current) {
+        transitionAt = 0
+        weightsRef.current = createWeights(modeRef.current)
+        paint(performance.now())
+      } else {
+        transitionAt = performance.now()
+        start()
+      }
+    }
     const onMotionChange = () => { if (reduceMotion.matches && frame) cancelAnimationFrame(frame); frame = 0; paint(performance.now()); start() }
     window.addEventListener('resize', resize)
     window.addEventListener('pointermove', onPointer, { passive: true })
@@ -235,20 +258,21 @@ export default function LoginAtmosphere() {
     document.addEventListener('visibilitychange', onVisibility)
     window.addEventListener('alteria-mode-change', onMode)
     reduceMotion.addEventListener('change', onMotionChange)
+    let initialMode = 'pigment'
     try {
-      const savedMode = Number(window.localStorage.getItem(modeStorageKey))
-      if (Number.isInteger(savedMode) && savedMode >= 0 && savedMode < modes.length && savedMode !== modeRef.current) {
-        previousModeRef.current = modeRef.current
-        modeRef.current = savedMode
-        savedModeFrame = requestAnimationFrame(() => setMode(savedMode))
-        onMode()
-      }
+      const savedMode = window.localStorage.getItem(modeStorageKey)
+      if (modeKeys.includes(savedMode)) initialMode = savedMode
+      else if (/^[0-2]$/.test(savedMode || '')) initialMode = legacyModeKeys[Number(savedMode)]
+      window.localStorage.setItem(modeStorageKey, initialMode)
     } catch {}
+    modeRef.current = initialMode
+    previousModeRef.current = initialMode
+    weightsRef.current = createWeights(initialMode)
+    setMode(initialMode)
     resize()
     start()
     return () => {
       if (frame) cancelAnimationFrame(frame)
-      if (savedModeFrame) cancelAnimationFrame(savedModeFrame)
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', onPointer)
       document.removeEventListener('input', onInput)
@@ -258,11 +282,12 @@ export default function LoginAtmosphere() {
     }
   }, [])
 
-  const selectMode = index => {
+  const selectMode = key => {
+    if (!modeKeys.includes(key)) return
     previousModeRef.current = modeRef.current
-    modeRef.current = index
-    setMode(index)
-    try { window.localStorage.setItem(modeStorageKey, String(index)) } catch {}
+    modeRef.current = key
+    setMode(key)
+    try { window.localStorage.setItem(modeStorageKey, key) } catch {}
     window.dispatchEvent(new Event('alteria-mode-change'))
   }
 
@@ -271,7 +296,7 @@ export default function LoginAtmosphere() {
       <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
       <div className={styles.safeZone} data-visible="true" aria-hidden="true" />
       <div className={styles.switcher} role="group" aria-label="Pilih animasi latar">
-        {modes.map((label, index) => <button key={label} type="button" aria-pressed={mode === index} onClick={() => selectMode(index)}>{label}</button>)}
+        {modes.map(({ key, label }) => <button key={key} type="button" aria-pressed={mode === key} onClick={() => selectMode(key)}>{label}</button>)}
       </div>
     </>
   )

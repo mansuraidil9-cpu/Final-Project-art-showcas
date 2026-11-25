@@ -450,9 +450,11 @@
 .lightbox {
   position:relative;
   display:grid;
-  grid-template-columns:minmax(0,1.24fr) minmax(0,.94fr);
-  width:min(100%,66rem);
+  grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
+  width:min(100%,62rem);
+  height:min(46rem,calc(100dvh - 2rem));
   max-height:calc(100dvh - 2rem);
+  min-height:0;
   overflow:hidden;
   border:1px solid rgba(44,51,39,.23);
   border-radius:2px;
@@ -484,12 +486,19 @@
   justify-content:center;
   gap:1.2rem;
   min-width:0;
+  min-height:0;
+  overflow:hidden;
   padding:clamp(1.1rem,3vw,3rem);
   border-right:1px solid var(--museum-rule);
   background:#eae2d6;
 }
 .lightboxMat {
+  display:flex;
+  flex:1;
+  align-items:center;
+  justify-content:center;
   width:100%;
+  min-height:0;
   padding:clamp(.8rem,1.6vw,1.3rem);
   border:1px solid var(--museum-rule);
   background:var(--museum-ivory);
@@ -498,7 +507,8 @@
 .lightboxImage {
   position:relative;
   width:100%;
-  aspect-ratio:4/3;
+  height:100%;
+  min-height:0;
   overflow:hidden;
   background:var(--museum-ivory);
   border:0;
@@ -531,10 +541,16 @@
   flex-direction:column;
   align-items:flex-start;
   min-width:0;
+  min-height:0;
   gap:.55rem;
   overflow-y:auto;
   padding:clamp(1.5rem,3vw,2.8rem);
+  scrollbar-color:rgba(44,51,39,.35) transparent;
+  scrollbar-width:thin;
 }
+.lightboxCopy::-webkit-scrollbar {width:6px;}
+.lightboxCopy::-webkit-scrollbar-track {background:transparent;}
+.lightboxCopy::-webkit-scrollbar-thumb {border-radius:999px;background:rgba(44,51,39,.28);}
 .mediumLabel {font-size:.73rem;color:#555c52;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}
 .lightbox .lightboxCopy h2 {
   margin:.3rem 0 0;
@@ -603,6 +619,7 @@
   .layoutTabs {display:none;}
   .lightbox {
     grid-template-columns:1fr;
+    height:auto;
     max-height:calc(100dvh - 1rem);
     overflow-y:auto;
   }
@@ -612,7 +629,8 @@
     border-bottom:1px solid var(--museum-rule);
   }
   .lightboxMat {width:min(100%,32rem);}
-  .lightboxImage {aspect-ratio:16/11;}
+  .lightboxMat {flex:none;}
+  .lightboxImage {height:auto;aspect-ratio:16/11;}
   .lightboxCopy {overflow:visible;padding:1.5rem;}
   .closeButton {top:.65rem;right:.65rem;}
 }
@@ -631,6 +649,7 @@
   .lightboxBackdrop {align-items:flex-start;padding:.35rem;}
   .lightbox {
     width:min(100%,66rem);
+    height:auto;
     max-height:calc(100dvh - .7rem);
     overflow-y:auto;
     margin:auto;

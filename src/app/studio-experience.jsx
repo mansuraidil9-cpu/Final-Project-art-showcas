@@ -28,7 +28,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
   const favoritesDialogRef = useRef(null)
   const chaptersRef = useRef([])
   const selectedRef = useRef({ locked: false })
-  const motionRef = useRef({ progress: 0, pointerX: 0, pointerY: 0, manual: false, orbitX: 0, orbitY: 0, galleryIndex: 0, dragOffset: 0 })
+  const motionRef = useRef({ progress: 0, pointerX: 0, pointerY: 0, manual: false, orbitX: 0, orbitY: 0, galleryIndex: 0, dragOffset: 0, studioVisible: true })
   const [chapter, setChapter] = useState(0)
   const [galleryIndex, setGalleryIndex] = useState(0)
   const [ready, setReady] = useState(false)
@@ -45,6 +45,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
   const favorites = artworks.filter(artwork => favoriteOverrides[artwork.id] ?? artwork.favorited)
   const activeChallenge = challenges[0] || null
   const sceneImages = works.map(artwork => artwork.imageSrc)
+  const sceneLabels = works.map(artwork => artwork.title)
   const onSceneReady = useCallback(() => setReady(true), [])
   const onSceneFailed = useCallback(() => setReady(false), [])
 
@@ -65,13 +66,23 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
       const studioVisible = rect.bottom > 0 && rect.top < innerHeight
         && !regularGalleryEntering
       root.dataset.studioVisible = studioVisible ? 'true' : 'false'
+      if (motionRef.current.studioVisible !== studioVisible) {
+        motionRef.current.studioVisible = studioVisible
+        window.dispatchEvent(new CustomEvent('alteria-studio-visibility',{detail:studioVisible}))
+      }
       motionRef.current.progress = p
+      motionRef.current.targetProgress = p * 3
       root.style.setProperty('--studio-progress', String(p))
 
       // Perubahan bab berdasarkan posisi section, bukan ambang persentase
       // terhadap total tinggi. Section 04 kini selalu aktif saat memasuki
       // area fokus layar, terlepas dari variasi tinggi viewport.
       const focusLine = innerHeight * .52
+      const sectionProgressAtFocus = section => section
+        ? clamp(((section.getBoundingClientRect().top - rect.top - focusLine) / distance) * 3,0,3)
+        : null
+      motionRef.current.galleryStartProgress = sectionProgressAtFocus(chaptersRef.current[2]) ?? 1.2
+      motionRef.current.finaleStartProgress = sectionProgressAtFocus(chaptersRef.current[3]) ?? 2.1
       let next = 0
       for (let i = 0; i < chaptersRef.current.length; i++) {
         const section = chaptersRef.current[i]
@@ -192,7 +203,7 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
     <div ref={rootRef} className={styles.experience} data-studio-experience>
       <div className={styles.stage} aria-hidden="true">
         <div className={`${styles.scene} ${manual ? styles.manual : ''}`}>
-          <StudioSceneLoader images={sceneImages} heroImage={mainArtwork.imageSrc} motionRef={motionRef} onSelectArtwork={selectArtwork} onReady={onSceneReady} onFailed={onSceneFailed} />
+          <StudioSceneLoader images={sceneImages} labels={sceneLabels} heroImage={mainArtwork.imageSrc} motionRef={motionRef} onSelectArtwork={selectArtwork} onReady={onSceneReady} onFailed={onSceneFailed} />
         </div>
         <div className={`${styles.fallback} ${ready ? styles.fallbackHidden : ''}`}>
           <div className={styles.fallbackFrame}>
@@ -249,7 +260,8 @@ export default function StudioExperience({ artworks = [], challenges = [], canLi
           <p className={styles.layerLabel}>Sorot Lapisan</p>
           <div className={styles.layerTags} role="group" aria-label="Sorot lapisan karya">
             {[
-              ['all', 'Semua Lapisan'], ['frame', 'Bingkai'], ['canvas', 'Kanvas'], ['ribbon', 'Aliran Warna'],
+              ['all', 'Semua Lapisan'], ['backing', 'Rangka & Plakat'], ['frame', 'Bingkai & Lis Emas'],
+              ['canvas', 'Kanvas'], ['glaze', 'Glaze / Vernis'], ['ribbon', 'Cat, Kuas & Pigmen'],
             ].map(([value, label]) => (
               <button type="button" key={value} aria-pressed={layer === value} onClick={() => setLayer(value)}>{label}</button>
             ))}

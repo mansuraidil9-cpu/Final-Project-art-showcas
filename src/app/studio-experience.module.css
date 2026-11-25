@@ -100,16 +100,18 @@
   border:1px solid rgb(125 84 39 / 18%); border-radius:4px;
   box-shadow:0 22px 52px -18px rgb(38 48 36 / 16%); pointer-events:auto;
 }
-.dimensionCard { width:min(37%,440px); padding:clamp(1.4rem,3vw,2.5rem); margin-right:max(0px,calc((100vw - 1480px)/2)); }
+.dimensionCard { width:min(37%,440px); padding:clamp(1.15rem,2.6vw,2.1rem); margin-right:max(0px,calc((100vw - 1480px)/2)); }
+.dimensionCard h2 { margin:.55rem 0 .7rem; font-size:clamp(2.1rem,3.6vw,3.25rem); }
+.dimensionCard > p:not(.layerLabel):not(.detailNote) { margin-block:.35rem; line-height:1.55; }
 .dimensionCard h2,.galleryCard h2,.finaleCard h2 {
   font:400 clamp(2.3rem,4vw,3.7rem)/1.04 var(--font-studio-serif),Georgia,serif;
   margin:.9rem 0 1rem; letter-spacing:-.025em;
 }
 .dimensionCard h2 em,.finaleCard h2 em { color:#435240; }
 .dimensionCard p,.galleryCard p,.finaleCard p { color:#5B5549; font-size:.88rem; line-height:1.7; }
-.layerTags { display:flex; flex-wrap:wrap; gap:.45rem; padding-top:1rem; margin-top:1.25rem; border-top:1px solid #B88A4433; }
+.layerTags { display:flex; flex-wrap:wrap; gap:.4rem; padding-top:.75rem; margin-top:.85rem; border-top:1px solid #B88A4433; }
 .layerTags span { padding:.45rem .7rem; background:#F1E5D6; border:1px solid #B88A4433; border-radius:999px; color:#313D2F; font-size:.72rem; }
-.dimensionCard .detailNote { margin-top:1rem; font-style:italic; font-size:.77rem; }
+.dimensionCard .detailNote { margin-top:.65rem; font-style:italic; font-size:.75rem; line-height:1.5; }
 .galleryCard {
   width:min(37%,460px);
   padding:clamp(1.25rem,2.5vw,2.05rem);
@@ -133,7 +135,7 @@
 .galleryCard .description { margin-bottom:1.3rem; }
 .cardActions { margin-top:1.25rem; }
 .cardActions .primary { padding-inline:1rem; }
-.finaleCard { width:min(100%,740px); text-align:center; padding:clamp(2rem,5vw,4.1rem); }
+.finaleCard { width:min(100%,500px); text-align:center; padding:clamp(1.5rem,3vw,2.5rem); }
 .finaleCard h2 { font-size:clamp(2.5rem,5vw,4.5rem); }
 .finaleCard h2 em { display:block; }
 .finaleCard p { max-width:540px; margin-inline:auto; }
@@ -199,7 +201,7 @@
   .heroCopy>p { max-width:32ch; font-size:.88rem; }
   .hero .actions { gap:.35rem .75rem; margin-top:.9rem; }
   .dimension { align-items:end; justify-content:center; padding-bottom:8rem; }
-  .dimensionCard { width:min(100%,430px); margin:0; padding:1.3rem; }
+  .dimensionCard { width:min(100%,430px); margin:0; padding:1.05rem 1.1rem; }
   .gallery { align-items:end; justify-content:center; padding-bottom:clamp(7.75rem,15svh,11rem); }
   .galleryCard {
     position:relative; top:auto; align-self:auto; width:min(100%,430px);
