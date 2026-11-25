@@ -5,6 +5,10 @@ import { roleLabels } from '@/lib/user-roles'
 import { reviewCurator } from './curator-decisions'
 import styles from './curator-queue.module.css'
 
+function initials(name = '') {
+  return name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'C'
+}
+
 export default function CuratorQueue({ registrations }) {
   const [feedback, review, pending] = useActionState(reviewCurator, null)
 
@@ -29,7 +33,8 @@ export default function CuratorQueue({ registrations }) {
         <ul className={styles.list}>
           {registrations.map(registration => (
             <li className={styles.row} key={registration.id}>
-              <div>
+              <span className={styles.avatar}>{initials(registration.name)}</span>
+              <div className={styles.person}>
                 <p className={styles.name}>{registration.name}</p>
                 <p className={styles.email}>{registration.email}</p>
                 <p className={styles.date}>

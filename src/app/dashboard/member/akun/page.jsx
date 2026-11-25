@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import AccountPanel from '@/app/account-panel'
 import ActionForm from '@/app/dashboard/action-form'
+import { signOut } from '@/app/auth-actions'
 import { isValidEmail, newPasswordPattern, normalizeEmail } from '@/lib/account-validation.mjs'
 import { requireUser } from '@/lib/session'
 import styles from '../member-artworks.module.css'
@@ -19,7 +20,9 @@ export default async function MemberAccountPage({ searchParams }) {
         <Link href="/dashboard/member">Kembali ke Dashboard Member</Link>
       </div>
       {search?.hasil === 'akun' && <p className={styles.notice} role="status">Email akun berhasil diperbarui.</p>}
-      <ActionForm action={saveAccount} submitLabel="Simpan perubahan">
+      <ActionForm action={saveAccount} submitLabel="Simpan perubahan" submitAside={(
+        <button className={styles.dangerButton} type="submit" formAction={signOut} formNoValidate>Logout</button>
+      )}>
         <div className={styles.field}>
           <label htmlFor="account-email">Email</label>
           <input id="account-email" type={emailType} inputMode="email" name="email" defaultValue={user.email} maxLength={254} autoComplete="email" required />

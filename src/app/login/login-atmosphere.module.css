@@ -1,0 +1,74 @@
+.canvas {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
+.safeZone {
+  position: fixed;
+  z-index: 1;
+  inset: 0 0 0 auto;
+  width: min(64vw, 850px);
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 74% 58% at 60% 48%, rgba(251, 248, 243, .78) 0%, rgba(251, 248, 243, .52) 48%, rgba(251, 248, 243, 0) 100%),
+    linear-gradient(90deg, rgba(251, 248, 243, 0), rgba(251, 248, 243, .2));
+  opacity: 0;
+  transition: opacity .65s ease;
+}
+.safeZone[data-visible="true"] { opacity: 1; }
+
+.switcher {
+  position: fixed;
+  z-index: 5;
+  right: clamp(.75rem, 2vw, 1.5rem);
+  bottom: clamp(.75rem, 2vh, 1.25rem);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: .25rem;
+  max-width: min(calc(100vw - 1.5rem), 27rem);
+  padding: .3rem;
+  border: 1px solid rgb(44 51 39 / 13%);
+  border-radius: 999px;
+  background: rgb(251 248 243 / 82%);
+  box-shadow: 0 5px 20px rgb(44 51 39 / 8%);
+  backdrop-filter: blur(12px);
+}
+
+.switcher button {
+  min-height: 2rem;
+  padding: .42rem .75rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #5b5549;
+  cursor: pointer;
+  font: 500 .68rem/1 var(--font-studio-sans), Arial, sans-serif;
+  white-space: nowrap;
+  transition: background-color .2s ease, color .2s ease;
+}
+
+.switcher button[aria-pressed="true"] {
+  background: #2c3327;
+  color: #fbf8f3;
+}
+
+.switcher button:focus-visible {
+  outline: 2px solid #9e7e52;
+  outline-offset: 2px;
+}
+
+@media (max-width: 520px) {
+  .safeZone { width: 100vw; background: radial-gradient(ellipse 90% 45% at 50% 56%, rgba(251, 248, 243, .78), rgba(251, 248, 243, .42) 52%, transparent 100%); }
+  .switcher { right: .65rem; bottom: .65rem; left: .65rem; max-width: none; justify-content: center; }
+  .switcher button { flex: 1; padding-inline: .42rem; font-size: .62rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .safeZone, .switcher button { transition: none; }
+}

@@ -342,3 +342,138 @@
   box-shadow:0 20px 50px -25px rgb(38 48 36 / 17%);
 }
 .field > input,.field > select,.password { background:#FBF8F3; border-color:rgb(125 84 39 / 23%); }
+
+.loginScreen {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  padding-bottom: 4.4rem;
+  background: transparent;
+  --login-ink: #2c3327;
+  --login-muted: #5b5549;
+  --login-bronze: #a68658;
+}
+.loginScreen .shell { position: relative; z-index: 1; }
+.loginScreen .header { border-color: rgb(44 51 39 / 14%); }
+.content.loginContent {
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+  align-items: center;
+  gap: clamp(2rem, 6vw, 5.2rem);
+  width: min(100%, 66rem);
+  min-height: calc(100svh - 4.7rem);
+  padding-block: clamp(2rem, 6vh, 4.5rem);
+}
+.panel.formPanel.loginCard {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 35rem;
+  justify-self: stretch;
+  overflow: hidden;
+  padding: clamp(1.45rem, 4vw, 2.75rem);
+  border: 1px solid rgb(44 51 39 / 15%);
+  border-radius: 3px;
+  background: rgba(251, 248, 243, .86);
+  box-shadow: 0 26px 64px -30px rgba(44, 51, 39, .24), 0 6px 20px -8px rgba(158, 126, 82, .16);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: border-color .3s ease, box-shadow .3s ease;
+}
+.loginCard::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 10%), rgba(200, 167, 110, .1), transparent 72%);
+  content: "";
+  opacity: 0;
+  transition: opacity .35s ease;
+  pointer-events: none;
+}
+.loginCard::after {
+  position: absolute;
+  z-index: 2;
+  top: -30%;
+  bottom: -30%;
+  left: -55%;
+  width: 32%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .2), transparent);
+  content: "";
+  opacity: 0;
+  transform: skewX(-14deg);
+  transition: transform .7s cubic-bezier(.22, 1, .36, 1), opacity .25s ease;
+  pointer-events: none;
+}
+.loginCard:hover { border-color: rgba(166, 134, 88, .48); box-shadow: 0 28px 68px -28px rgba(44, 51, 39, .25), 0 6px 24px -8px rgba(158, 126, 82, .2); }
+.loginCard:hover::before { opacity: 1; }
+.loginCard:hover::after { opacity: 1; transform: translateX(510%) skewX(-14deg); }
+.loginCard h1 { margin-bottom: .15rem; color: var(--login-ink); font-size: clamp(3.35rem, 6vw, 4.8rem); }
+.loginCard .intro { max-width: 34ch; margin-block: .65rem 1.7rem; color: var(--login-muted); }
+.loginCard .field label { color: var(--login-ink); }
+.loginCard .field > input, .loginCard .password { border-color: rgba(44, 51, 39, .16); background: rgba(251, 248, 243, .77); }
+.loginCard .field > input:focus, .loginCard .password:focus-within { border-color: var(--login-bronze); box-shadow: 0 0 0 3px rgba(166, 134, 88, .1); }
+.loginCard .password button { color: var(--login-muted); }
+.loginCard .submit { min-height: 3rem; margin-top: .18rem; border-radius: 2px; background: var(--login-ink); transition: background .2s ease, transform .2s ease; }
+.loginCard .submit:not(:disabled):hover { background: #1f251b; transform: translateY(-1px); }
+.loginCard .switch { padding-top: 1rem; border-top: 1px solid rgba(44, 51, 39, .12); color: var(--login-muted); }
+.loginCard .switch a { color: var(--login-ink); }
+.loginCard .feedback { margin: 0; }
+.loginScreen .accountInfo {
+  width: min(100%, 27rem);
+  margin: 0;
+  padding-top: 1.35rem;
+  border-color: rgba(166, 134, 88, .55);
+  justify-self: start;
+}
+.loginScreen .accountInfo h2 { color: var(--login-ink); font-size: clamp(2.7rem, 5vw, 4rem); }
+.loginScreen .accountInfo p { max-width: 40ch; color: var(--login-muted); font-size: .95rem; }
+.loginScreen .accountInfo.loginEditorial { padding-top: 1.35rem; }
+.loginBulletList { display: grid; gap: .9rem; margin: .35rem 0 0; padding: 0; list-style: none; }
+.loginBulletList li { position: relative; padding: .7rem 0 .7rem 1.1rem; border-bottom: 1px solid rgba(44, 51, 39, .11); color: var(--login-ink); font-size: .85rem; }
+.loginBulletList li::before { position: absolute; top: 1.04rem; left: 0; width: .38rem; height: .38rem; border-radius: 50%; background: var(--login-bronze); content: ""; }
+.panel.formPanel.registerCard { padding: clamp(1.1rem, 3vw, 2rem); }
+.registerCard h1 { font-size: clamp(3rem, 5.3vw, 4.3rem); }
+.registerCard .intro { max-width: 44ch; margin-block: .4rem 1rem; font-size: .86rem; }
+.registerCard .form { gap: .62rem; }
+.registerCard .field { gap: .24rem; }
+.registerCard .field label { font-size: .78rem; }
+.registerCard .field > input, .registerCard .field > select, .registerCard .password { min-height: 2.55rem; }
+.registerCard .field > input, .registerCard .field > select, .registerCard .password input { padding-block: .4rem; font-size: .9rem; }
+.registerCard .password button { min-height: 2.5rem; }
+.registerCard .hint { margin-top: -.46rem; font-size: .71rem; }
+.registerCard .submit { min-height: 2.75rem; }
+.registerCard .switch { margin-top: .85rem; padding-top: .75rem; }
+.loginScreen .accountInfo .loginBulletList { gap: .55rem; margin-top: .3rem; }
+.loginScreen .accountInfo .loginBulletList li { padding-block: .58rem; font-size: .82rem; }
+.loginScreen .accountInfo .loginBulletList li::before { top: .9rem; }
+
+@media (max-width: 760px) {
+  .content.loginContent { grid-template-columns: minmax(0, 1fr); gap: 1.8rem; min-height: unset; padding-block: 2rem; }
+  .panel.formPanel.loginCard { width: min(100%, 34rem); justify-self: center; }
+  .loginScreen .accountInfo { width: min(100%, 34rem); justify-self: center; }
+}
+@media (max-width: 420px) {
+  .panel.formPanel.loginCard { padding: 1.2rem; }
+  .loginCard h1 { font-size: 3.2rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loginCard, .loginCard::before, .loginCard::after, .loginCard .submit { transition: none; }
+}
+
+@media (min-width: 761px) {
+  .loginScreen { padding-bottom: 0; }
+  .loginScreen .shell { display: flex; min-height: 100svh; flex-direction: column; }
+  .content.loginContent { flex: 1; min-height: calc(100svh - 4.7rem); padding-block: clamp(1.15rem, 3.5vh, 3.25rem); }
+}
+@media (max-height: 700px) and (min-width: 761px) {
+  .content.loginContent { padding-block: 1rem; }
+  .loginCard h1 { font-size: clamp(3rem, 6vh, 4rem); }
+  .loginCard .intro { margin-block: .45rem 1rem; }
+  .loginCard .form { gap: .7rem; }
+  .loginCard .field > input, .loginCard .password { min-height: 2.6rem; }
+  .loginScreen .accountInfo { gap: .55rem; padding-top: .9rem; }
+  .loginBulletList { gap: .3rem; }
+}
+@media (max-width: 760px) {
+  .loginScreen { padding-bottom: 4.4rem; }
+  .loginScreen .shell { min-height: unset; }
+}

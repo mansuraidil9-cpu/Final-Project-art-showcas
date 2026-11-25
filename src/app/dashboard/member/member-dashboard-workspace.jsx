@@ -292,7 +292,7 @@ function ArtworkWorkspace({ artworks, error, notice, onPreview }) {
 }
 
 export default function MemberDashboardWorkspace({
-  user, profile, artworks, favorites, submissions, notice, homeLink, logout,
+  user, profile, artworks, favorites, submissions, notice, homeLink,
 }) {
   const router = useRouter()
   const [modal, setModal] = useState(null)
@@ -398,7 +398,6 @@ export default function MemberDashboardWorkspace({
               )}
             </div>
             {homeLink}
-            <div className={styles.headerLogout}>{logout}</div>
           </div>
         </header>
 

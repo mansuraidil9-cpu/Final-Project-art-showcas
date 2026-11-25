@@ -6,6 +6,7 @@ import { newPasswordPattern } from '../lib/account-validation.mjs'
 import { signIn, signUp } from './auth-actions'
 import HomeLink from './home-link'
 import styles from './auth.module.css'
+import LoginAtmosphere from './login/login-atmosphere'
 
 const screens = {
   login: {
@@ -17,7 +18,7 @@ const screens = {
   },
   register: {
     title: 'Daftar',
-    description: 'Pilih peran akun yang ingin kamu buat di ALTERIA.',
+    description: 'Buat akun ALTERIA untuk memamerkan karya, menyimpan favorit, dan mengikuti challenge.',
     action: 'Buat akun',
     question: 'Sudah punya akun?',
     link: { href: '/login', label: 'Masuk' },
@@ -58,17 +59,27 @@ export default function AuthPage({ variant }) {
   const screen = screens[variant]
   const registering = variant === 'register'
   const [feedback, submit, pending] = useActionState(registering ? signUp : signIn, null)
+  const login = !registering
 
   return (
-    <div className={styles.screen}>
+    <div className={`${styles.screen} ${styles.loginScreen}`}>
+      <LoginAtmosphere />
       <div className={styles.shell}>
         <header className={styles.header}>
           <Link className={styles.wordmark} href="/">ALTERIA</Link>
           <HomeLink />
         </header>
 
-        <main className={styles.content}>
-          <section className={`${styles.panel} ${styles.formPanel}`} aria-labelledby="auth-title">
+        <main className={`${styles.content} ${styles.loginContent}`}>
+          <section
+            className={`${styles.panel} ${styles.formPanel} ${styles.loginCard} ${registering ? styles.registerCard : ''}`}
+            aria-labelledby="auth-title"
+            onPointerMove={event => {
+              const bounds = event.currentTarget.getBoundingClientRect()
+              event.currentTarget.style.setProperty('--mx', `${event.clientX - bounds.left}px`)
+              event.currentTarget.style.setProperty('--my', `${event.clientY - bounds.top}px`)
+            }}
+          >
             <h1 id="auth-title">{screen.title}</h1>
             <p className={styles.intro}>{screen.description}</p>
 
@@ -143,10 +154,27 @@ export default function AuthPage({ variant }) {
             </p>
           </section>
 
-          <aside className={styles.accountInfo} aria-labelledby="account-info-heading">
-            <h2 id="account-info-heading">Apa itu ALTERIA?</h2>
-            <p>ALTERIA adalah galeri seni digital untuk menjelajahi karya dan mengenal kreator di baliknya.</p>
-            <p>Kreator bisa memamerkan karya dan mengikuti challenge seni yang diadakan Curator.</p>
+          <aside className={`${styles.accountInfo} ${styles.loginEditorial}`} aria-labelledby="account-info-heading">
+            <h2 id="account-info-heading">{registering ? 'Mulai Ruang Karyamu.' : 'Apa itu ALTERIA?'}</h2>
+            {login ? (
+              <>
+                <p>ALTERIA adalah ruang galeri digital untuk merayakan karya, menemukan kreator, dan bertemu lewat challenge seni yang dikurasi.</p>
+                <ul className={styles.loginBulletList}>
+                  <li>Jelajahi karya dari berbagai kreator.</li>
+                  <li>Simpan karya favorit dalam koleksi personal.</li>
+                  <li>Ikuti challenge seni pilihan Curator.</li>
+                </ul>
+              </>
+            ) : (
+              <>
+                <p>Bangun ruang kreatifmu di ALTERIA—tempat karya, penikmat seni, dan kesempatan berkarya bertemu.</p>
+                <ul className={styles.loginBulletList}>
+                  <li>Pamerkan karya lintas medium dalam ruang kurasi digital.</li>
+                  <li>Ikuti challenge berkala yang dikurasi langsung oleh Curator.</li>
+                  <li>Simpan karya favorit dan ajukan akses Curator dari dashboard.</li>
+                </ul>
+              </>
+            )}
           </aside>
         </main>
       </div>

@@ -1,5 +1,4 @@
 import HomeLink from '../../home-link'
-import ProfileLogout from '../profile-logout'
 import { getMemberArtworks, getMemberFavorites, getPublicCreator } from '../../../lib/artworks'
 import { getMemberChallengeSubmissions } from '@/lib/challenges'
 import { requireUser } from '../../../lib/session'
@@ -51,7 +50,6 @@ export default async function MemberDashboard({ searchParams }) {
       submissions={submissions}
       notice={notice ?? null}
       homeLink={<HomeLink />}
-      logout={<ProfileLogout />}
     />
   )
 }
