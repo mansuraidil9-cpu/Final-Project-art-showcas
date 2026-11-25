@@ -67,7 +67,7 @@ export function UserManagement({ users, role }) {
                     <ActionForm action={removeUser.bind(null, user.id)} submitLabel="Hapus akun ini" danger>
                       <label className="flex items-start gap-2">
                         <input type="checkbox" name="confirmed" value="yes" required />
-                        Hapus akun ini beserta karya atau challenge miliknya.
+                        Challenge milik akun ini beserta arsip juaranya ikut terhapus. Arsip juara karya akun ini di challenge Curator lain tetap tersimpan.
                       </label>
                     </ActionForm>
                   </details>

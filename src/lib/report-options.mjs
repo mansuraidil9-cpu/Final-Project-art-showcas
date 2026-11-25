@@ -1,4 +1,5 @@
 export const reportOptions = [
+  { value: 'sara', label: 'SARA (suku, agama, ras, antargolongan)' },
   { value: 'plagiarism', label: 'Plagiarisme atau pelanggaran hak cipta' },
   { value: 'ai', label: 'Karya AI tanpa keterangan' },
   { value: 'inappropriate', label: 'Konten tidak pantas atau melanggar aturan' },

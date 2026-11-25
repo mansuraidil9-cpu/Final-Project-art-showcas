@@ -16,14 +16,10 @@ export async function removeUser(id, _previous, formData) {
   try {
     const { rowCount } = await pool.query(
       `DELETE FROM users u
-       WHERE u.id = $1 AND u.id <> $2 AND u.role IN ('member', 'curator')
-       AND NOT EXISTS (
-         SELECT 1 FROM challenges c
-         WHERE c.owner_id = u.id AND c.winners_published_at IS NOT NULL
-       )`,
+       WHERE u.id = $1 AND u.id <> $2 AND u.role IN ('member', 'curator')`,
       [id, admin.id],
     )
-    if (!rowCount) return { error: 'Akun tidak ditemukan atau memiliki challenge dengan hasil final yang wajib diarsipkan.' }
+    if (!rowCount) return { error: 'Akun tidak ditemukan atau tidak dapat dihapus.' }
   } catch (error) {
     console.error('Pengguna gagal dihapus.', error.code ?? error.name)
     return { error: 'Akun belum bisa dihapus.' }

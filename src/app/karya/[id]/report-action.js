@@ -28,8 +28,11 @@ async function saveReport(id, reason) {
 }
 
 export async function reportArtwork(id, _previous, formData) {
-  const result = await saveReport(id, readText(formData, 'reason'))
-  return result?.success ? null : result
+  const reason = buildReportReason(readText(formData, 'reportType'), readText(formData, 'details'))
+  if (!reason) {
+    return { error: 'Pilih alasan laporan. Untuk alasan lainnya, tulis minimal 5 karakter (maksimal 300).' }
+  }
+  return saveReport(id, reason)
 }
 
 export async function reportArtworkFromMenu(id, _previous, formData) {

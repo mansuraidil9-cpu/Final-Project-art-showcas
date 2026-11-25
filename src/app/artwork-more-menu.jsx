@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { createPortal } from 'react-dom'
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { reportArtworkFromMenu } from './karya/[id]/report-action'
-import { reportOptions } from '@/lib/report-options.mjs'
+import ArtworkReportFields from './artwork-report-fields'
 import styles from './artwork-more-menu.module.css'
 
 export default function ArtworkMoreMenu({ artwork, canReport = false }) {
@@ -162,24 +162,8 @@ export default function ArtworkMoreMenu({ artwork, canReport = false }) {
                 </div>
               ) : (
                 <form action={submit} className={styles.form} aria-busy={pending}>
-                  <fieldset disabled={pending}>
-                    <legend>Pilih alasan</legend>
-                    {reportOptions.map(option => (
-                      <label key={option.value} className={styles.radioRow}>
-                        <input type="radio" name="reportType" value={option.value}
-                          checked={reportType === option.value}
-                          onChange={event => setReportType(event.target.value)} required />
-                        <span>{option.label}</span>
-                      </label>
-                    ))}
-                  </fieldset>
-                  <label className={styles.field}>
-                    Detail tambahan {reportType === 'other' ? '(wajib)' : '(opsional)'}
-                    <textarea name="details" value={details} onChange={event => setDetails(event.target.value)}
-                      placeholder="Jelaskan singkat alasan laporan Anda..." maxLength={300} rows={3}
-                      required={reportType === 'other'} disabled={pending} />
-                    <small>{details.length}/300</small>
-                  </label>
+                  <ArtworkReportFields reportType={reportType} details={details}
+                    onReportTypeChange={setReportType} onDetailsChange={setDetails} disabled={pending} />
                   {feedback?.error && <p className={styles.error} role="alert">{feedback.error}</p>}
                   <footer className={styles.actions}>
                     <button type="button" className={styles.cancel} disabled={pending}

@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { getArtworkById, getArtworkComments } from '../../../lib/artworks'
-import ActionForm from '@/app/dashboard/action-form'
 import fieldStyles from '@/app/dashboard/member/member-artworks.module.css'
 import { hasArtworkReport } from '@/lib/reports'
 import { getCurrentUser } from '../../../lib/session'
@@ -83,15 +82,7 @@ export default async function DetailKarya({ params }) {
           {canReport && (reported ? (
             <p id="laporkan-karya" className={fieldStyles.hint + ' mt-4 scroll-mt-28'} role="status">Karya ini sudah kamu laporkan.</p>
           ) : (
-            <ArtworkReportDetails>
-              <summary className={fieldStyles.deleteLink}>Laporkan karya</summary>
-              <ActionForm action={reportArtwork.bind(null, artwork.id)} submitLabel="Kirim laporan">
-                <label className={fieldStyles.field}>
-                  Alasan laporan
-                  <textarea name="reason" rows={3} maxLength={500} required />
-                </label>
-              </ActionForm>
-            </ArtworkReportDetails>
+            <ArtworkReportDetails action={reportArtwork.bind(null, artwork.id)} />
           ))}
         </div>
       </article>
