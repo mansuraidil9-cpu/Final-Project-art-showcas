@@ -7,7 +7,7 @@ import { dashboardPath, requireUser } from '@/lib/session'
 
 export default async function CuratorProfilePage() {
   const user = await requireUser()
-  if (user.role !== 'curator') redirect(dashboardPath(user))
+  if (user.role !== 'curator' || user.curator_status !== 'approved') redirect(dashboardPath(user))
 
   return (
     <AccountPanel title="Profil Curator" description={user.display_name}>

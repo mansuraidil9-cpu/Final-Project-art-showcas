@@ -89,7 +89,7 @@ export async function createCuratorChallenge(curatorId, fields, banner) {
       starts_at, ends_at, cover_image, cover_alt, cover_data
     )
     SELECT id, $2, $3, 'Seni', $4, $5, $6, $7, $8, $9, $3, $10
-    FROM users WHERE id = $1 AND role IN ('member', 'curator') AND curator_status = 'approved'
+    FROM users WHERE id = $1 AND role = 'curator' AND curator_status = 'approved'
     RETURNING id::text`,
     [curatorId, randomUUID(), fields.title, fields.description, fields.rules, fields.prize,
       fields.startsAt, fields.endsAt, banner.src, banner.data],
@@ -106,7 +106,7 @@ function withLockedChallenge(id, change) {
 
 const challengeOwner = `
   c.owner_id = $2 AND EXISTS (
-    SELECT 1 FROM users u WHERE u.id = c.owner_id AND u.role IN ('member', 'curator') AND u.curator_status = 'approved'
+    SELECT 1 FROM users u WHERE u.id = c.owner_id AND u.role = 'curator' AND u.curator_status = 'approved'
   )`
 
 export function updateCuratorChallenge(id, curatorId, fields, banner) {

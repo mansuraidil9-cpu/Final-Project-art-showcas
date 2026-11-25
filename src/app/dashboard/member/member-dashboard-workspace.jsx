@@ -186,26 +186,6 @@ function ProfileEditor({ profile, initialName, avatarSrc, onCancel, onPreview, o
   )
 }
 
-function CuratorRequest({ action, onClose, onSaved }) {
-  const [feedback, submit, pending] = useActionState(action, null)
-  useEffect(() => {
-    if (feedback?.success) onSaved()
-  }, [feedback, onSaved])
-  return (
-    <form action={submit} className={styles.editorForm} aria-busy={pending}>
-      <p>Ajukan akses untuk membuat challenge dan meninjau karya peserta. Pengajuan akan masuk ke antrean Admin.</p>
-      <p className={styles.smallNote}>Pengajuan ini menggunakan sistem persetujuan Curator yang sudah ada di ALTERIA.</p>
-      {feedback?.error && <p className={styles.error} role="alert">{feedback.error}</p>}
-      <div className={styles.dialogActions}>
-        <button type="button" className={styles.secondaryButton} onClick={onClose} disabled={pending}>Batal</button>
-        <button type="submit" className={styles.primaryButton} disabled={pending}>
-          {pending ? 'Mengirim…' : 'Kirim Pengajuan'}
-        </button>
-      </div>
-    </form>
-  )
-}
-
 function GalleryCards({ artworks, saved = false, onPreview }) {
   return (
     <ul className={styles.artworkGrid}>
@@ -312,7 +292,7 @@ function ArtworkWorkspace({ artworks, error, notice, onPreview }) {
 }
 
 export default function MemberDashboardWorkspace({
-  user, profile, artworks, favorites, submissions, notice, curatorAction, homeLink, logout,
+  user, profile, artworks, favorites, submissions, notice, homeLink, logout,
 }) {
   const router = useRouter()
   const [modal, setModal] = useState(null)
@@ -375,12 +355,6 @@ export default function MemberDashboardWorkspace({
     setDisplayName(name)
     setModal(null)
     setFlash('Profil berhasil diperbarui.')
-    router.refresh()
-  }, [router])
-
-  const curatorSaved = useCallback(() => {
-    setModal(null)
-    setFlash('Pengajuan Curator sudah dikirim untuk ditinjau Admin.')
     router.refresh()
   }, [router])
 
@@ -474,26 +448,6 @@ export default function MemberDashboardWorkspace({
 
           {flash && <p className={styles.notice} role="status">{flash}</p>}
 
-          <section className={styles.curatorCard} aria-labelledby="akses-curator">
-            <div>
-              <p className={styles.eyebrow}>PERAN KOMUNITAS</p>
-              <h2 id="akses-curator">Akses Curator</h2>
-              <p>Ajukan akses untuk membuat challenge dan meninjau karya peserta.</p>
-              {user.curatorStatus === 'rejected' && <p className={styles.error} role="status">Pengajuan sebelumnya ditolak. Kamu dapat mengajukan ulang.</p>}
-            </div>
-            <div className={styles.curatorAction}>
-              {user.curatorStatus === 'approved' ? (
-                <Link className={styles.primaryButton} href="/dashboard/curator">Buka Dashboard Curator</Link>
-              ) : user.curatorStatus === 'pending' ? (
-                <span className={styles.pendingBadge} role="status">Pengajuan Sedang Ditinjau</span>
-              ) : (
-                <button className={styles.primaryButton} type="button" onClick={() => setModal('curator')}>
-                  {user.curatorStatus === 'rejected' ? 'Ajukan ulang akses Curator' : 'Ajukan akses Curator'}
-                </button>
-              )}
-            </div>
-          </section>
-
           <ArtworkWorkspace artworks={artworks} error={artworks === null} notice={notice} onPreview={openPreview} />
 
           <section id="karya-favorit" className={styles.workspaceSection} aria-labelledby="judul-favorit">
@@ -547,11 +501,6 @@ export default function MemberDashboardWorkspace({
             profile={profile} initialName={displayName} avatarSrc={selectedAvatar}
             onCancel={dismissModal} onPreview={previewAvatar} onSaved={profileSaved}
           />
-        </Dialog>
-      )}
-      {modal === 'curator' && (
-        <Dialog title="Ajukan Akses Curator" eyebrow="PERAN KOMUNITAS" onClose={dismissModal}>
-          <CuratorRequest action={curatorAction} onClose={dismissModal} onSaved={curatorSaved} />
         </Dialog>
       )}
       {modal === 'preview' && preview && (

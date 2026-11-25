@@ -26,7 +26,7 @@ export default async function AdminDashboard({ searchParams }) {
               COALESCE(curator_applied_at, created_at) AS applied_at,
               curator_applied_at::text AS application_version
        FROM users
-       WHERE role IN ('member', 'curator') AND curator_status = 'pending'
+       WHERE role = 'curator' AND curator_status = 'pending'
        ORDER BY applied_at, id`,
     ),
   ])

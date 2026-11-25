@@ -110,13 +110,13 @@
 .accountIdentity {
   min-inline-size: 0;
   max-inline-size: 10rem;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  justify-items: end;
-  gap: .15rem;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
 }
 
 .accountName {
+  min-inline-size: 0;
   max-inline-size: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -128,6 +128,7 @@
 
 .accountRole {
   flex: none;
+  white-space: nowrap;
   padding: .2rem .55rem;
   border: 1px solid var(--rule);
   border-radius: 999px;

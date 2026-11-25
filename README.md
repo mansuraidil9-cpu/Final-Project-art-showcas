@@ -13,13 +13,13 @@ Dibangun dengan Next.js, React, JavaScript, Tailwind CSS, dan PostgreSQL. Sharp 
 | Peran | Aktivitas |
 | --- | --- |
 | **Tamu** | Mencari, memfilter, dan mengurutkan karya di galeri. Melihat detail karya, profil kreator, komentar, dan hasil challenge. |
-| **Member** | Mengelola karya, profil, dan akun sendiri. Menyukai karya, berkomentar, menyimpan karya ke **Karya Favorit**, melaporkan karya unggahan Member lain, mengikuti challenge, dan mengajukan akses Curator. |
+| **Member** | Mengelola karya, profil, dan akun sendiri. Menyukai karya, berkomentar, menyimpan karya ke **Karya Favorit**, melaporkan karya unggahan Member lain, dan mengikuti challenge. |
 | **Kurator (Curator)** | Mengatur jadwal dalam WITA, mengelola challenge miliknya, meninjau submisi, dan mengumumkan pemenang. |
-| **Admin** | Mengganti foto profil sendiri, melihat statistik, menyetujui atau menolak pengajuan akses Curator, mengelola akun dan kategori, serta menolak laporan atau menghapus karya yang dilaporkan. |
+| **Admin** | Mengganti foto profil sendiri, melihat statistik, menyetujui atau menolak pendaftaran Curator, mengelola akun dan kategori, serta menolak laporan atau menghapus karya yang dilaporkan. |
 
-Halaman **Daftar** membuat akun Member. Untuk menjadi Kurator, buka **Akses Curator** di Dashboard Member dan kirim pengajuan. Admin meninjau pengajuan tersebut. Jika ditolak, Member dapat mengajukan ulang dari halaman yang sama.
+Saat mendaftar, pilih **Member** atau **Curator**. Akun Curator menunggu persetujuan Admin sebelum dapat membuka dashboard. Jika ditolak, pemilik akun dapat menghapus akunnya dari halaman status.
 
-Setelah disetujui, label **Curator** muncul dan Dashboard Curator bisa dibuka dari akun yang sama. Dashboard Member, foto profil, dan fitur Member tetap tersedia. Akun Kurator dari versi sebelumnya masih dapat masuk dan mengikuti alur verifikasi akun yang sudah ada.
+Setelah disetujui, Curator dapat membuka Dashboard Curator dan mengelola challenge. Curator dapat menjelajahi karya seperti Tamu, sementara fitur Member hanya tersedia untuk akun Member.
 
 Selama challenge aktif, Member dapat mengirim satu karya miliknya dan menarik submisi sebelum tenggat. Setelah challenge berakhir, Kurator dapat menetapkan maksimal tiga pemenang. Karya peserta dan hasilnya tampil di halaman **Challenge**.
 
@@ -95,7 +95,7 @@ Setelah terminal menampilkan **Akun Admin ALTERIA berhasil dibuat**, hapus baris
 ## Diagram sistem
 
 - [Diagram use case](docs/diagram-use-case.svg) menunjukkan akses dan tindakan yang tersedia untuk empat peran.
-- [Diagram aktivitas](docs/diagram-aktivitas.svg) menunjukkan alur kunjungan, sesi akun, dan pengajuan akses Curator.
+- [Diagram aktivitas](docs/diagram-aktivitas.svg) menunjukkan alur kunjungan dan sesi akun.
 
 ## Pemeriksaan proyek
 

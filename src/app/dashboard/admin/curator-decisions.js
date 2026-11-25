@@ -28,7 +28,7 @@ export async function reviewCurator(_previous, formData) {
     const result = await pool.query(
       `UPDATE users
        SET curator_status = $1
-       WHERE id = $2 AND role IN ('member', 'curator') AND curator_status = 'pending'
+       WHERE id = $2 AND role = 'curator' AND curator_status = 'pending'
          AND curator_applied_at::text IS NOT DISTINCT FROM NULLIF($3, '')`,
       [decision, id, applicationVersion],
     )

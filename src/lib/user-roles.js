@@ -5,5 +5,5 @@ export const roleLabels = {
 }
 
 export function hasCuratorAccess(user) {
-  return user?.curator_status === 'approved' && (user.role === 'member' || user.role === 'curator')
+  return user?.role === 'curator' && user.curator_status === 'approved'
 }

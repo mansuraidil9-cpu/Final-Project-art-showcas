@@ -144,10 +144,10 @@
       <text class="case-title" x="440" y="1005" text-anchor="middle">Laporkan karya</text>
       <text class="case-detail" x="440" y="1021" text-anchor="middle">Unggahan Member lain</text>
     </g>
-    <g class="case" data-use-case="Ajukan akses Curator">
+    <g class="case" data-use-case="Daftar sebagai Curator">
       <ellipse class="use-case" cx="440" cy="1070" rx="208" ry="27" />
-      <text class="case-title" x="440" y="1069" text-anchor="middle">Ajukan akses Curator</text>
-      <text class="case-detail" x="440" y="1085" text-anchor="middle">Cek status atau ajukan ulang di dashboard</text>
+      <text class="case-title" x="440" y="1069" text-anchor="middle">Daftar sebagai Curator</text>
+      <text class="case-detail" x="440" y="1085" text-anchor="middle">Menunggu persetujuan Admin</text>
     </g>
   </g>
   <g id="admin">
@@ -166,10 +166,10 @@
       <ellipse class="use-case" cx="1040" cy="633" rx="208" ry="27" />
       <text class="case-title" x="1040" y="639" text-anchor="middle">Lihat statistik platform</text>
     </g>
-    <g class="case" data-use-case="Tinjau pengajuan akses Curator">
+    <g class="case" data-use-case="Tinjau pendaftaran Curator">
       <ellipse class="use-case" cx="1040" cy="723" rx="208" ry="27" />
-      <text class="case-title" x="1040" y="722" text-anchor="middle">Tinjau pengajuan akses Curator</text>
-      <text class="case-detail" x="1040" y="738" text-anchor="middle">Setujui atau tolak pengajuan</text>
+      <text class="case-title" x="1040" y="722" text-anchor="middle">Tinjau pendaftaran Curator</text>
+      <text class="case-detail" x="1040" y="738" text-anchor="middle">Setujui atau tolak akun</text>
     </g>
     <g class="case" data-use-case="Kelola akun pengguna">
       <ellipse class="use-case" cx="1040" cy="813" rx="208" ry="27" />
@@ -190,7 +190,7 @@
   <g id="access-notes" class="note">
     <text x="155" y="1151"><tspan font-weight="bold">Akses bersama.</tspan> Semua peran dapat melihat halaman publik. Member, Kurator, dan Admin dapat masuk dan keluar dari akun.</text>
     <text x="155" y="1179"><tspan font-weight="bold">Member.</tspan> Satu karya milik sendiri per challenge aktif. Submisi dapat ditarik sebelum tenggat.</text>
-    <text x="155" y="1207"><tspan font-weight="bold">Pengajuan Curator.</tspan> Admin menyetujui atau menolak pengajuan Member sebelum akses pengelolaan challenge dibuka.</text>
-    <text x="155" y="1235"><tspan font-weight="bold">Setelah disetujui.</tspan> Akun yang sama memperoleh label Curator dan tetap bisa memakai fitur Member serta foto profilnya.</text>
+    <text x="155" y="1207"><tspan font-weight="bold">Pendaftaran Curator.</tspan> Admin menyetujui atau menolak akun sebelum akses pengelolaan challenge dibuka.</text>
+    <text x="155" y="1235"><tspan font-weight="bold">Setelah disetujui.</tspan> Curator memperoleh akses ke dashboard Curator; fitur Member hanya tersedia untuk akun Member.</text>
   </g>
 </svg>

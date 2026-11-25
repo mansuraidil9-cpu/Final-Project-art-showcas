@@ -3,7 +3,6 @@ import ProfileLogout from '../profile-logout'
 import { getMemberArtworks, getMemberFavorites, getPublicCreator } from '../../../lib/artworks'
 import { getMemberChallengeSubmissions } from '@/lib/challenges'
 import { requireUser } from '../../../lib/session'
-import { applyForCurator } from './curator-application'
 import MemberDashboardWorkspace from './member-dashboard-workspace'
 
 export const metadata = { title: 'Dashboard Member | ALTERIA' }
@@ -40,7 +39,6 @@ export default async function MemberDashboard({ searchParams }) {
         displayName: user.display_name,
         email: user.email,
         avatarSrc: user.avatarSrc ?? null,
-        curatorStatus: user.curator_status,
       }}
       profile={{
         displayName: publicProfile?.displayName ?? user.display_name,
@@ -52,7 +50,6 @@ export default async function MemberDashboard({ searchParams }) {
       favorites={favorites}
       submissions={submissions}
       notice={notice ?? null}
-      curatorAction={applyForCurator.bind(null, user.curator_status)}
       homeLink={<HomeLink />}
       logout={<ProfileLogout />}
     />

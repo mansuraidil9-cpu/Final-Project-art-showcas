@@ -1,6 +1,6 @@
 import { pool } from './db.mjs'
 
-const curatorAccounts = `(role = 'curator' OR (role = 'member' AND curator_status = 'approved'))`
+const curatorAccounts = `role = 'curator'`
 
 export async function getPlatformStats() {
   const { rows } = await pool.query(`

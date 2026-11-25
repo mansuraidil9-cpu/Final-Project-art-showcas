@@ -17,7 +17,7 @@ const screens = {
   },
   register: {
     title: 'Daftar',
-    description: 'Buat akun Member. Kamu bisa mengajukan peran Curator dari dashboard.',
+    description: 'Pilih peran akun yang ingin kamu buat di ALTERIA.',
     action: 'Buat akun',
     question: 'Sudah punya akun?',
     link: { href: '/login', label: 'Masuk' },
@@ -85,6 +85,16 @@ export default function AuthPage({ variant }) {
                     maxLength={120}
                     required
                   />
+                </div>
+              )}
+
+              {registering && (
+                <div className={styles.field}>
+                  <label htmlFor="role">Daftar sebagai</label>
+                  <select id="role" name="role" defaultValue={feedback?.values.role || 'member'} required>
+                    <option value="member">Member</option>
+                    <option value="curator">Curator</option>
+                  </select>
                 </div>
               )}
 

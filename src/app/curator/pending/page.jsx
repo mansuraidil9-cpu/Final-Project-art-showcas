@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import AccountPanel from '../../account-panel'
 import { deleteRejectedCurator } from '../../auth-actions'
@@ -14,7 +13,6 @@ export default async function CuratorPending() {
   if (user.curator_status === 'rejected') {
     return (
       <AccountPanel title="Pendaftaran ditolak" description="Admin menolak pendaftaran Curator Anda.">
-        <Link className="text-sm underline underline-offset-4" href="/curator/profil">Profil Curator</Link>
         <form action={deleteRejectedCurator} className={styles.form}>
           <label className="flex items-start gap-2 text-sm">
             <input type="checkbox" name="confirmed" value="yes" required />
@@ -28,10 +26,8 @@ export default async function CuratorPending() {
 
   return (
     <AccountPanel
-      title="Akun Anda sedang ditinjau"
+      title="Akun Anda sedang ditinjau."
       description="Anda bisa membuka dashboard Curator setelah Admin menyetujui akun ini."
-    >
-      <Link className="text-sm underline underline-offset-4" href="/curator/profil">Profil Curator</Link>
-    </AccountPanel>
+    />
   )
 }

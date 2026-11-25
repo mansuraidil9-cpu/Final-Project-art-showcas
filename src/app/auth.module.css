@@ -159,6 +159,7 @@
 }
 
 .field > input,
+.field > select,
 .password {
   min-height: 2.9rem;
   border: 1px solid var(--rule);
@@ -166,6 +167,7 @@
 }
 
 .field > input,
+.field > select,
 .password input {
   width: 100%;
   min-width: 0;
@@ -323,4 +325,4 @@
   border:1px solid rgb(125 84 39 / 20%);
   box-shadow:0 20px 50px -25px rgb(38 48 36 / 17%);
 }
-.field > input,.password { background:#FBF8F3; border-color:rgb(125 84 39 / 23%); }
+.field > input,.field > select,.password { background:#FBF8F3; border-color:rgb(125 84 39 / 23%); }

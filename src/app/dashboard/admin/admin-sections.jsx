@@ -19,15 +19,8 @@ const curatorStatusLabels = {
   rejected: 'Ditolak',
 }
 
-const memberCuratorLabels = {
-  pending: 'Pengajuan Curator menunggu',
-  approved: 'Curator',
-  rejected: 'Pengajuan Curator ditolak',
-}
-
 function formatUserRoles(user) {
-  const labels = user.role === 'member' ? memberCuratorLabels : curatorStatusLabels
-  const curatorLabel = labels[user.curator_status]
+  const curatorLabel = user.role === 'curator' ? curatorStatusLabels[user.curator_status] : null
   return curatorLabel ? `${roleLabels[user.role]} · ${curatorLabel}` : roleLabels[user.role]
 }
 
@@ -46,7 +39,6 @@ export function PlatformStats({ stats }) {
           </div>
         ))}
       </dl>
-      <p className={styles.hint}>Member yang disetujui ikut dihitung sebagai Curator.</p>
     </section>
   )
 }

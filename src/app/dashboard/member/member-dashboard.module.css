@@ -170,7 +170,7 @@
   color:#fbf8f3;
 }
 .memberIntro {min-width:0;flex:1;}
-.memberIntro h1,.sectionHeading h2,.curatorCard h2 {
+.memberIntro h1,.sectionHeading h2 {
   margin:0;
   font:400 clamp(2.65rem,4.2vw,4rem)/.98 var(--font-studio-serif),Georgia,serif;
   letter-spacing:-.025em;
@@ -178,7 +178,7 @@
 .greeting {display:flex;flex-wrap:wrap;align-items:center;gap:.45rem .75rem;margin-top:1rem;}
 .greeting p {color:var(--member-muted);font-size:.89rem;}
 .greeting strong {color:var(--member-olive);font-weight:600;}
-.roleBadge,.pendingBadge {
+.roleBadge {
   display:inline-flex;align-items:center;
   width:fit-content;
   gap:.4rem;
@@ -190,7 +190,6 @@
   font-weight:600;
 }
 .roleBadge::before {content:"";width:6px;height:6px;background:#a67c46;border-radius:50%;}
-.pendingBadge {background:#f0e9d9;color:#6d5938;border-color:rgba(166,124,70,.32);}
 .profileBio {max-width:48ch;color:var(--member-muted);font-size:.8rem;line-height:1.7;margin-top:.55rem;}
 .inlineActions {display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-top:1.25rem;}
 /* Ikon hanya pada Edit Profil & Pengaturan akun di header Member. */
@@ -252,20 +251,6 @@
   color:var(--member-olive);
 }
 .statsPanel span {max-width:11ch;font-size:.68rem;line-height:1.45;color:var(--member-muted);}
-.curatorCard {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:1.75rem;
-  padding:clamp(1.5rem,3vw,2.05rem);
-  border:1px solid var(--member-hairline);
-  border-left:4px solid var(--member-olive);
-  background:var(--member-ivory);
-  box-shadow:0 12px 32px -26px rgba(44,51,39,.25);
-}
-.curatorCard h2 {font-size:clamp(2.1rem,3.3vw,2.75rem);}
-.curatorCard p:not(.eyebrow) {margin-top:.6rem;max-width:55ch;font-size:.85rem;line-height:1.7;color:var(--member-muted);}
-.curatorAction {flex:none;}
 .workspaceSection {
   display:grid;
   gap:1.5rem;
@@ -554,7 +539,6 @@
 }
 @media(max-width:800px){
   .artworkGrid,.submissionGrid {grid-template-columns:repeat(2,minmax(0,1fr));}
-  .curatorCard {align-items:flex-start;flex-direction:column;}
 }
 @media(max-width:580px){
   .memberShell > header {flex-wrap:wrap;padding-block:.75rem;}

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1660" height="2230" viewBox="0 0 1660 2230" role="img" aria-labelledby="title description">
   <title id="title">Diagram Aktivitas ALTERIA</title>
-  <desc id="description">Diagram aktivitas ALTERIA untuk kunjungan publik, pendaftaran Member, sesi akun, dan pengajuan akses Curator dari Dashboard Member yang ditinjau Admin.</desc>
+  <desc id="description">Diagram aktivitas ALTERIA untuk kunjungan publik, pendaftaran akun, sesi akun, dan persetujuan pendaftaran Curator oleh Admin.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
       <path d="M 0,0 L 10,5 L 0,10 Z" fill="#505b4c" />
@@ -146,7 +146,7 @@
     <text class="detail" x="233" y="1029" text-anchor="middle">Sukai, komentari, atau simpan karya</text>
     <text class="detail" x="233" y="1052" text-anchor="middle">Laporkan karya</text>
     <text class="detail" x="233" y="1075" text-anchor="middle">Kirim atau tarik submisi challenge</text>
-    <text class="detail" x="233" y="1098" text-anchor="middle">Ajukan akses Curator</text>
+    <text class="detail" x="233" y="1098" text-anchor="middle">Lihat karya seperti Tamu</text>
   </g>
   <g id="curator-status-page">
     <rect class="action role-action" x="460" y="952" width="310" height="160" rx="14" />
@@ -164,7 +164,7 @@
     <rect class="action role-action" x="1244" y="952" width="366" height="160" rx="14" />
     <text class="action-title" x="1427" y="1003" text-anchor="middle">Pilih aktivitas Admin</text>
     <text class="detail" x="1427" y="1030" text-anchor="middle">Lihat statistik atau kelola pengguna</text>
-    <text class="detail" x="1427" y="1053" text-anchor="middle">Tinjau pengajuan akses Curator</text>
+    <text class="detail" x="1427" y="1053" text-anchor="middle">Tinjau pendaftaran Curator</text>
     <text class="detail" x="1427" y="1076" text-anchor="middle">Kelola kategori atau moderasi laporan</text>
   </g>
   <g id="merge-curator-routes">
@@ -186,8 +186,8 @@
     <circle cx="830" cy="1451" r="9" class="terminal" />
   </g>
 
-  <g id="curator-application-flow">
-    <text class="section-title" x="50" y="1537">Pengajuan akses Curator</text>
+  <g id="curator-registration-flow">
+    <text class="section-title" x="50" y="1537">Pendaftaran akun Curator</text>
     <path d="M 50,1553 H 1610" stroke="#d9d6c9" stroke-width="1.4" />
 
     <circle class="terminal" cx="830" cy="1574" r="8" />
@@ -197,22 +197,20 @@
     <path class="flow" d="M 830,1783 V 1803" />
     <path class="flow" d="M 718,1839 H 421 V 1917" />
     <path class="flow" d="M 942,1839 H 1239 V 1917" />
-    <path class="flow" d="M 421,2013 V 2037" />
-    <path class="flow" d="M 307,2072 H 137 V 1599 H 822" />
-    <path class="flow" d="M 421,2107 V 2140 H 816" />
+    <path class="flow" d="M 421,2013 V 2140 H 816" />
     <path class="flow" d="M 1239,2013 V 2140 H 844" />
     <path class="flow" d="M 830,2154 V 2175" />
 
     <polygon class="merge" points="830,1591 838,1599 830,1607 822,1599" />
     <g id="submit-curator-application">
       <rect class="action role-action" x="590" y="1618" width="480" height="74" rx="14" />
-      <text class="action-title" x="830" y="1647" text-anchor="middle">Member mengajukan akses Curator</text>
-      <text class="detail" x="830" y="1674" text-anchor="middle">Dashboard Member → Akses Curator</text>
+      <text class="action-title" x="830" y="1647" text-anchor="middle">Daftar sebagai Curator</text>
+      <text class="detail" x="830" y="1674" text-anchor="middle">Pilih peran pada halaman Daftar</text>
     </g>
     <g id="review-curator-application">
       <rect class="action role-action" x="590" y="1707" width="480" height="76" rx="14" />
-      <text class="action-title" x="830" y="1738" text-anchor="middle">Admin meninjau pengajuan</text>
-      <text class="detail" x="830" y="1765" text-anchor="middle">Member dapat melihat status pengajuan</text>
+      <text class="action-title" x="830" y="1738" text-anchor="middle">Admin meninjau pendaftaran</text>
+      <text class="detail" x="830" y="1765" text-anchor="middle">Akun menunggu di halaman status Curator</text>
     </g>
     <g id="curator-application-decision">
       <polygon class="decision" points="830,1803 942,1839 830,1875 718,1839" />
@@ -222,21 +220,15 @@
     </g>
     <g id="curator-application-rejected">
       <rect class="action role-action" x="201" y="1917" width="440" height="96" rx="14" />
-      <text class="action-title" x="421" y="1950" text-anchor="middle">Pengajuan ditolak</text>
-      <text class="detail" x="421" y="1977" text-anchor="middle">Member tetap dapat memakai akunnya</text>
-      <text class="detail" x="421" y="2000" text-anchor="middle">Pengajuan ulang tersedia di Akses Curator</text>
+      <text class="action-title" x="421" y="1950" text-anchor="middle">Pendaftaran ditolak</text>
+      <text class="detail" x="421" y="1977" text-anchor="middle">Halaman status menampilkan alasan penolakan</text>
+      <text class="detail" x="421" y="2000" text-anchor="middle">Akun hanya dapat dihapus</text>
     </g>
     <g id="curator-application-approved">
       <rect class="action role-action" x="1009" y="1917" width="460" height="96" rx="14" />
       <text class="action-title" x="1239" y="1950" text-anchor="middle">Dashboard Curator terbuka</text>
-      <text class="detail" x="1239" y="1977" text-anchor="middle">Label Curator muncul pada akun yang sama</text>
-      <text class="detail" x="1239" y="2000" text-anchor="middle">Fitur Member dan foto profil tetap tersedia</text>
-    </g>
-    <g id="resubmit-curator-application">
-      <polygon class="decision" points="421,2037 535,2072 421,2107 307,2072" />
-      <text class="decision-title" x="421" y="2079" text-anchor="middle">Ajukan ulang?</text>
-      <text class="guard" x="233" y="2059" text-anchor="middle">[Ya]</text>
-      <text class="guard" x="439" y="2130" text-anchor="start">[Tidak]</text>
+      <text class="detail" x="1239" y="1977" text-anchor="middle">Akun dapat mengelola challenge</text>
+      <text class="detail" x="1239" y="2000" text-anchor="middle">Fitur Member tidak tersedia</text>
     </g>
     <polygon class="merge" points="830,2126 844,2140 830,2154 816,2140" />
     <circle cx="830" cy="2189" r="14" fill="#f6f3ea" stroke="#344333" stroke-width="2" />
